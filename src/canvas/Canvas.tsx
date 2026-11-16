@@ -15,6 +15,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { Node, NodeId, Breakpoint } from '../types';
 import { renderNode } from './renderNode';
+import SelectionOverlay from './SelectionOverlay';
+import { useEditorStore } from '../store/useEditorStore';
 
 const BREAKPOINT_WIDTH: Record<Breakpoint, number> = {
   desktop: 1440,
@@ -35,6 +37,8 @@ interface CanvasProps {
 
 export default function Canvas({ page, nodes, breakpoint, zoom = 1 }: CanvasProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const selection = useEditorStore((state) => state.selection);
+  const selectedId = selection.length > 0 ? (selection[0] ?? null) : null;
 
   const width = BREAKPOINT_WIDTH[breakpoint] ?? 1440;
 
@@ -85,7 +89,16 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1 }: CanvasProp
           display: 'block',
         }}
       />
-      {loaded ? element : null}
+      {loaded ? (
+        <>
+          {element}
+          <SelectionOverlay
+            iframeRef={iframeRef}
+            selectedId={selectedId}
+            zoom={zoom}
+          />
+        </>
+      ) : null}
     </>
   );
 }
