@@ -10,6 +10,7 @@
 //
 // This module is the element registry: every ElementType from spec §4 maps to
 // markup here.
+import { Fragment } from 'react';
 import type { CSSProperties, ComponentType, JSX, SVGAttributes } from 'react';
 import * as Lucide from 'lucide-react';
 import type {
@@ -198,7 +199,9 @@ export function renderNode(node: Node, ctx: RenderContext): JSX.Element {
   const attrs = canvasAttrs(node, ctx);
   const children = node.children.map((id) => {
     const child = ctx.nodes[id];
-    return child ? renderNode(child, ctx) : null;
+    return child ? (
+      <Fragment key={id}>{renderNode(child, ctx)}</Fragment>
+    ) : null;
   });
 
   // hidden is a per-node, per-breakpoint override (desktop-first). When hidden
