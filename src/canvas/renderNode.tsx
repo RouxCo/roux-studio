@@ -152,22 +152,45 @@ for (const [key, value] of Object.entries(Lucide)) {
   }
 }
 
-function renderIcon(
-  node: IconNode,
-  style: CSSProperties,
-  attrs: Record<string, string>,
-): JSX.Element {
-  const Comp = LUCIDE_BY_NAME[node.name] ?? LUCIDE_BY_NAME[node.name.toLowerCase()] ?? MissingIcon;
-  return <Comp {...attrs} style={style} />;
-}
 
 function MissingIcon({ style, ...props }: SVGAttributes<SVGSVGElement>): JSX.Element {
   return (
-    <svg {...props} style={{ display: 'inline-block', width: 24, height: 24, ...style }} viewBox="0 0 24 24" aria-hidden="true">
+    <svg {...props} style={style} viewBox="0 0 24 24" aria-hidden="true">
       <rect x="2" y="2" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" rx="2" />
       <path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
     </svg>
   );
+}
+
+// Deterministic hash of a resolved style object. Identical styles produce the
+// identical r-{hash} class name, so M4's compileStyles can emit one CSS rule
+// per class and reuse it across every element that shares those styles.
+export function hashStyle(style: CSSProperties): string {
+  const serialized = Object.keys(style)
+    .sort()
+    .map((key) => `${key}:${String(style[key as keyof CSSProperties])}`)
+    .join(';');
+  // FNV-1a 32-bit, rendered as hex.
+  let h = 2166136261;
+  for (let i = 0; i < serialized.length; i++) {
+    h ^= serialized.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0).toString(16).padStart(6, '0');
+}
+
+function renderIcon(
+  node: IconNode,
+  style: CSSProperties | undefined,
+  className: string | undefined,
+  attrs: Record<string, string>,
+  isExport: boolean,
+): JSX.Element {
+  const Comp = LUCIDE_BY_NAME[node.name] ?? LUCIDE_BY_NAME[node.name.toLowerCase()] ?? MissingIcon;
+  // The fallback svg's base inline style is editor output; in export mode all
+  // inline styles are replaced by the r-{hash} class name.
+  const svgStyle = isExport ? undefined : { display: 'inline-block', width: 24, height: 24, ...style };
+  return <Comp {...attrs} className={className} style={svgStyle} />;
 }
 
 export function renderNode(node: Node, ctx: RenderContext): JSX.Element {
@@ -184,32 +207,39 @@ export function renderNode(node: Node, ctx: RenderContext): JSX.Element {
     style.display = 'none';
   }
 
+  // Export mode never emits inline style attributes: styles are captured in an
+  // r-{hash} class name instead (M4's compileStyles turns those into CSS).
+  // Canvas mode keeps inline styles for live editing.
+  const isExport = ctx.mode === 'export';
+  const styleProp = isExport ? undefined : style;
+  const className = isExport && Object.keys(style).length > 0 ? `r-${hashStyle(style)}` : undefined;
+
   switch (node.type) {
     case 'page':
-      return <div {...attrs} style={style}>{children}</div>;
+      return <div {...attrs} style={styleProp} className={className}>{children}</div>;
     case 'section':
-      return <section {...attrs} style={style}>{children}</section>;
+      return <section {...attrs} style={styleProp} className={className}>{children}</section>;
     case 'container':
     case 'box':
-      return <div {...attrs} style={style}>{children}</div>;
+      return <div {...attrs} style={styleProp} className={className}>{children}</div>;
     case 'heading': {
       const Tag = ('h' + node.level) as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
-      return <Tag {...attrs} style={style}>{node.text}</Tag>;
+      return <Tag {...attrs} style={styleProp} className={className}>{node.text}</Tag>;
     }
     case 'paragraph':
-      return <p {...attrs} style={style}>{node.text}</p>;
+      return <p {...attrs} style={styleProp} className={className}>{node.text}</p>;
     case 'richText':
-      return <div {...attrs} style={style}>{children}</div>;
+      return <div {...attrs} style={styleProp} className={className}>{children}</div>;
     case 'button':
-      return <button {...attrs} style={style}>{node.text}</button>;
+      return <button {...attrs} style={styleProp} className={className}>{node.text}</button>;
     case 'link':
-      return <a href={node.href} {...attrs} style={style}>{node.text}</a>;
+      return <a href={node.href} {...attrs} style={styleProp} className={className}>{node.text}</a>;
     case 'image':
-      return <img src={node.src} alt={node.alt} {...attrs} style={style} />;
+      return <img src={node.src} alt={node.alt} {...attrs} style={styleProp} className={className} />;
     case 'icon':
-      return renderIcon(node, style, attrs);
+      return renderIcon(node, styleProp, className, attrs, isExport);
     case 'form':
-      return <form {...attrs} style={style}>{children}</form>;
+      return <form {...attrs} style={styleProp} className={className}>{children}</form>;
     case 'formField':
     case 'faq':
     case 'faqItem':
@@ -219,12 +249,12 @@ export function renderNode(node: Node, ctx: RenderContext): JSX.Element {
     case 'imageItem':
     case 'pricingTable':
     case 'card':
-      return <div {...attrs} style={style}>{children}</div>;
+      return <div {...attrs} style={styleProp} className={className}>{children}</div>;
     case 'nav':
-      return <nav {...attrs} style={style}>{children}</nav>;
+      return <nav {...attrs} style={styleProp} className={className}>{children}</nav>;
     case 'footer':
-      return <footer {...attrs} style={style}>{children}</footer>;
+      return <footer {...attrs} style={styleProp} className={className}>{children}</footer>;
     case 'componentInstance':
-      return <div {...attrs} style={style} data-component-id={node.componentId}>{children}</div>;
+      return <div {...attrs} style={styleProp} className={className} data-component-id={node.componentId}>{children}</div>;
   }
 }

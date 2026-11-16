@@ -237,4 +237,52 @@ describe('lengthToCss', () => {
     expect(lengthToCss('auto')).toBe('auto');
     expect(lengthToCss('none')).toBe('none');
   });
+
+  describe('renderNode — export mode never emits inline styles', () => {
+    it('emits an r-{hash} class name and no style attribute on styled elements in export mode', () => {
+      const html = render('box-1', 'desktop', 'export');
+      expect(html).toMatch(/<div[^>]*class="r-[a-f0-9]{6,}"[^>]*>/);
+      expect(html).not.toMatch(/style=/);
+    });
+
+    it('keeps inline styles and emits no r-{hash} classes in canvas mode', () => {
+      const html = render('box-1', 'desktop', 'canvas');
+      expect(html).toContain('padding:16px');
+      expect(html).not.toMatch(/class="r-/);
+    });
+
+    it('hashes identical styles to the same class and different styles to different classes', () => {
+      const base: Node = {
+        id: 'n', type: 'box', parentId: null, children: [], styles: { color: { desktop: '#0f766e' } },
+        hidden: {}, locked: false,
+      };
+      const same = { ...base, id: 'm' };
+      const different = { ...base, id: 'd', styles: { color: { desktop: '#ff0000' } } };
+      const ctx = (id: string, node: Node): RenderContext => ({
+        mode: 'export', breakpoint: 'desktop', nodes: { [id]: node },
+      });
+      const classOf = (node: Node): string => {
+        const html = renderToStaticMarkup(renderNode(node, ctx(node.id, node)));
+        const match = html.match(/class="([^"]+)"/);
+        if (!match) throw new Error(`no class attribute in ${html}`);
+        return match[1]!;
+      };
+      expect(classOf(base)).toMatch(/^r-[a-f0-9]{6,}$/);
+      expect(classOf(same)).toBe(classOf(base));
+      expect(classOf(different)).not.toBe(classOf(base));
+    });
+
+    it('hides via the r-{hash} class instead of inline style in export mode', () => {
+      const html = render('h-1', 'mobile', 'export');
+      expect(html).toMatch(/<h2[^>]*class="r-[a-f0-9]{6,}"[^>]*>/);
+      expect(html).not.toMatch(/style=/);
+    });
+
+    it('emits neither style nor an r-{hash} class on unstyled elements in export mode', () => {
+      const html = render('link-1', 'desktop', 'export');
+      expect(html).toMatch(/<a[^>]*href="\/work"[^>]*>/);
+      expect(html).not.toMatch(/style=/);
+      expect(html).not.toMatch(/class="r-/);
+    });
+  });
 });
