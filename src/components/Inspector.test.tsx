@@ -83,12 +83,24 @@ describe('Inspector', () => {
     expect(inputFor(container, 'e.g. 100%').value).toBe('100px');
   });
 
-  it('shows the override dot only for a style overridden at the active breakpoint', () => {
-    const node = box('box1');
-    node.styles = { width: { desktop: { kind: 'px', value: 200 } } } as never;
-    const { container } = renderInspector({ box1: node }, ['box1'], 'desktop');
-    expect(container.querySelector('[title="Override at desktop"]')).not.toBeNull();
-    expect(container.querySelector('[title="Override at tablet"]')).toBeNull();
+  it('hides the override dot on desktop but shows it on tablet and mobile', () => {
+    // Desktop: an override exists but the dot is never shown there.
+    const desktopNode = box('box1');
+    desktopNode.styles = { width: { desktop: { kind: 'px', value: 200 } } } as never;
+    const { container: desktopContainer } = renderInspector({ box1: desktopNode }, ['box1'], 'desktop');
+    expect(desktopContainer.querySelector('[title="Override at desktop"]')).toBeNull();
+
+    // Tablet: an override at the active breakpoint shows the dot.
+    const tabletNode = box('box1');
+    tabletNode.styles = { width: { tablet: { kind: 'px', value: 200 } } } as never;
+    const { container: tabletContainer } = renderInspector({ box1: tabletNode }, ['box1'], 'tablet');
+    expect(tabletContainer.querySelector('[title="Override at tablet"]')).not.toBeNull();
+
+    // Mobile: same as tablet.
+    const mobileNode = box('box1');
+    mobileNode.styles = { width: { mobile: { kind: 'px', value: 200 } } } as never;
+    const { container: mobileContainer } = renderInspector({ box1: mobileNode }, ['box1'], 'mobile');
+    expect(mobileContainer.querySelector('[title="Override at mobile"]')).not.toBeNull();
   });
 
   it('does not show a dot for a style with no override', () => {
@@ -97,15 +109,16 @@ describe('Inspector', () => {
   });
 
   it('resets an override back to the base via the reset button', () => {
+    // Reset dots/buttons only render on tablet and mobile (never desktop — Fix 4).
     const node = box('box1');
-    node.styles = { width: { desktop: { kind: 'px', value: 200 } } } as never;
-    const { container, get } = renderInspector({ box1: node }, ['box1'], 'desktop');
-    expect(get().nodes['box1']?.styles.width).toEqual({ desktop: { kind: 'px', value: 200 } });
+    node.styles = { width: { tablet: { kind: 'px', value: 200 } } } as never;
+    const { container, get } = renderInspector({ box1: node }, ['box1'], 'tablet');
+    expect(get().nodes['box1']?.styles.width).toEqual({ tablet: { kind: 'px', value: 200 } });
 
     const reset = container.querySelector('[title="Reset to base"]') as HTMLButtonElement;
     act(() => reset.click());
     expect(get().nodes['box1']?.styles.width).toEqual({});
-    expect(container.querySelector('[title="Override at desktop"]')).toBeNull();
+    expect(container.querySelector('[title="Override at tablet"]')).toBeNull();
   });
 
   it('resolves the active breakpoint value (mobile ?? tablet ?? desktop)', () => {

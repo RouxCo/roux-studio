@@ -72,6 +72,44 @@ function canContain(parentType: ElementType | 'root', childType: ElementType): b
   }
 }
 
+export function handleDragEnd(
+  nodes: Record<NodeId, Node>,
+  moveNode: (id: NodeId, parentId: NodeId | null, index?: number) => void,
+  event: DragEndEvent,
+) {
+  const { active, over } = event;
+  const draggedId = active.id as NodeId;
+  const targetId = over ? (over.id as NodeId) : null;
+  if (!targetId || targetId === draggedId) return;
+  const dragged = nodes[draggedId];
+  const target = nodes[targetId];
+  if (!dragged || !target) return;
+
+  let parentId: NodeId | null = dragged.parentId;
+  let index: number | undefined;
+
+  if (target.parentId === dragged.parentId) {
+    // Reorder among siblings: insert dragged right before target.
+    const children = nodes[dragged.parentId ?? '']?.children ?? [];
+    const ti = children.indexOf(targetId);
+    const di = children.indexOf(draggedId);
+    if (ti < 0 || di < 0) return;
+    index = ti > di ? ti - 1 : ti;
+  } else if (canContain(target.type, dragged.type)) {
+    // Move into a different parent: append as the target's last child.
+    parentId = targetId;
+    index = undefined;
+  } else {
+    return;
+  }
+
+  try {
+    moveNode(draggedId, parentId, index);
+  } catch {
+    // Containment rejected — drop cancels, store is left untouched.
+  }
+}
+
 function Row({
   node,
   depth,
@@ -197,40 +235,8 @@ export default function LayersTree({ onContextMenu }: LayersTreeProps) {
   );
   const sensors = useSensors(pointerSensor);
 
-  const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
-      const { active, over } = event;
-      const draggedId = active.id as NodeId;
-      const targetId = over ? (over.id as NodeId) : null;
-      if (!targetId || targetId === draggedId) return;
-      const dragged = nodes[draggedId];
-      const target = nodes[targetId];
-      if (!dragged || !target) return;
-
-      let parentId: NodeId | null = dragged.parentId;
-      let index: number | undefined;
-
-      if (target.parentId === dragged.parentId) {
-        // Reorder among siblings: insert dragged right before target.
-        const children = nodes[dragged.parentId ?? '']?.children ?? [];
-        const ti = children.indexOf(targetId);
-        const di = children.indexOf(draggedId);
-        if (ti < 0 || di < 0) return;
-        index = ti > di ? ti - 1 : ti;
-      } else if (canContain(target.type, dragged.type)) {
-        // Move into a different parent: append as the target's last child.
-        parentId = targetId;
-        index = undefined;
-      } else {
-        return;
-      }
-
-      try {
-        moveNode(draggedId, parentId, index);
-      } catch {
-        // Containment rejected — drop cancels, store is left untouched.
-      }
-    },
+  const onDragEnd = useCallback(
+    (event: DragEndEvent) => handleDragEnd(nodes, moveNode, event),
     [nodes, moveNode],
   );
 
@@ -247,7 +253,7 @@ export default function LayersTree({ onContextMenu }: LayersTreeProps) {
   ];
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={onDragEnd}>
       <div className="h-full flex flex-col" onContextMenu={handleContextMenu}>
         <div className="px-4 py-3 text-xs font-semibold text-slate-300 uppercase tracking-wider">Layers</div>
         <div className="flex-1 overflow-y-auto">

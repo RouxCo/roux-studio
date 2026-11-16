@@ -122,7 +122,8 @@ function Section({ title, fields, nodeId, breakpoint, nodes }: SectionProps) {
         {fields.map((field) => {
           const responsive = node?.styles[field.key] as Responsive<unknown> | undefined;
           const current = resolveResponsive(breakpoint, responsive);
-          const overridden = responsive !== undefined && breakpoint in responsive;
+          // Override dots are shown only on tablet and mobile, never on desktop.
+          const overridden = breakpoint !== 'desktop' && responsive !== undefined && breakpoint in responsive;
           return (
             <div
               key={field.key}

@@ -29,8 +29,8 @@ export default function TopBar() {
   const setZoom = useEditorStore((state) => state.setZoom);
   const undo = useEditorStore((state) => state.undo);
   const redo = useEditorStore((state) => state.redo);
-  const canUndo = useEditorStore((state) => state.canUndo);
-  const canRedo = useEditorStore((state) => state.canRedo);
+  const canUndo = useEditorStore((state) => state.canUndo());
+  const canRedo = useEditorStore((state) => state.canRedo());
 
   const handleZoomChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -110,7 +110,7 @@ export default function TopBar() {
         <div className="flex items-center gap-1">
           <button
             onClick={undo}
-            disabled={!canUndo()}
+            disabled={!canUndo}
             className="w-8 h-8 shrink-0 rounded-md bg-slate-800/50 text-slate-400 flex items-center justify-center disabled:opacity-40 disabled:pointer-events-none hover:!bg-slate-700 disabled:hover:!bg-slate-800/50"
             title="Undo"
             aria-label="Undo"
@@ -119,7 +119,7 @@ export default function TopBar() {
           </button>
           <button
             onClick={redo}
-            disabled={!canRedo()}
+            disabled={!canRedo}
             className="w-8 h-8 shrink-0 rounded-md bg-slate-800/50 text-slate-400 flex items-center justify-center disabled:opacity-40 disabled:pointer-events-none hover:!bg-slate-700 disabled:hover:!bg-slate-800/50"
             title="Redo"
             aria-label="Redo"
