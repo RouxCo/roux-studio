@@ -9,9 +9,12 @@ import { create } from 'zustand';
 import {
   produceWithPatches,
   applyPatches,
+  enablePatches,
   type Patch,
   type Draft,
 } from 'immer';
+
+enablePatches();
 import type {
   Node, NodeId, PageId, Page, DesignTokens, Breakpoint,
 } from '../types';
@@ -160,7 +163,12 @@ export const useEditorStore = create<EditorStore>((set, get) => {
     if (state.historyIndex < 0) return;
     const entry = state.history[state.historyIndex];
     if (!entry) return;
-    const prev = applyPatches(projectDataOf(state), entry.inversePatches);
+    // Inverse patches accumulate in chronological order; undo applies them
+    // in reverse so the earliest change of a coalesced batch is undone last.
+    const prev = applyPatches(
+      projectDataOf(state),
+      [...entry.inversePatches].reverse(),
+    );
     set({ ...prev, historyIndex: state.historyIndex - 1 });
   },
 
