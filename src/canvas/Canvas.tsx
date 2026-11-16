@@ -38,9 +38,11 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1 }: CanvasProp
 
   const width = BREAKPOINT_WIDTH[breakpoint] ?? 1440;
 
+  const [loaded, setLoaded] = useState(false);
+
   const render = useCallback(() => {
     const iframe = iframeRef.current;
-    if (!iframe) return;
+    if (!iframe || !loaded) return;
     const doc = iframe.contentDocument || iframe.contentWindow?.document;
     if (!doc) return;
     const container = doc.body;
@@ -49,30 +51,31 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1 }: CanvasProp
       renderNode(page, { mode: 'canvas', breakpoint, nodes }),
       container,
     );
-  }, [page, nodes, breakpoint]);
+  }, [page, nodes, breakpoint, loaded]);
 
   const [element, setElement] = useState<React.ReactNode>(null);
 
   useEffect(() => {
-    const iframe = iframeRef.current;
-    if (!iframe) return;
     const go = () => {
       const el = render();
       if (el) setElement(el);
     };
-    if (iframe.contentDocument) {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+    if (loaded) {
       go();
     } else {
       iframe.addEventListener('load', go);
       return () => iframe.removeEventListener('load', go);
     }
-  }, [render]);
+  }, [render, loaded]);
 
   return (
     <>
       <iframe
         ref={iframeRef}
         srcDoc={SHELL}
+        onLoad={() => setLoaded(true)}
         style={{
           width: width,
           height: '100%',
@@ -82,7 +85,7 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1 }: CanvasProp
           display: 'block',
         }}
       />
-      {element}
+      {loaded ? element : null}
     </>
   );
 }
