@@ -236,3 +236,15 @@ function classFor(nodeId: string): string {
   }
   return `r-${(h >>> 0).toString(16).padStart(6, '0')}`;
 }
+
+describe('compileStyles: preview widths never leak into media queries', () => {
+  it('uses only 1023px and 767px breakpoints, never 1440/768/390', () => {
+    const out = compileStyles(mkProject(TREE), 'pg-1' as PageId, TREE);
+    const queries = out.match(/@media[^{]*/g) ?? [];
+    expect(queries.length).toBeGreaterThan(0);
+    for (const q of queries) {
+      expect(q).toMatch(/max-width:\s*(1023|767)px/);
+      expect(q).not.toMatch(/1440|768|390/);
+    }
+  });
+});
