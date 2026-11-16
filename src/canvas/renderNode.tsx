@@ -5,8 +5,9 @@
 // exporter (mode: 'export') — spec §4.4. Canvas output carries data-node-id
 // attributes for hit-testing and selection; export output omits editor
 // artefacts. Styles resolve per active breakpoint from ResponsiveStyles
-// (desktop-first, mobile ?? tablet ?? desktop) and are emitted as inline
-// styles; M4's compileStyles replaces them with r-{hash} classes on export.
+// (desktop-first, mobile ?? tablet ?? desktop) and are captured in every
+// node's r-{hash} class name (M4's compileStyles compiles each class into a
+// CSS rule); no inline style attributes are emitted in either mode.
 //
 // This module is the element registry: every ElementType from spec §4 maps to
 // markup here.
@@ -188,9 +189,9 @@ const LUCIDE_BY_NAME: Record<string, ComponentType<SVGAttributes<SVGSVGElement>>
 };
 
 
-function MissingIcon({ style, ...props }: SVGAttributes<SVGSVGElement>): JSX.Element {
+function MissingIcon(props: SVGAttributes<SVGSVGElement>): JSX.Element {
   return (
-    <svg {...props} style={style} viewBox="0 0 24 24" aria-hidden="true">
+    <svg {...props} viewBox="0 0 24 24" aria-hidden="true">
       <rect x="2" y="2" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" rx="2" />
       <path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
     </svg>
@@ -199,16 +200,11 @@ function MissingIcon({ style, ...props }: SVGAttributes<SVGSVGElement>): JSX.Ele
 
 function renderIcon(
   node: IconNode,
-  style: CSSProperties | undefined,
   className: string | undefined,
   attrs: Record<string, string>,
-  isExport: boolean,
 ): JSX.Element {
   const Comp = LUCIDE_BY_NAME[node.name] ?? LUCIDE_BY_NAME[node.name.toLowerCase()] ?? MissingIcon;
-  // The fallback svg's base inline style is editor output; in export mode all
-  // inline styles are replaced by the r-{hash} class name.
-  const svgStyle = isExport ? undefined : { display: 'inline-block', width: 24, height: 24, ...style };
-  return <Comp {...attrs} className={className} style={svgStyle} />;
+  return <Comp {...attrs} className={className} />;
 }
 
 // Inline text editing for heading, paragraph, button and link nodes.
@@ -367,12 +363,11 @@ export function renderNode(node: Node, ctx: RenderContext): JSX.Element {
     style.display = 'none';
   }
 
-  // Export mode never emits inline style attributes: styles are captured in an
-  // r-{hash} class name instead (M4's compileStyles turns those into CSS).
-  // Canvas mode keeps inline styles for live editing.
-  const isExport = ctx.mode === 'export';
-  const styleProp = isExport ? undefined : style;
-  const className = isExport && Object.keys(style).length > 0 ? classFor(node.id) : undefined;
+  // Every node gets an r-{hash} class name (from its ID, compiled into a CSS
+  // rule by M4's compileStyles) in both canvas and export mode. No inline
+  // style attributes are emitted in either mode.
+  const styleProp: CSSProperties | undefined = undefined;
+  const className = Object.keys(style).length > 0 ? classFor(node.id) : undefined;
 
   switch (node.type) {
     case 'page':
@@ -397,7 +392,7 @@ export function renderNode(node: Node, ctx: RenderContext): JSX.Element {
     case 'image':
       return <img src={node.src} alt={node.alt} {...attrs} style={styleProp} className={className} />;
     case 'icon':
-      return renderIcon(node, styleProp, className, attrs, isExport);
+      return renderIcon(node, className, attrs);
     case 'form':
       return <form {...attrs} style={styleProp} className={className}>{children}</form>;
     case 'formField':

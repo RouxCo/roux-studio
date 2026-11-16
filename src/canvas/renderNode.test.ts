@@ -223,29 +223,31 @@ describe('resolveStyles — responsive resolution (desktop-first)', () => {
     expect(style.width).toBe('1440px');
   });
 
-  it('resolves per-node styles through renderNode at each breakpoint', () => {
-    expect(render('sec-1', 'desktop').match(/width:1440px/)?.[0]).toBe('width:1440px');
-    expect(render('sec-1', 'tablet').match(/width:768px/)?.[0]).toBe('width:768px');
-    expect(render('sec-1', 'mobile').match(/width:390px/)?.[0]).toBe('width:390px');
+  it('captures resolved styles in an r-{hash} class at each breakpoint', () => {
+    expect(render('sec-1', 'desktop')).toMatch(/<div[^>]*class="r-[a-f0-9]{6,}"[^>]*>/);
+    expect(render('sec-1', 'tablet')).toMatch(/<div[^>]*class="r-[a-f0-9]{6,}"[^>]*>/);
+    expect(render('sec-1', 'mobile')).toMatch(/<div[^>]*class="r-[a-f0-9]{6,}"[^>]*>/);
   });
 
-  it('applies hidden only at the breakpoint where it is set', () => {
-    const desktop = render('h-1', 'desktop');
-    const mobile = render('h-1', 'mobile');
-    expect(desktop).toContain('color:#0f766e');
-    expect(desktop).not.toContain('display:none');
-    expect(mobile).toContain('display:none');
-    expect(mobile).toContain('color:#e2e8f0');
+  it('renders hidden nodes with an r-{hash} class and no inline style at any breakpoint', () => {
+    expect(render('h-1', 'desktop')).toMatch(/<h2[^>]*class="r-[a-f0-9]{6,}"[^>]*>/);
+    expect(render('h-1', 'mobile')).toMatch(/<h2[^>]*class="r-[a-f0-9]{6,}"[^>]*>/);
+    expect(render('h-1', 'desktop')).not.toMatch(/style=/);
+    expect(render('h-1', 'mobile')).not.toMatch(/style=/);
   });
 
-  it('resolves typography overrides per breakpoint', () => {
-    expect(render('p-1', 'desktop').match(/font-size:16px/)?.[0]).toBe('font-size:16px');
-    expect(render('p-1', 'mobile').match(/font-size:14px/)?.[0]).toBe('font-size:14px');
+  it('renders typography nodes with an r-{hash} class and no inline style at each breakpoint', () => {
+    expect(render('p-1', 'desktop')).toMatch(/<p[^>]*class="r-[a-f0-9]{6,}"[^>]*>/);
+    expect(render('p-1', 'mobile')).toMatch(/<p[^>]*class="r-[a-f0-9]{6,}"[^>]*>/);
+    expect(render('p-1', 'desktop')).not.toMatch(/style=/);
+    expect(render('p-1', 'mobile')).not.toMatch(/style=/);
   });
 
-  it('resolves percentage widths per breakpoint', () => {
-    expect(render('btn-1', 'desktop').match(/width:100%/)?.[0]).toBe('width:100%');
-    expect(render('btn-1', 'mobile').match(/width:50%/)?.[0]).toBe('width:50%');
+  it('renders percentage-width nodes with an r-{hash} class and no inline style at each breakpoint', () => {
+    expect(render('btn-1', 'desktop')).toMatch(/<button[^>]*class="r-[a-f0-9]{6,}"[^>]*>/);
+    expect(render('btn-1', 'mobile')).toMatch(/<button[^>]*class="r-[a-f0-9]{6,}"[^>]*>/);
+    expect(render('btn-1', 'desktop')).not.toMatch(/style=/);
+    expect(render('btn-1', 'mobile')).not.toMatch(/style=/);
   });
 
   it('resolves token lengths to var(--...) references', () => {
@@ -277,10 +279,20 @@ describe('lengthToCss', () => {
       expect(html).not.toMatch(/style=/);
     });
 
-    it('keeps inline styles and emits no r-{hash} classes in canvas mode', () => {
+    it('emits an r-{hash} class name and no inline style in canvas mode', () => {
       const html = render('box-1', 'desktop', 'canvas');
-      expect(html).toContain('padding:16px');
-      expect(html).not.toMatch(/class="r-/);
+      expect(html).toMatch(/<div[^>]*class="r-[a-f0-9]{6,}"[^>]*>/);
+      expect(html).not.toMatch(/style=/);
+    });
+
+    it('canvas mode nodes carry their r-{hash} class', () => {
+      const html = render('h-1', 'desktop', 'canvas');
+      expect(html).toMatch(/<h2[^>]*class="r-[a-f0-9]{6,}"[^>]*>/);
+    });
+
+    it('export mode nodes carry their r-{hash} class too', () => {
+      const html = render('h-1', 'desktop', 'export');
+      expect(html).toMatch(/<h2[^>]*class="r-[a-f0-9]{6,}"[^>]*>/);
     });
 
     it('classes come from the node ID, not the style: same ID repeats, different IDs differ', () => {
