@@ -10,8 +10,8 @@
 //
 // This module is the element registry: every ElementType from spec §4 maps to
 // markup here.
-import { Fragment } from 'react';
-import type { CSSProperties, ComponentType, JSX, SVGAttributes } from 'react';
+import { Fragment, useCallback, useEffect, useRef } from 'react';
+import type { CSSProperties, ComponentType, ElementType, JSX, SVGAttributes } from 'react';
 import {
   ArrowRight,
   ChevronDown,
@@ -43,6 +43,13 @@ export interface RenderContext {
   mode: 'canvas' | 'export';
   breakpoint: Breakpoint;
   nodes: Record<NodeId, Node>;
+  // Inline text editing (canvas mode only). When editingNodeId matches a node's
+  // id that node renders contentEditable. On blur the new text is saved through
+  // onSaveText as exactly one undo step; onCancelEditing aborts without saving.
+  editingNodeId?: NodeId | null;
+  onStartEditing?: (id: NodeId) => void;
+  onSaveText?: (id: NodeId, text: string) => void;
+  onCancelEditing?: () => void;
 }
 
 const DATA_NODE_ID = 'data-node-id';
@@ -220,6 +227,146 @@ function renderIcon(
   return <Comp {...attrs} className={className} style={svgStyle} />;
 }
 
+// Inline text editing for heading, paragraph, button and link nodes.
+//
+// Double-click enters contentEditable mode; blur saves the new text as exactly
+// one undo step (via onSaveText). Escape cancels without saving. Only active in
+// canvas mode — export mode always renders the static tag.
+interface InlineTextEditProps {
+  tag: ElementType;
+  text: string;
+  onSave: (next: string) => void;
+  onCancel: () => void;
+  style: CSSProperties | undefined;
+  className: string | undefined;
+  attrs: Record<string, string>;
+  href?: string;
+}
+
+function InlineTextEdit({
+  tag: Tag,
+  text,
+  onSave,
+  onCancel,
+  style,
+  className,
+  attrs,
+  href,
+}: InlineTextEditProps): JSX.Element {
+  const ref = useRef<HTMLElement>(null);
+  const committed = useRef(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || committed.current) return;
+    el.contentEditable = 'true';
+    el.dataset.editing = 'true';
+    el.focus();
+    const selection = window.getSelection();
+    if (selection) {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const commit = useCallback(
+    (next: string) => {
+      if (committed.current) return;
+      committed.current = true;
+      const el = ref.current;
+      if (el) {
+        el.contentEditable = 'false';
+        delete el.dataset.editing;
+      }
+      onSave(next);
+    },
+    [onSave],
+  );
+
+  const handleBlur = (e: React.FocusEvent<HTMLElement>) => {
+    commit(e.currentTarget.innerText ?? e.currentTarget.textContent ?? '');
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.currentTarget.blur();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      onCancel();
+    }
+  };
+
+  return (
+    <Tag
+      ref={ref}
+      {...attrs}
+      style={style}
+      className={className}
+      {...(href !== undefined ? { href } : {})}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
+    >
+      {text}
+    </Tag>
+  );
+}
+
+// Renders an editable text node (heading, paragraph, button, link). In canvas
+// mode a double-click enters inline edit mode; otherwise the static tag is
+// emitted exactly as before.
+function textNode(
+  node: { id: NodeId; text: string },
+  Tag: ElementType,
+  ctx: RenderContext,
+  props: {
+    style: CSSProperties | undefined;
+    className: string | undefined;
+    attrs: Record<string, string>;
+    href?: string;
+  },
+): JSX.Element {
+  const isEditing =
+    ctx.mode === 'canvas' &&
+    ctx.editingNodeId === node.id &&
+    typeof ctx.onStartEditing === 'function' &&
+    typeof ctx.onSaveText === 'function';
+
+  if (isEditing) {
+    return (
+      <InlineTextEdit
+        tag={Tag}
+        text={node.text}
+        onSave={(next: string) => ctx.onSaveText!(node.id, next)}
+        onCancel={ctx.onCancelEditing ?? (() => {})}
+        style={props.style}
+        className={props.className}
+        attrs={props.attrs}
+        href={props.href}
+      />
+    );
+  }
+
+  return (
+    <Tag
+      {...props.attrs}
+      style={props.style}
+      className={props.className}
+      {...(props.href !== undefined ? { href: props.href } : {})}
+      onDoubleClick={
+        ctx.mode === 'canvas' && typeof ctx.onStartEditing === 'function'
+          ? () => ctx.onStartEditing!(node.id)
+          : undefined
+      }
+    >
+      {node.text}
+    </Tag>
+  );
+}
+
 export function renderNode(node: Node, ctx: RenderContext): JSX.Element {
   const style = resolveStyles(node.styles, ctx.breakpoint);
   const attrs = canvasAttrs(node, ctx);
@@ -253,16 +400,16 @@ export function renderNode(node: Node, ctx: RenderContext): JSX.Element {
       return <div {...attrs} style={styleProp} className={className}>{children}</div>;
     case 'heading': {
       const Tag = ('h' + node.level) as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
-      return <Tag {...attrs} style={styleProp} className={className}>{node.text}</Tag>;
+      return textNode(node, Tag, ctx, { style: styleProp, className, attrs });
     }
     case 'paragraph':
-      return <p {...attrs} style={styleProp} className={className}>{node.text}</p>;
+      return textNode(node, 'p', ctx, { style: styleProp, className, attrs });
     case 'richText':
       return <div {...attrs} style={styleProp} className={className}>{children}</div>;
     case 'button':
-      return <button {...attrs} style={styleProp} className={className}>{node.text}</button>;
+      return textNode(node, 'button', ctx, { style: styleProp, className, attrs });
     case 'link':
-      return <a href={node.href} {...attrs} style={styleProp} className={className}>{node.text}</a>;
+      return textNode(node, 'a', ctx, { style: styleProp, className, attrs, href: node.href });
     case 'image':
       return <img src={node.src} alt={node.alt} {...attrs} style={styleProp} className={className} />;
     case 'icon':

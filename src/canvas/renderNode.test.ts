@@ -1,7 +1,7 @@
 // src/canvas/renderNode.test.ts
 // Renderer tests: canvas vs export mode, responsive style resolution,
 // per-element markup, and the length/style helpers (spec §4.4, §7).
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { Breakpoint, Node, NodeId } from '../types';
 import { lengthToCss, resolveStyles, renderNode, type RenderContext } from './renderNode';
@@ -113,6 +113,38 @@ describe('renderNode — canvas vs export mode', () => {
     expect(render('btn-1', 'desktop', 'export')).toMatch(/<button[^>]*>Get in touch<\/button>/);
     expect(render('link-1', 'desktop', 'export')).toContain('<a href="/work">See our work</a>');
     expect(render('img-1', 'desktop', 'export')).toContain('<img src="assets/logo.svg" alt="Roux logo"');
+  });
+
+  it('renders the inline edit branch for a heading in canvas mode when editing', () => {
+    const onStartEditing = vi.fn();
+    const onSaveText = vi.fn();
+    const html = renderToStaticMarkup(
+      renderNode(H2, {
+        mode: 'canvas',
+        breakpoint: 'desktop',
+        nodes: TREE,
+        editingNodeId: 'h-1',
+        onStartEditing,
+        onSaveText,
+      }),
+    );
+    expect(html).toContain('Roux and Co.');
+    expect(html).toContain('<h2');
+  });
+
+  it('keeps double-click editing out of export mode', () => {
+    const html = renderToStaticMarkup(
+      renderNode(H2, {
+        mode: 'export',
+        breakpoint: 'desktop',
+        nodes: TREE,
+        editingNodeId: 'h-1',
+        onStartEditing: vi.fn(),
+        onSaveText: vi.fn(),
+      }),
+    );
+    expect(html).toMatch(/<h2[^>]*>Roux and Co\.<\/h2>/);
+    expect(html).not.toMatch(/data-editing/);
   });
 
   it('maps heading level to h1 through h6', () => {

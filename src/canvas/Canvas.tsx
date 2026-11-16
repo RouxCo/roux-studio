@@ -43,6 +43,33 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1 }: CanvasProp
   const width = BREAKPOINT_WIDTH[breakpoint] ?? 1440;
 
   const [loaded, setLoaded] = useState(false);
+  // UI-only state (not history-tracked): the node currently being inline-edited.
+  const [editingNodeId, setEditingNodeId] = useState<NodeId | null>(null);
+
+  const startEditing = useCallback((id: NodeId) => {
+    setEditingNodeId(id);
+  }, []);
+
+  const saveText = useCallback(
+    (id: NodeId, text: string) => {
+      setEditingNodeId(null);
+      useEditorStore.getState().patchNode(id, (draft) => {
+        if (
+          draft.type === 'heading' ||
+          draft.type === 'paragraph' ||
+          draft.type === 'button' ||
+          draft.type === 'link'
+        ) {
+          draft.text = text;
+        }
+      });
+    },
+    [],
+  );
+
+  const cancelEditing = useCallback(() => {
+    setEditingNodeId(null);
+  }, []);
 
   const render = useCallback(() => {
     const iframe = iframeRef.current;
@@ -52,10 +79,18 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1 }: CanvasProp
     const container = doc.body;
     if (!container) return;
     return createPortal(
-      renderNode(page, { mode: 'canvas', breakpoint, nodes }),
+      renderNode(page, {
+        mode: 'canvas',
+        breakpoint,
+        nodes,
+        editingNodeId,
+        onStartEditing: startEditing,
+        onSaveText: (id, text) => saveText(id, text),
+        onCancelEditing: cancelEditing,
+      }),
       container,
     );
-  }, [page, nodes, breakpoint, loaded]);
+  }, [page, nodes, breakpoint, loaded, editingNodeId, startEditing, saveText, cancelEditing]);
 
   const [element, setElement] = useState<React.ReactNode>(null);
 
