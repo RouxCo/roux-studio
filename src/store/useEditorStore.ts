@@ -19,6 +19,11 @@ import type {
   Node, NodeId, PageId, Page, DesignTokens, Breakpoint,
 } from '../types';
 import { projectBroadcast } from '../db/broadcast';
+import {
+  assertCanContain,
+  assertCanMove,
+  ContainmentError,
+} from './containment';
 
 const HISTORY_CAP = 200;
 
@@ -232,12 +237,20 @@ export const useEditorStore = create<EditorStore>((set, get) => {
 
   addNode: (node, parentId) => {
     get().updateData((draft) => {
+      const parent = parentId === null ? null : draft.nodes[parentId];
+      const parentType = parent === null ? 'root' : parent?.type;
+      if (parentType === undefined) {
+        throw new ContainmentError(
+          `Cannot add ${node.id} (${node.type}): parent "${parentId}" does not exist.`,
+        );
+      }
+      assertCanContain(parentType, node.type);
       draft.nodes[node.id] = node;
       const nodeDraft = draft.nodes[node.id];
       if (parentId !== null && nodeDraft) {
         nodeDraft.parentId = parentId;
-        const parent = draft.nodes[parentId];
-        if (parent) parent.children.push(node.id);
+        const p = draft.nodes[parentId];
+        if (p) p.children.push(node.id);
       } else if (nodeDraft) {
         nodeDraft.parentId = null;
       }
@@ -263,6 +276,7 @@ export const useEditorStore = create<EditorStore>((set, get) => {
 
   moveNode: (nodeId, parentId, index) => {
     get().updateData((draft) => {
+      assertCanMove(draft.nodes, nodeId, parentId);
       const node = draft.nodes[nodeId];
       if (!node) return;
 
