@@ -111,7 +111,7 @@ describe('renderNode — canvas vs export mode', () => {
     expect(render('h-1', 'desktop', 'export')).toMatch(/<h2[^>]*>/);
     expect(render('p-1', 'desktop', 'export')).toMatch(/<p[^>]*>/);
     expect(render('btn-1', 'desktop', 'export')).toMatch(/<button[^>]*>Get in touch<\/button>/);
-    expect(render('link-1', 'desktop', 'export')).toContain('<a href="/work">See our work</a>');
+    expect(render('link-1', 'desktop', 'export')).toMatch(/<a class="r-[0-9a-f]+" href="\/work">See our work<\/a>/);
     expect(render('img-1', 'desktop', 'export')).toContain('<img src="assets/logo.svg" alt="Roux logo"');
   });
 
@@ -156,7 +156,7 @@ describe('renderNode — canvas vs export mode', () => {
       const html = renderToStaticMarkup(
         renderNode(node, { mode: 'export', breakpoint: 'desktop', nodes: { [node.id]: node } }),
       );
-      expect(html).toContain(`<h${level}>L${level}</h${level}>`);
+      expect(html).toMatch(new RegExp(`<h${level} class="r-[0-9a-f]+">L${level}</h${level}>`));
     }
   });
 
@@ -325,11 +325,11 @@ describe('lengthToCss', () => {
       expect(html).not.toMatch(/style=/);
     });
 
-    it('emits neither style nor an r-{hash} class on unstyled elements in export mode', () => {
+    it('emits no style attribute in export mode', () => {
       const html = render('link-1', 'desktop', 'export');
       expect(html).toMatch(/<a[^>]*href="\/work"[^>]*>/);
       expect(html).not.toMatch(/style=/);
-      expect(html).not.toMatch(/class="r-/);
+      expect(html).toMatch(/class="r-[0-9a-f]+"/);
     });
   });
 });

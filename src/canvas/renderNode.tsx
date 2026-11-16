@@ -367,7 +367,7 @@ export function renderNode(node: Node, ctx: RenderContext): JSX.Element {
   // rule by M4's compileStyles) in both canvas and export mode. No inline
   // style attributes are emitted in either mode.
   const styleProp: CSSProperties | undefined = undefined;
-  const className = Object.keys(style).length > 0 ? classFor(node.id) : undefined;
+  const className = classFor(node.id);
 
   switch (node.type) {
     case 'page':

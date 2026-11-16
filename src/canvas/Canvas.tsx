@@ -11,10 +11,11 @@
 // The iframe width follows the active breakpoint (desktop 1440 / tablet 768 /
 // mobile 390) and a `transform: scale()` zoom lets the canvas be viewed larger
 // or smaller than its natural size.
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import type { Node, NodeId, Breakpoint } from '../types';
+import type { Node, NodeId, Breakpoint, PageId, Project } from '../types';
 import { renderNode } from './renderNode';
+import { compileStyles } from '../compile/compileStyles';
 import SelectionOverlay from './SelectionOverlay';
 import ContextMenu from '../components/ContextMenu';
 import { useEditorStore } from '../store/useEditorStore';
@@ -44,6 +45,30 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1, onContextMen
   const selectedId = selection.length > 0 ? (selection[0] ?? null) : null;
 
   const width = BREAKPOINT_WIDTH[breakpoint] ?? 1440;
+
+  // Project data from the editor store, shaped into a Project for compileStyles.
+  // createdAt/updatedAt aren't tracked by the store and aren't read by compileStyles.
+  const projectId = useEditorStore((state) => state.projectId);
+  const projectName = useEditorStore((state) => state.projectName);
+  const pages = useEditorStore((state) => state.pages);
+  const tokens = useEditorStore((state) => state.tokens);
+  const currentPageId = useEditorStore((state) => state.currentPageId);
+  // PageId (e.g. 'pg-1'), not the page node id (e.g. 'page-1'): fall back to the
+  // page whose rootId matches the rendered page node.
+  const pageId =
+    currentPageId ?? pages.find((p) => p.rootId === page.id)?.id ?? '';
+
+  const project = useMemo<Project>(
+    () => ({
+      id: projectId ?? 'project',
+      name: projectName,
+      createdAt: '2026-01-01T00:00:00Z',
+      updatedAt: '2026-01-01T00:00:00Z',
+      pages,
+      tokens,
+    }),
+    [projectId, projectName, pages, tokens]
+  );
 
   const [loaded, setLoaded] = useState(false);
   // UI-only state (not history-tracked): the node currently being inline-edited.
@@ -162,6 +187,38 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1, onContextMen
     doc.addEventListener('contextmenu', handler);
     return () => doc.removeEventListener('contextmenu', handler);
   }, [loaded, setSelection]);
+
+  // Inject the compiled CSS into the canvas iframe: one shared <style id="roux-compiled">
+  // holds every node's r-<hash> rule (desktop base + breakpoint media queries). Recompiles
+  // whenever project/pages/tokens or the node set changes, throttled to one paint per
+  // animation frame so style edits don't thrash the iframe.
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe || !loaded) return undefined;
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!doc) return undefined;
+    let frame: number | null = null;
+    const flush = () => {
+      frame = null;
+      const head = doc.head || doc.getElementsByTagName('head')[0];
+      if (!head) return;
+      let style = doc.getElementById('roux-compiled') as HTMLStyleElement | null;
+      if (!style) {
+        style = doc.createElement('style');
+        style.id = 'roux-compiled';
+        head.appendChild(style);
+      }
+      style.textContent = compileStyles(project, pageId as PageId, nodes);
+    };
+    const schedule = () => {
+      if (frame !== null) return;
+      frame = requestAnimationFrame(flush);
+    };
+    schedule();
+    return () => {
+      if (frame !== null) cancelAnimationFrame(frame);
+    };
+  }, [loaded, project, pageId, nodes]);
 
   return (
     <>
