@@ -38,6 +38,7 @@ interface CanvasProps {
 export default function Canvas({ page, nodes, breakpoint, zoom = 1 }: CanvasProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const selection = useEditorStore((state) => state.selection);
+  const setSelection = useEditorStore((state) => state.setSelection);
   const selectedId = selection.length > 0 ? (selection[0] ?? null) : null;
 
   const width = BREAKPOINT_WIDTH[breakpoint] ?? 1440;
@@ -108,6 +109,22 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1 }: CanvasProp
       return () => iframe.removeEventListener('load', go);
     }
   }, [render, loaded]);
+
+  // Delegated click in the iframe canvas: clicking a rendered node selects it,
+  // keeping the layers tree and canvas selection in sync (both read the store).
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe || !loaded) return undefined;
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!doc) return undefined;
+    const handler = (e: MouseEvent) => {
+      const el = (e.target as Element | null)?.closest('[data-node-id]');
+      const id = el?.getAttribute('data-node-id') ?? null;
+      if (id) setSelection([id]);
+    };
+    doc.addEventListener('click', handler);
+    return () => doc.removeEventListener('click', handler);
+  }, [loaded, setSelection]);
 
   return (
     <>

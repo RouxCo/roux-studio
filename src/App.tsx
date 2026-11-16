@@ -1,6 +1,8 @@
 import './index.css'
+import { useEffect } from 'react'
 import type { Node, NodeId } from './types'
 import Canvas from './canvas/Canvas'
+import LayersTree from './components/LayersTree'
 import { useEditorStore } from './store/useEditorStore'
 
 const NODES: Record<NodeId, Node> = {
@@ -35,6 +37,16 @@ export default function App() {
   const breakpoint = useEditorStore((state) => state.breakpoint)
   const zoom = useEditorStore((state) => state.zoom)
 
+  // Seed the store with the built-in page so the layers tree (and canvas) share
+  // one source of truth. Runs once on mount.
+  useEffect(() => {
+    useEditorStore.setState({
+      pages: [{ id: 'page-1', title: 'Home', slug: 'home', rootId: 'page-1' }],
+      nodes: NODES,
+      currentPageId: 'page-1',
+    })
+  }, [])
+
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-slate-950 text-slate-100">
       {/* Top bar — full width */}
@@ -46,10 +58,9 @@ export default function App() {
         <div className="text-xs text-slate-500">Desktop</div>
       </header>
 
-      {/* Left panel — feature contents added in later jobs */}
+      {/* Left panel — layers tree */}
       <aside className={`fixed top-[${TOP_BAR_HEIGHT}px] bottom-0 left-0 z-30 w-[${SIDE_PANEL_WIDTH}px] border-r border-slate-800 bg-slate-900 text-slate-400`}>
-        <div className="p-4 text-sm font-medium">Insert</div>
-        <div className="px-4 text-xs text-slate-600">Components go here</div>
+        <LayersTree />
       </aside>
 
       {/* Centre canvas — fills the remaining space, centred and scrollable */}
