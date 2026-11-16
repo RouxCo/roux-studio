@@ -16,6 +16,7 @@ import { createPortal } from 'react-dom';
 import type { Node, NodeId, Breakpoint } from '../types';
 import { renderNode } from './renderNode';
 import SelectionOverlay from './SelectionOverlay';
+import ContextMenu from '../components/ContextMenu';
 import { useEditorStore } from '../store/useEditorStore';
 
 const BREAKPOINT_WIDTH: Record<Breakpoint, number> = {
@@ -33,9 +34,10 @@ interface CanvasProps {
   nodes: Record<NodeId, Node>;
   breakpoint: Breakpoint;
   zoom?: number;
+  onContextMenu?: (x: number, y: number) => void;
 }
 
-export default function Canvas({ page, nodes, breakpoint, zoom = 1 }: CanvasProps) {
+export default function Canvas({ page, nodes, breakpoint, zoom = 1, onContextMenu }: CanvasProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const selection = useEditorStore((state) => state.selection);
   const setSelection = useEditorStore((state) => state.setSelection);
@@ -46,6 +48,11 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1 }: CanvasProp
   const [loaded, setLoaded] = useState(false);
   // UI-only state (not history-tracked): the node currently being inline-edited.
   const [editingNodeId, setEditingNodeId] = useState<NodeId | null>(null);
+  // Right-click context menu, positioned within the iframe so iframe-relative
+  // client coordinates line up without any main-window transform math.
+  const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
+
+  const closeMenu = useCallback(() => setMenu(null), []);
 
   const startEditing = useCallback((id: NodeId) => {
     setEditingNodeId(id);
@@ -80,18 +87,28 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1 }: CanvasProp
     const container = doc.body;
     if (!container) return;
     return createPortal(
-      renderNode(page, {
-        mode: 'canvas',
-        breakpoint,
-        nodes,
-        editingNodeId,
-        onStartEditing: startEditing,
-        onSaveText: (id, text) => saveText(id, text),
-        onCancelEditing: cancelEditing,
-      }),
+      <>
+        {renderNode(page, {
+          mode: 'canvas',
+          breakpoint,
+          nodes,
+          editingNodeId,
+          onStartEditing: startEditing,
+          onSaveText: (id, text) => saveText(id, text),
+          onCancelEditing: cancelEditing,
+        })}
+        {menu && (
+          <ContextMenu
+            open={true}
+            x={menu.x}
+            y={menu.y}
+            onClose={closeMenu}
+          />
+        )}
+      </>,
       container,
     );
-  }, [page, nodes, breakpoint, loaded, editingNodeId, startEditing, saveText, cancelEditing]);
+  }, [page, nodes, breakpoint, loaded, editingNodeId, startEditing, saveText, cancelEditing, menu]);
 
   const [element, setElement] = useState<React.ReactNode>(null);
 
@@ -121,9 +138,29 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1 }: CanvasProp
       const el = (e.target as Element | null)?.closest('[data-node-id]');
       const id = el?.getAttribute('data-node-id') ?? null;
       if (id) setSelection([id]);
+      setMenu(null);
     };
     doc.addEventListener('click', handler);
     return () => doc.removeEventListener('click', handler);
+  }, [loaded, setSelection]);
+
+  // Delegated right-click in the iframe canvas: select the clicked node and open
+  // the context menu at the click position (iframe-relative client coords).
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe || !loaded) return undefined;
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!doc) return undefined;
+    const handler = (e: MouseEvent) => {
+      e.preventDefault();
+      const el = (e.target as Element | null)?.closest('[data-node-id]');
+      const id = el?.getAttribute('data-node-id') ?? null;
+      if (id) setSelection([id]);
+      setMenu(null);
+      onContextMenu?.(e.clientX, e.clientY);
+    };
+    doc.addEventListener('contextmenu', handler);
+    return () => doc.removeEventListener('contextmenu', handler);
   }, [loaded, setSelection]);
 
   return (

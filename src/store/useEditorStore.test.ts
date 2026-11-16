@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import 'fake-indexeddb/auto';
 
 import { useEditorStore } from './useEditorStore';
-import type { BoxNode, NodeId, SectionNode } from '../types';
+import type { BoxNode, Node, NodeId, SectionNode } from '../types';
 import { emptyEditorData } from '../types';
 import { ContainmentError } from './containment';
 
@@ -20,6 +20,20 @@ function box(id: NodeId, parentId: NodeId | null = null): BoxNode {
     styles: {},
     hidden: {},
     locked: false,
+  };
+}
+
+function heading(id: NodeId, parentId: NodeId | null = null): Node {
+  return {
+    id,
+    type: 'heading',
+    parentId,
+    children: [],
+    styles: {},
+    hidden: {},
+    locked: false,
+    level: 1,
+    text: 'Hello',
   };
 }
 
@@ -48,6 +62,7 @@ beforeEach(() => {
     isBatching: false,
     pendingForward: [],
     pendingInverse: [],
+    clipboard: null,
   });
 });
 
@@ -323,5 +338,172 @@ describe('containment — addNode / moveNode reject illegal nests', () => {
     expect(() => get().moveNode('box-1', 'sec-2')).not.toThrow();
     expect(() => get().moveNode('sec-1', 'cont-1')).toThrow(ContainmentError);
     expect(get().nodes['sec-1']?.parentId).toBeNull();
+  });
+});
+
+describe('clipboard — copy / cut / paste / duplicate', () => {
+  // Pages live at the root and are added via addPage, not addNode — containment
+  // only allows section/nav/footer/componentInstance directly at the root. So
+  // build the test tree with a section at the root instead.
+  function setupTree() {
+    get().addNode(section('sec-1'), null);
+    get().addNode(box('box-1'), 'sec-1');
+    // box's containment rule is NONE, so addNode rejects heading under box.
+    // Paste/duplicate legally create such box→heading nests (they only
+    // containment-check the root node, not descendants), so plant h-1 directly.
+    const h1 = heading('h-1', 'box-1');
+    useEditorStore.setState((s) => ({
+      nodes: {
+        ...s.nodes,
+        [h1.id]: h1,
+        'box-1': { ...s.nodes['box-1']!, children: [...s.nodes['box-1']!.children, h1.id] },
+      },
+    }));
+  }
+
+  it('copy snapshots the top-level selection into the clipboard', () => {
+    setupTree();
+    get().setSelection(['box-1']);
+    get().copy(['box-1']);
+
+    const clip = get().clipboard;
+    expect(clip).not.toBeNull();
+    expect(clip!.roots).toEqual(['box-1']);
+    expect(clip!.nodes).toHaveProperty('box-1');
+    // descendants are copied too, keyed by their original ids
+    expect(clip!.nodes).toHaveProperty('h-1');
+    expect(clip!.nodes['h-1']?.parentId).toBe('box-1');
+  });
+
+  it('copy only keeps top-level ids (a subtree is not repeated per child)', () => {
+    setupTree();
+    get().setSelection(['box-1', 'h-1']);
+    get().copy(['box-1', 'h-1']);
+
+    const clip = get().clipboard!;
+    expect(clip.roots).toEqual(['box-1']);
+    // h-1 is a descendant of box-1, so it is not a separate root
+    expect(clip.roots).not.toContain('h-1');
+    expect(clip.nodes).toHaveProperty('h-1');
+  });
+
+  it('paste creates new nodes with new ids under the target parent', () => {
+    setupTree();
+    get().copy(['box-1']);
+    const before = Object.keys(get().nodes);
+    get().paste('sec-1');
+
+    const after = Object.keys(get().nodes);
+    expect(after).toHaveLength(before.length + 2); // box + heading
+    expect(get().nodes['box-1']).toBeDefined(); // original untouched
+    const copies = after.filter((id) => !before.includes(id));
+    expect(copies).toHaveLength(2);
+    const newBox = copies.find((id) => get().nodes[id]!.type === 'box')!;
+    const newHeading = copies.find((id) => get().nodes[id]!.type === 'heading')!;
+    expect(get().nodes[newBox]!.parentId).toBe('sec-1');
+    expect(get().nodes[newHeading]!.parentId).toBe(newBox);
+    // the copy is appended to the parent's children
+    expect(get().nodes['sec-1']!.children).toContain(newBox);
+  });
+
+  it('paste with an empty clipboard does nothing', () => {
+    setupTree();
+    const before = Object.keys(get().nodes);
+    get().paste('sec-1');
+    expect(Object.keys(get().nodes)).toEqual(before);
+  });
+
+  it('paste rejects a type the target cannot contain (store untouched)', () => {
+    setupTree();
+    get().copy(['box-1']);
+    // a box may not be pasted at the page root
+    expect(() => get().paste(null)).toThrow(ContainmentError);
+    // and may not be pasted into another box
+    expect(() => get().paste('box-1')).toThrow(ContainmentError);
+    expect(Object.keys(get().nodes)).toEqual(['sec-1', 'box-1', 'h-1']);
+  });
+
+  it('cut copies then removes the selection', () => {
+    setupTree();
+    get().setSelection(['box-1']);
+    get().cut(['box-1']);
+
+    const clip = get().clipboard!;
+    expect(clip.roots).toEqual(['box-1']);
+    expect(get().nodes).not.toHaveProperty('box-1');
+    expect(get().nodes).not.toHaveProperty('h-1');
+    expect(get().nodes['sec-1']!.children).toEqual([]);
+  });
+
+  it('duplicate inserts a copy immediately after the original in its parent', () => {
+    setupTree();
+    get().duplicate(['box-1']);
+
+    const sec = get().nodes['sec-1']!;
+    expect(sec.children).toHaveLength(2);
+    expect(sec.children[0]).toBe('box-1');
+    const copyId = sec.children[1]!;
+    expect(copyId).not.toBe('box-1');
+    expect(get().nodes[copyId]!.type).toBe('box');
+    expect(get().nodes[copyId]!.parentId).toBe('sec-1');
+    // the heading descendant is duplicated too
+    const copyHeading = get().nodes[copyId]!.children[0]!;
+    expect(get().nodes[copyHeading]!.type).toBe('heading');
+  });
+
+  it('duplicate rejects an illegal root node (store untouched)', () => {
+    setupTree();
+    // Seed a box at the page root bypassing addNode's containment check, so
+    // duplicate's assertCanContain('root', 'box') is the thing being tested.
+    useEditorStore.setState({
+      nodes: { ...get().nodes, 'root-box': box('root-box') },
+    });
+    const before = Object.keys(get().nodes);
+    expect(() => get().duplicate(['root-box'])).toThrow(ContainmentError);
+    expect(Object.keys(get().nodes)).toEqual(before);
+  });
+
+  it('removeNodes deletes top-level nodes and all descendants', () => {
+    setupTree();
+    get().removeNodes(['sec-1']);
+
+    expect(get().nodes).not.toHaveProperty('sec-1');
+    expect(get().nodes).not.toHaveProperty('box-1');
+    expect(get().nodes).not.toHaveProperty('h-1');
+    expect(Object.keys(get().nodes)).toEqual([]);
+  });
+
+  it('removeNodes ignores descendants passed directly (top-level only)', () => {
+    setupTree();
+    get().removeNodes(['box-1', 'h-1']);
+
+    expect(get().nodes).not.toHaveProperty('box-1');
+    expect(get().nodes).not.toHaveProperty('h-1');
+    expect(get().nodes['sec-1']!.children).toEqual([]);
+  });
+
+  it('each clipboard/edit action is one undoable history step', () => {
+    setupTree();
+    // Reset history so the paste is the first tracked step.
+    useEditorStore.setState({ history: [], historyIndex: -1 });
+
+    get().copy(['box-1']);
+    expect(get().canUndo()).toBe(false); // copy is UI state, not history
+    expect(get().clipboard).not.toBeNull();
+
+    get().paste('sec-1');
+    expect(get().canUndo()).toBe(true);
+    const indexAfterPaste = get().historyIndex;
+
+    get().undo();
+    // undoing the paste removes the copied nodes
+    expect(get().nodes).toHaveProperty('box-1');
+    const sec = get().nodes['sec-1']!;
+    expect(sec.children).toEqual(['box-1']);
+    expect(get().historyIndex).toBe(indexAfterPaste - 1);
+
+    get().redo();
+    expect(Object.keys(get().nodes)).toHaveLength(5);
+    expect(get().historyIndex).toBe(indexAfterPaste);
   });
 });

@@ -15,6 +15,7 @@ import {
 } from 'immer';
 
 enablePatches();
+import { nanoid } from 'nanoid';
 import type {
   Node, NodeId, PageId, Page, DesignTokens, Breakpoint,
 } from '../types';
@@ -46,6 +47,10 @@ export interface EditorStore extends ProjectData {
   breakpoint: Breakpoint;
   selection: NodeId[];
   zoom: number;
+
+  // In-memory clipboard: a forest of copied nodes keyed by their (original) ids,
+  // plus the root ids of the copied selection. Not history-tracked.
+  clipboard: { nodes: Record<NodeId, Node>; roots: NodeId[] } | null;
 
   // Multi-tab guard: true when another tab saved a newer revision.
   readOnly: boolean;
@@ -87,6 +92,13 @@ export interface EditorStore extends ProjectData {
   removeNode: (nodeId: NodeId) => void;
   moveNode: (nodeId: NodeId, parentId: NodeId | null, index?: number) => void;
   patchNode: (nodeId: NodeId, recipe: (node: Draft<Node>) => void) => void;
+
+  // Clipboard / editing actions (each one history step unless batched)
+  removeNodes: (ids: NodeId[]) => void;
+  copy: (ids: NodeId[]) => void;
+  cut: (ids: NodeId[]) => void;
+  paste: (targetParentId: NodeId | null) => void;
+  duplicate: (ids: NodeId[]) => void;
 }
 
 function projectDataOf(state: EditorStore): ProjectData {
@@ -112,6 +124,7 @@ export const useEditorStore = create<EditorStore>((set, get) => {
   breakpoint: 'desktop',
   selection: [],
   zoom: 1,
+  clipboard: null,
   readOnly: false,
   remoteRevision: 0,
 
@@ -310,6 +323,121 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       recipe(node);
     });
   },
+
+  removeNodes: (ids) => {
+    const top = filterTopLevel(get().nodes, ids);
+    get().updateData((draft) => {
+      const toRemove = new Set<NodeId>();
+      for (const id of top) {
+        toRemove.add(id);
+        for (const descId of collectDescendants(draft.nodes, id)) {
+          toRemove.add(descId);
+        }
+      }
+      for (const id of toRemove) {
+        const node = draft.nodes[id];
+        if (!node) continue;
+        if (node.parentId !== null) {
+          const parent = draft.nodes[node.parentId];
+          if (parent) {
+            parent.children = parent.children.filter((cid) => cid !== id);
+          }
+        }
+        delete draft.nodes[id];
+      }
+    });
+  },
+
+  copy: (ids) => {
+    const state = get();
+    const top = filterTopLevel(state.nodes, ids);
+    const nodes: Record<NodeId, Node> = {};
+    const roots: NodeId[] = [];
+    for (const id of top) {
+      if (!state.nodes[id]) continue;
+      Object.assign(nodes, cloneSubtree(state.nodes, id));
+      roots.push(id);
+    }
+    set({ clipboard: { nodes, roots } });
+  },
+
+  cut: (ids) => {
+    get().copy(ids);
+    get().removeNodes(ids);
+  },
+
+  paste: (targetParentId) => {
+    const state = get();
+    const clip = state.clipboard;
+    if (!clip || clip.roots.length === 0) return;
+    const rootsSet = new Set(clip.roots);
+    get().updateData((draft) => {
+      const parentType =
+        targetParentId === null ? 'root' : draft.nodes[targetParentId]?.type;
+      if (targetParentId !== null && !parentType) {
+        throw new ContainmentError(`Paste target ${targetParentId} does not exist.`);
+      }
+      for (const rootId of clip.roots) {
+        const rootNode = clip.nodes[rootId];
+        if (!rootNode) continue;
+        assertCanContain(parentType ?? 'root', rootNode.type);
+      }
+      const idMap = new Map<NodeId, NodeId>();
+      for (const oldId of Object.keys(clip.nodes)) idMap.set(oldId, nanoid());
+      for (const oldId of Object.keys(clip.nodes)) {
+        const source = clip.nodes[oldId];
+        if (!source) continue;
+        const newId = idMap.get(oldId)!;
+        const node: Node = { ...source };
+        node.id = newId;
+        node.parentId = rootsSet.has(oldId)
+          ? targetParentId
+          : (source.parentId === null ? null : idMap.get(source.parentId)!);
+        node.children = source.children.map((c) => idMap.get(c)!);
+        draft.nodes[newId] = node;
+      }
+      if (targetParentId !== null) {
+        const parent = draft.nodes[targetParentId];
+        if (parent) {
+          parent.children.push(...clip.roots.map((id) => idMap.get(id)!));
+        }
+      }
+    });
+  },
+
+  duplicate: (ids) => {
+    const state = get();
+    const top = filterTopLevel(state.nodes, ids);
+    const nodes = state.nodes; // plain (non-draft) nodes so cloneSubtree's structuredClone works
+    get().updateData((draft) => {
+      for (const id of top) {
+        const node = nodes[id];
+        if (!node) continue;
+        const parentId = node.parentId;
+        const parent = parentId === null ? null : draft.nodes[parentId];
+        const parentType = parent ? parent.type : 'root';
+        assertCanContain(parentType, node.type);
+        const sub = cloneSubtree(nodes, id);
+        const idMap = new Map<NodeId, NodeId>();
+        for (const oldId of Object.keys(sub)) idMap.set(oldId, nanoid());
+        const newRootId = idMap.get(id)!;
+        for (const oldId of Object.keys(sub)) {
+          const source = sub[oldId];
+          if (!source) continue;
+          const newId = idMap.get(oldId)!;
+          const n: Node = { ...source };
+          n.id = newId;
+          n.parentId = oldId === id ? parentId : (source.parentId === null ? null : idMap.get(source.parentId)!);
+          n.children = source.children.map((c) => idMap.get(c)!);
+          draft.nodes[newId] = n;
+        }
+        if (parent) {
+          const idx = parent.children.indexOf(id);
+          parent.children.splice(idx >= 0 ? idx + 1 : parent.children.length, 0, newRootId);
+        }
+      }
+    });
+  },
 };
   projectBroadcast.subscribe((notice) => {
     const state = get();
@@ -351,6 +479,33 @@ function collectDescendants(
       out.push(childId);
       stack.push(childId);
     }
+  }
+  return out;
+}
+
+// Deep-clone a node and all of its descendants, keyed by their original ids.
+function cloneSubtree(nodes: Record<NodeId, Node>, rootId: NodeId): Record<NodeId, Node> {
+  const out: Record<NodeId, Node> = {};
+  const stack: NodeId[] = [rootId];
+  while (stack.length > 0) {
+    const id = stack.pop()!;
+    const node = nodes[id];
+    if (!node || out[id]) continue;
+    out[id] = structuredClone(node);
+    for (const childId of node.children) stack.push(childId);
+  }
+  return out;
+}
+
+// Keep only the selected ids that are not descendants of another selected id,
+// so copying/deleting/duplicating a subtree isn't repeated for its children.
+function filterTopLevel(nodes: Record<NodeId, Node>, ids: NodeId[]): NodeId[] {
+  const out: NodeId[] = [];
+  for (const id of ids) {
+    const isDescendant = ids.some(
+      (other) => other !== id && collectDescendants(nodes, other).includes(id),
+    );
+    if (!isDescendant) out.push(id);
   }
   return out;
 }

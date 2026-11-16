@@ -169,11 +169,24 @@ function Row({
   );
 }
 
-export default function LayersTree() {
+interface LayersTreeProps {
+  onContextMenu?: (x: number, y: number) => void;
+}
+
+export default function LayersTree({ onContextMenu }: LayersTreeProps) {
   const nodes = useEditorStore((state) => state.nodes);
   const currentPageId = useEditorStore((state) => state.currentPageId);
   const moveNode = useEditorStore((state) => state.moveNode);
   const [collapsed, setCollapsed] = useState<Set<NodeId>>(new Set());
+
+  const handleContextMenu = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      onContextMenu?.(e.clientX, e.clientY);
+    },
+    [onContextMenu],
+  );
 
   const pointerSensor = useMemo(
     () => ({
@@ -235,7 +248,7 @@ export default function LayersTree() {
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
-      <div className="h-full flex flex-col">
+      <div className="h-full flex flex-col" onContextMenu={handleContextMenu}>
         <div className="px-4 py-3 text-xs font-semibold text-slate-300 uppercase tracking-wider">Layers</div>
         <div className="flex-1 overflow-y-auto">
           {!root ? (
