@@ -12,7 +12,22 @@
 // markup here.
 import { Fragment } from 'react';
 import type { CSSProperties, ComponentType, JSX, SVGAttributes } from 'react';
-import * as Lucide from 'lucide-react';
+import {
+  ArrowRight,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  ExternalLink,
+  Home,
+  Mail,
+  Menu,
+  Phone,
+  Plus,
+  Search,
+  Settings,
+  User,
+} from 'lucide-react';
 import type {
   Breakpoint,
   IconNode,
@@ -143,15 +158,26 @@ export function resolveStyles(styles: ResponsiveStyles, bp: Breakpoint): CSSProp
   return out as CSSProperties;
 }
 
-// Every lucide-react icon export (PascalCase function), keyed by its name and
-// a lowercase alias, so IconNode.name resolves regardless of casing.
-const LUCIDE_BY_NAME: Record<string, ComponentType<SVGAttributes<SVGSVGElement>>> = {};
-for (const [key, value] of Object.entries(Lucide)) {
-  if (typeof value === 'function' && /^[A-Z]/.test(key)) {
-    LUCIDE_BY_NAME[key] = value as ComponentType<SVGAttributes<SVGSVGElement>>;
-    LUCIDE_BY_NAME[key.toLowerCase()] = value as ComponentType<SVGAttributes<SVGSVGElement>>;
-  }
-}
+// Explicit icon map: only the Lucide icons actually rendered by the studio,
+// keyed by icon name (and a lowercase alias) so IconNode.name resolves regardless
+// of casing. Anything not listed here renders the MissingIcon fallback below,
+// which keeps the bundle from pulling in the whole lucide-react library.
+const LUCIDE_BY_NAME: Record<string, ComponentType<SVGAttributes<SVGSVGElement>>> = {
+  Menu,
+  Search,
+  Home,
+  User,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  ChevronDown,
+  ArrowRight,
+  Plus,
+  Mail,
+  Phone,
+  ExternalLink,
+};
 
 
 function MissingIcon({ style, ...props }: SVGAttributes<SVGSVGElement>): JSX.Element {
