@@ -2,6 +2,7 @@ import './index.css'
 import { useEffect } from 'react'
 import type { Node, NodeId } from './types'
 import Canvas from './canvas/Canvas'
+import Inspector from './components/Inspector'
 import LayersTree from './components/LayersTree'
 import TopBar from './components/TopBar'
 import { useEditorStore } from './store/useEditorStore'
@@ -65,10 +66,9 @@ export default function App() {
         </div>
       </main>
 
-      {/* Right panel — feature contents added in later jobs */}
-      <aside className={`fixed top-[${TOP_BAR_HEIGHT}px] bottom-0 right-0 z-30 w-[${SIDE_PANEL_WIDTH}px] border-l border-slate-800 bg-slate-900 text-slate-400`}>
-        <div className="p-4 text-sm font-medium">Properties</div>
-        <div className="px-4 text-xs text-slate-600">Controls go here</div>
+      {/* Right panel — Inspector: layout, typography, colors, spacing */}
+      <aside className={`fixed top-[${TOP_BAR_HEIGHT}px] bottom-0 right-0 z-30 w-[${SIDE_PANEL_WIDTH}px] border-l border-slate-800 bg-slate-900 text-slate-400 flex flex-col`}>
+        <Inspector />
       </aside>
     </div>
   )
