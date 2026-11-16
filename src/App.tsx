@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import type { Node, NodeId } from './types'
 import Canvas from './canvas/Canvas'
 import LayersTree from './components/LayersTree'
+import TopBar from './components/TopBar'
 import { useEditorStore } from './store/useEditorStore'
 
 const NODES: Record<NodeId, Node> = {
@@ -49,14 +50,8 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-slate-950 text-slate-100">
-      {/* Top bar — full width */}
-      <header className="fixed top-0 left-0 right-0 z-40 h-[56px] border-b border-slate-800 bg-slate-900 flex items-center justify-between px-6 text-slate-200">
-        <div className="flex items-center gap-3">
-          <span className="font-semibold tracking-tight">Roux Studio</span>
-          <span className="text-xs text-slate-500">Editor</span>
-        </div>
-        <div className="text-xs text-slate-500">Desktop</div>
-      </header>
+      {/* Top bar — breakpoint, zoom, undo/redo */}
+      <TopBar />
 
       {/* Left panel — layers tree */}
       <aside className={`fixed top-[${TOP_BAR_HEIGHT}px] bottom-0 left-0 z-30 w-[${SIDE_PANEL_WIDTH}px] border-r border-slate-800 bg-slate-900 text-slate-400`}>
