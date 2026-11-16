@@ -1,6 +1,7 @@
 import './index.css'
 import type { Node, NodeId } from './types'
 import Canvas from './canvas/Canvas'
+import { useEditorStore } from './store/useEditorStore'
 
 const NODES: Record<NodeId, Node> = {
   'page-1': {
@@ -27,16 +28,42 @@ const NODES: Record<NodeId, Node> = {
   },
 }
 
+const TOP_BAR_HEIGHT = 56
+const SIDE_PANEL_WIDTH = 280
+
 export default function App() {
+  const breakpoint = useEditorStore((state) => state.breakpoint)
+  const zoom = useEditorStore((state) => state.zoom)
+
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100">
-      <main className="max-w-4xl mx-auto p-8">
-        <h1 className="text-2xl font-semibold mb-4">Roux Studio</h1>
-        <p className="text-slate-400">Local-first visual website builder</p>
+    <div className="relative min-h-screen w-full overflow-hidden bg-slate-950 text-slate-100">
+      {/* Top bar — full width */}
+      <header className="fixed top-0 left-0 right-0 z-40 h-[56px] border-b border-slate-800 bg-slate-900 flex items-center justify-between px-6 text-slate-200">
+        <div className="flex items-center gap-3">
+          <span className="font-semibold tracking-tight">Roux Studio</span>
+          <span className="text-xs text-slate-500">Editor</span>
+        </div>
+        <div className="text-xs text-slate-500">Desktop</div>
+      </header>
+
+      {/* Left panel — feature contents added in later jobs */}
+      <aside className={`fixed top-[${TOP_BAR_HEIGHT}px] bottom-0 left-0 z-30 w-[${SIDE_PANEL_WIDTH}px] border-r border-slate-800 bg-slate-900 text-slate-400`}>
+        <div className="p-4 text-sm font-medium">Insert</div>
+        <div className="px-4 text-xs text-slate-600">Components go here</div>
+      </aside>
+
+      {/* Centre canvas — fills the remaining space, centred and scrollable */}
+      <main className={`fixed top-[${TOP_BAR_HEIGHT}px] bottom-0 left-[${SIDE_PANEL_WIDTH}px] right-[${SIDE_PANEL_WIDTH}px] z-10 overflow-auto relative bg-slate-950`}>
+        <div className="flex h-full w-full items-center justify-center p-6">
+          <Canvas page={NODES['page-1']!} nodes={NODES} breakpoint={breakpoint} zoom={zoom} />
+        </div>
       </main>
-      <div style={{ minHeight: 500 }}>
-        <Canvas page={NODES['page-1']!} nodes={NODES} breakpoint="desktop" />
-      </div>
+
+      {/* Right panel — feature contents added in later jobs */}
+      <aside className={`fixed top-[${TOP_BAR_HEIGHT}px] bottom-0 right-0 z-30 w-[${SIDE_PANEL_WIDTH}px] border-l border-slate-800 bg-slate-900 text-slate-400`}>
+        <div className="p-4 text-sm font-medium">Properties</div>
+        <div className="px-4 text-xs text-slate-600">Controls go here</div>
+      </aside>
     </div>
   )
 }
