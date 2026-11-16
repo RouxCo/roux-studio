@@ -8,8 +8,8 @@
 import { useCallback } from 'react';
 import { RotateCw } from 'lucide-react';
 import { useEditorStore } from '../store/useEditorStore';
-import type { Node, NodeId, Breakpoint, Length, Responsive, ResponsiveStyles } from '../types';
-import { resolveResponsive } from '../types';
+import type { Node, NodeId, Breakpoint, Length, ResponsiveStyles } from '../types';
+import { resolveStyle } from '../compile/resolveStyle';
 import { lengthToCss } from '../canvas/renderNode';
 
 type Kind = 'length' | 'number' | 'text';
@@ -120,10 +120,10 @@ function Section({ title, fields, nodeId, breakpoint, nodes }: SectionProps) {
       </h3>
       <div className="divide-y divide-slate-800/50">
         {fields.map((field) => {
-          const responsive = node?.styles[field.key] as Responsive<unknown> | undefined;
-          const current = resolveResponsive(breakpoint, responsive);
+          const current = node ? resolveStyle(node, breakpoint, field.key) : undefined;
           // Override dots are shown only on tablet and mobile, never on desktop.
-          const overridden = breakpoint !== 'desktop' && responsive !== undefined && breakpoint in responsive;
+          const overridden =
+            breakpoint !== 'desktop' && node !== undefined && node.styles[field.key]?.[breakpoint] !== undefined;
           return (
             <div
               key={field.key}

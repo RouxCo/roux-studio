@@ -85,3 +85,16 @@ Log any deviation from spec §2 here; ambiguous choices are logged per rule 9.
 - Snapshotting the whole project per step.
 
 **Reason:** Spec §2 lists Zustand 5.x + Immer 10.x; §6.4 requires one user intent = one step with batching. Patch-based history is memory-light for a flat nodes map and reversible per step. The cap of 200 bounds memory growth.
+
+Hover/focus-visible compile deferred until a hover field is added to the node types (M4 later job)
+---
+
+## 2026-11-16 — compileStyles: nodes passed as 3rd argument, not read from Project
+
+**Decision:** `compileStyles(project, pageId, nodes)` takes the page's node tree as a third argument instead of reading nodes from `Project`, emits compiled CSS only (`c-{hash}` dedupe deferred to M5), no inline `style` attributes.
+
+**Alternatives:**
+- Add a `nodes` field to `Project`/`Page` and read it inside `compileStyles`.
+- Have `compileStyles(project, pageId)` look nodes up from a global store.
+
+**Reason:** `Project`/`Page` have no `nodes` field — nodes live in `EditorData.nodes` — so the pure function receives the tree as its third argument. This is a small spec deviation logged here per §17 rule 8. Output: `:root` token variables use `--<name>`; base element styles emitted once at the top; one `r-{hash}` rule per node walked in document order, desktop-first; `@media (max-width: 1023px)` and `@media (max-width: 767px)` blocks hold only keys whose resolved value differs (hidden → `display:none` only where it takes effect).
