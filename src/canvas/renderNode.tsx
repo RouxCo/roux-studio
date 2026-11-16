@@ -38,6 +38,7 @@ import type {
   ResponsiveStyles,
 } from '../types';
 import { resolveResponsive } from '../types';
+import { classFor } from '../compile/classFor';
 
 export interface RenderContext {
   mode: 'canvas' | 'export';
@@ -194,23 +195,6 @@ function MissingIcon({ style, ...props }: SVGAttributes<SVGSVGElement>): JSX.Ele
       <path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
     </svg>
   );
-}
-
-// Deterministic hash of a resolved style object. Identical styles produce the
-// identical r-{hash} class name, so M4's compileStyles can emit one CSS rule
-// per class and reuse it across every element that shares those styles.
-export function hashStyle(style: CSSProperties): string {
-  const serialized = Object.keys(style)
-    .sort()
-    .map((key) => `${key}:${String(style[key as keyof CSSProperties])}`)
-    .join(';');
-  // FNV-1a 32-bit, rendered as hex.
-  let h = 2166136261;
-  for (let i = 0; i < serialized.length; i++) {
-    h ^= serialized.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return (h >>> 0).toString(16).padStart(6, '0');
 }
 
 function renderIcon(
@@ -388,7 +372,7 @@ export function renderNode(node: Node, ctx: RenderContext): JSX.Element {
   // Canvas mode keeps inline styles for live editing.
   const isExport = ctx.mode === 'export';
   const styleProp = isExport ? undefined : style;
-  const className = isExport && Object.keys(style).length > 0 ? `r-${hashStyle(style)}` : undefined;
+  const className = isExport && Object.keys(style).length > 0 ? classFor(node.id) : undefined;
 
   switch (node.type) {
     case 'page':

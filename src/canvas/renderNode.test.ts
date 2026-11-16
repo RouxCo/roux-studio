@@ -283,13 +283,13 @@ describe('lengthToCss', () => {
       expect(html).not.toMatch(/class="r-/);
     });
 
-    it('hashes identical styles to the same class and different styles to different classes', () => {
-      const base: Node = {
+    it('classes come from the node ID, not the style: same ID repeats, different IDs differ', () => {
+      const styled: Node = {
         id: 'n', type: 'box', parentId: null, children: [], styles: { color: { desktop: '#0f766e' } },
         hidden: {}, locked: false,
       };
-      const same = { ...base, id: 'm' };
-      const different = { ...base, id: 'd', styles: { color: { desktop: '#ff0000' } } };
+      const sameIdAgain = { ...styled, id: 'n' };
+      const otherIdSameStyle = { ...styled, id: 'm' };
       const ctx = (id: string, node: Node): RenderContext => ({
         mode: 'export', breakpoint: 'desktop', nodes: { [id]: node },
       });
@@ -299,9 +299,12 @@ describe('lengthToCss', () => {
         if (!match) throw new Error(`no class attribute in ${html}`);
         return match[1]!;
       };
-      expect(classOf(base)).toMatch(/^r-[a-f0-9]{6,}$/);
-      expect(classOf(same)).toBe(classOf(base));
-      expect(classOf(different)).not.toBe(classOf(base));
+      const first = classOf(styled);
+      expect(first).toMatch(/^r-[a-f0-9]{6,}$/);
+      // same node ID renders the same class every time
+      expect(classOf(sameIdAgain)).toBe(first);
+      // different node ID renders a different class even with identical styles
+      expect(classOf(otherIdSameStyle)).not.toBe(first);
     });
 
     it('hides via the r-{hash} class instead of inline style in export mode', () => {
