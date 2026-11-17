@@ -31,6 +31,10 @@ function colorToken(name: string, value = '#0f766e'): DesignToken {
   return { name, value, type: 'color' };
 }
 
+function fontToken(name: string, value = 'Georgia, serif'): DesignToken {
+  return { name, value, type: 'font' };
+}
+
 function lengthRef(token: string) {
   return { kind: 'token' as const, value: 0, token };
 }
@@ -290,5 +294,44 @@ describe('token store actions', () => {
 
     expect(get().tokens.byName['space-4']).toBeUndefined();
     expect(get().tokens.byName['gap-8']!.value).toBe('1rem');
+  });
+
+  it('addToken accepts a font token and it lands in tokens.byName', () => {
+    get().addToken(fontToken('font-heading', 'Georgia, serif'));
+
+    expect(get().tokens.byName['font-heading']).toEqual({
+      name: 'font-heading',
+      value: 'Georgia, serif',
+      type: 'font',
+    });
+  });
+
+  it('tokenUsage counts one node whose fontFamily references a font token', () => {
+    const a = page('page-a', 'Page A');
+    const boxA = box('box-a', 'page-a');
+    boxA.styles = { fontFamily: { desktop: 'var(--font-heading)' } };
+
+    resetWith(
+      [a],
+      { [a.id]: a, [boxA.id]: boxA },
+      { 'font-heading': fontToken('font-heading') },
+    );
+
+    expect(tokenUsage(get().nodes, 'font-heading')).toBe(1);
+    expect(tokenUsage(get().nodes, 'color-ink')).toBe(0);
+  });
+
+  it('font token is not counted by a colour-only reference', () => {
+    const a = page('page-a', 'Page A');
+    const boxA = box('box-a', 'page-a');
+    boxA.styles = { color: { desktop: '#0f766e' } };
+
+    resetWith(
+      [a],
+      { [a.id]: a, [boxA.id]: boxA },
+      { 'font-heading': fontToken('font-heading') },
+    );
+
+    expect(tokenUsage(get().nodes, 'font-heading')).toBe(0);
   });
 });

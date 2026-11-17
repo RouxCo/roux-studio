@@ -17,12 +17,13 @@ type TokenType = DesignToken['type'];
 
 const TYPE_LABELS: Record<TokenType, string> = {
   color: 'Colours',
+  font: 'Fonts',
   spacing: 'Spacing',
   length: 'Lengths',
   number: 'Numbers',
 };
 
-const TYPE_ORDER: TokenType[] = ['color', 'spacing', 'length', 'number'];
+const TYPE_ORDER: TokenType[] = ['color', 'font', 'spacing', 'length', 'number'];
 
 const KEBAB = /^[a-z][a-z0-9-]*$/;
 
@@ -31,6 +32,7 @@ function groupByType(
 ): Record<TokenType, DesignToken[]> {
   const groups: Record<TokenType, DesignToken[]> = {
     color: [],
+    font: [],
     spacing: [],
     length: [],
     number: [],
@@ -375,6 +377,14 @@ function TokenRow({
           style={{ backgroundColor: token.value }}
           title={token.value}
         />
+      ) : token.type === 'font' ? (
+        <div
+          className="w-5 h-5 shrink-0 flex items-center justify-center text-[10px] leading-none"
+          style={{ fontFamily: token.value }}
+          title={token.value}
+        >
+          {token.value.split(',')[0]!.trim()}
+        </div>
       ) : (
         <div className="w-5 h-5 shrink-0" />
       )}

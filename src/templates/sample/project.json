@@ -1,0 +1,214 @@
+{
+  "id": "sample",
+  "name": "Sample",
+  "createdAt": "2026-11-17T00:00:00.000Z",
+  "updatedAt": "2026-11-17T00:00:00.000Z",
+  "pages": [
+    {
+      "id": "page-home",
+      "title": "Sample Home",
+      "slug": "home",
+      "rootId": "page-home",
+      "useGlobalHeader": false,
+      "useGlobalFooter": false,
+      "backgroundLayers": []
+    }
+  ],
+  "tokens": {
+    "byName": {
+      "color-ink": { "name": "color-ink", "value": "#0f172a", "type": "color" },
+      "color-surface": { "name": "color-surface", "value": "#ffffff", "type": "color" },
+      "color-accent": { "name": "color-accent", "value": "#0f766e", "type": "color" },
+      "color-muted": { "name": "color-muted", "value": "#64748b", "type": "color" },
+      "space-4": { "name": "space-4", "value": "1rem", "type": "spacing" },
+      "space-8": { "name": "space-8", "value": "1.5rem", "type": "spacing" },
+      "space-16": { "name": "space-16", "value": "3rem", "type": "spacing" },
+      "radius-md": { "name": "radius-md", "value": "8", "type": "length" },
+      "font-heading": { "name": "font-heading", "value": "Georgia, serif", "type": "font" },
+      "font-body": { "name": "font-body", "value": "Inter, sans-serif", "type": "font" }
+    }
+  },
+  "nodes": {
+    "page-home": {
+      "id": "page-home",
+      "type": "page",
+      "parentId": null,
+      "children": ["sec-hero", "sec-cards"],
+      "styles": {},
+      "hidden": {},
+      "locked": false,
+      "rootId": "page-home",
+      "title": "Sample Home",
+      "slug": "home",
+      "backgroundLayers": []
+    },
+    "sec-hero": {
+      "id": "sec-hero",
+      "type": "section",
+      "parentId": "page-home",
+      "children": ["h-hero", "p-hero"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [
+        {
+          "id": "grad-hero",
+          "type": "gradient",
+          "name": "Hero gradient",
+          "enabled": true,
+          "opacity": 1,
+          "blendMode": "normal",
+          "angle": 135,
+          "stops": [
+            { "offset": 0, "color": "var(--color-ink)" },
+            { "offset": 100, "color": "var(--color-accent)" }
+          ]
+        }
+      ]
+    },
+    "h-hero": {
+      "id": "h-hero",
+      "type": "heading",
+      "parentId": "sec-hero",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-surface)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 40 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 1,
+      "text": "We build websites that last."
+    },
+    "p-hero": {
+      "id": "p-hero",
+      "type": "paragraph",
+      "parentId": "sec-hero",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-surface)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 18 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "We craft fast, accessible sites for growing teams."
+    },
+    "sec-cards": {
+      "id": "sec-cards",
+      "type": "section",
+      "parentId": "page-home",
+      "children": ["h-cards", "card-1", "card-2"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": []
+    },
+    "h-cards": {
+      "id": "h-cards",
+      "type": "heading",
+      "parentId": "sec-cards",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 24 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 2,
+      "text": "What we build"
+    },
+    "card-1": {
+      "id": "card-1",
+      "type": "form",
+      "parentId": "sec-cards",
+      "children": ["h-card-1", "p-card-1"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 2, "token": "space-8" } },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-md" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "h-card-1": {
+      "id": "h-card-1",
+      "type": "heading",
+      "parentId": "card-1",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 20 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 3,
+      "text": "Brand sites"
+    },
+    "p-card-1": {
+      "id": "p-card-1",
+      "type": "paragraph",
+      "parentId": "card-1",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Custom marketing sites that reflect your brand."
+    },
+    "card-2": {
+      "id": "card-2",
+      "type": "form",
+      "parentId": "sec-cards",
+      "children": ["h-card-2", "p-card-2"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 2, "token": "space-8" } },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-md" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "h-card-2": {
+      "id": "h-card-2",
+      "type": "heading",
+      "parentId": "card-2",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 20 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 3,
+      "text": "E-commerce"
+    },
+    "p-card-2": {
+      "id": "p-card-2",
+      "type": "paragraph",
+      "parentId": "card-2",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Online stores built to convert."
+    }
+  },
+  "blocks": [],
+  "globalHeaderId": null,
+  "globalFooterId": null,
+  "schemaVersion": 2
+}

@@ -158,7 +158,7 @@ export interface SectionBlend {
 export interface DesignToken {
   name: string; // e.g. 'color-primary'
   value: string; // e.g. '#0f766e' or a var(--...) reference
-  type: 'color' | 'spacing' | 'length' | 'number';
+  type: 'color' | 'spacing' | 'length' | 'number' | 'font';
 }
 
 export interface DesignTokens {
