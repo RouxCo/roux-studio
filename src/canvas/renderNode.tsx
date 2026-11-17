@@ -40,7 +40,7 @@ import type {
 } from '../types';
 import { resolveResponsive } from '../types';
 import { classFor } from '../compile/classFor';
-import { visibleLayers, needsLayeredPath, layerClass } from '../compile/backgrounds';
+import { visibleLayers, usesLayeredPath, layerClass } from '../compile/backgrounds';
 
 export interface RenderContext {
   mode: 'canvas' | 'export';
@@ -382,7 +382,7 @@ export function renderNode(node: Node, ctx: RenderContext): JSX.Element {
       // child, holding one .r-bg-layer per visible layer in reverse order
       // (bottom layer first in the DOM). No inline styles are emitted.
       const background =
-        needsLayeredPath(layers) ? (
+        usesLayeredPath(node) ? (
           <div className="r-bg" aria-hidden="true">
             {[...layers].reverse().map((layer) => (
               <div key={layer.id} className={`r-bg-layer ${layerClass(layer)}`}>

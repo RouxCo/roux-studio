@@ -3,7 +3,7 @@
 // r-<hash> rules with desktop/base and breakpoint-only media queries, hidden,
 // length serialisation and kebab-case keys. Pure: no React/store/DOM.
 import { describe, expect, it } from 'vitest';
-import type { Node, PageId, Project } from '../types';
+import type { BackgroundLayer, Node, PageId, Project } from '../types';
 import { compileStyles } from './compileStyles';
 import { useEditorStore } from '../store/useEditorStore';
 
@@ -260,5 +260,172 @@ describe('compileStyles: preview widths never leak into media queries', () => {
       expect(q).toMatch(/max-width:\s*(1023|767)px/);
       expect(q).not.toMatch(/1440|768|390/);
     }
+  });
+});
+
+describe('compileStyles — section blend', () => {
+  const BROOT = 'page-2';
+  const BSA = 'sec-a';
+  const BSB = 'sec-b';
+  const BSC = 'sec-c';
+  const BBOX = 'box-2';
+
+  const colorLayer = (id: string, color: string): BackgroundLayer => ({
+    id,
+    type: 'color',
+    enabled: true,
+    opacity: 1,
+    blendMode: 'normal',
+    color,
+  });
+
+  const blendTree: Record<string, Node> = {
+    [BROOT]: {
+      id: BROOT,
+      type: 'page',
+      parentId: null,
+      children: [BSA, BSB, BSC, BBOX],
+      styles: {},
+      hidden: {},
+      locked: false,
+      title: 'Home',
+      slug: 'home',
+      backgroundLayers: [],
+    },
+    [BSA]: {
+      id: BSA,
+      type: 'section',
+      parentId: BROOT,
+      children: [],
+      styles: {},
+      hidden: {},
+      locked: false,
+      backgroundLayers: [colorLayer('bg-a', '#ff0000')],
+      sectionBlend: { enabled: true, feather: 120, overlap: 0 },
+    },
+    [BSB]: {
+      id: BSB,
+      type: 'section',
+      parentId: BROOT,
+      children: [],
+      styles: {},
+      hidden: {},
+      locked: false,
+      backgroundLayers: [colorLayer('bg-b', '#0000ff')],
+      sectionBlend: { enabled: true, feather: 120, overlap: 0 },
+    },
+    [BSC]: {
+      id: BSC,
+      type: 'section',
+      parentId: BROOT,
+      children: [],
+      styles: {},
+      hidden: {},
+      locked: false,
+      backgroundLayers: [colorLayer('bg-c', '#00ff00')],
+      sectionBlend: { enabled: true, feather: 120, overlap: 0 },
+    },
+    [BBOX]: {
+      id: BBOX,
+      type: 'box',
+      parentId: BROOT,
+      children: [],
+      styles: {},
+      hidden: {},
+      locked: false,
+    },
+  };
+
+  function blendProject(_tree: Record<string, Node>): Project {
+    return project([page('pg-2', BROOT)], {});
+  }
+
+  function sectionRule(out: string, nodeId: string): string {
+    const cls = classFor(nodeId);
+    const m = out.match(new RegExp(`\\.${cls}\\s*\\{[^}]*\\}`));
+    if (!m) throw new Error(`no rule for ${cls} in ${out}`);
+    return m[0]!;
+  }
+
+  function wrapRule(out: string, nodeId: string): string {
+    const cls = classFor(nodeId);
+    const m = out.match(new RegExp(`\\.${cls} > \\.r-bg\\{[^}]*\\}`));
+    if (!m) throw new Error(`no .r-bg wrapper rule for ${cls} in ${out}`);
+    return m[0]!;
+  }
+
+  function hasWrapRule(out: string, nodeId: string): boolean {
+    const cls = classFor(nodeId);
+    return new RegExp(`\\.${cls} > \\.r-bg\\{`).test(out);
+  }
+
+  it('gives blended sections increasing wrapper z-index (-1000, -999, -998) in document order', () => {
+    const out = compileStyles(blendProject(blendTree), 'pg-2', blendTree);
+    expect(wrapRule(out, BSA)).toContain('z-index:-1000');
+    expect(wrapRule(out, BSB)).toContain('z-index:-999');
+    expect(wrapRule(out, BSC)).toContain('z-index:-998');
+  });
+
+  it('puts feather mask-image on .r-<hash> > .r-bg, never on the section rule', () => {
+    const out = compileStyles(blendProject(blendTree), 'pg-2', blendTree);
+    const mask =
+      'mask-image:linear-gradient(to bottom, transparent 0, #000 120px, #000 calc(100% - 120px), transparent 100%)';
+    expect(sectionRule(out, BSA)).not.toContain('mask-image');
+    expect(sectionRule(out, BSA)).not.toContain('-webkit-mask-image');
+    expect(wrapRule(out, BSA)).toContain(mask);
+    expect(wrapRule(out, BSA)).toContain(`-webkit-mask-image:${mask.slice('mask-image:'.length)}`);
+  });
+
+  it('overlap 120 renders top:-120px on the wrapper', () => {
+    const tree = {
+      ...blendTree,
+      [BSA]: { ...blendTree[BSA], sectionBlend: { enabled: true, feather: 0, overlap: 120 } } as Node,
+    };
+    const out = compileStyles(blendProject(tree), 'pg-2', tree);
+    expect(wrapRule(out, BSA)).toContain('z-index:-1000');
+    expect(wrapRule(out, BSA)).toContain('top:-120px');
+    expect(wrapRule(out, BSA)).not.toContain('mask-image');
+  });
+
+  it('emits no blend CSS when blend is disabled', () => {
+    const tree = {
+      ...blendTree,
+      [BSA]: { ...blendTree[BSA], sectionBlend: { enabled: false, feather: 120, overlap: 0 } } as Node,
+    };
+    const out = compileStyles(blendProject(tree), 'pg-2', tree);
+    expect(hasWrapRule(out, BSA)).toBe(false);
+    expect(sectionRule(out, BSA)).not.toContain('mask-image');
+    expect(sectionRule(out, BSA)).not.toContain('top:-');
+  });
+
+  it('gives the page isolation:isolate when any section blends', () => {
+    const out = compileStyles(blendProject(blendTree), 'pg-2', blendTree);
+    const root = sectionRule(out, BROOT);
+    expect(root).toContain('position: relative');
+    expect(root).toContain('isolation: isolate');
+  });
+
+  it('featherTop overrides feather for the top edge only', () => {
+    const tree = {
+      ...blendTree,
+      [BSA]: {
+        ...blendTree[BSA],
+        sectionBlend: { enabled: true, feather: 120, featherTop: 60, overlap: 0 },
+      } as Node,
+    };
+    const out = compileStyles(blendProject(tree), 'pg-2', tree);
+    expect(wrapRule(out, BSA)).toContain(
+      'mask-image:linear-gradient(to bottom, transparent 0, #000 60px, #000 calc(100% - 120px), transparent 100%)',
+    );
+  });
+
+  it('rounds blend px values to whole numbers', () => {
+    const tree = {
+      ...blendTree,
+      [BSA]: { ...blendTree[BSA], sectionBlend: { enabled: true, feather: 12.6, overlap: 0 } } as Node,
+    };
+    const out = compileStyles(blendProject(tree), 'pg-2', tree);
+    expect(wrapRule(out, BSA)).toContain('#000 13px');
+    expect(wrapRule(out, BSA)).not.toContain('12.6');
   });
 });

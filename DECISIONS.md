@@ -100,3 +100,16 @@ Hover/focus-visible compile deferred until a hover field is added to the node ty
 **Reason:** `Project`/`Page` have no `nodes` field — nodes live in `EditorData.nodes` — so the pure function receives the tree as its third argument. This is a small spec deviation logged here per §17 rule 8. Output: `:root` token variables use `--<name>`; base element styles emitted once at the top; one `r-{hash}` rule per node walked in document order, desktop-first; `@media (max-width: 1023px)` and `@media (max-width: 767px)` blocks hold only keys whose resolved value differs (hidden → `display:none` only where it takes effect).
 
 Optional layer fields added for M4 Job 4 (name, blur, brightness, intensity, scale, transition)
+
+---
+
+## 2026-11-17 — SectionBlend: optional featherTop/featherBottom, overlap = previous section
+
+**Decision:** SectionBlend gains optional `featherTop`/`featherBottom` (px) that fall back to `feather`; `overlap` is the overlap with the PREVIOUS section, applied as `top: -Npx` on the section's `.r-bg` wrapper. Blend CSS (feather `mask-image`/`-webkit-mask-image`, overlap `top`) goes on `.r-<hash> > .r-bg` only, never on the section itself, so the text content is never masked. A blended section gets `position:relative` without `isolation` so its `.r-bg` joins the page's stacking context; each blended section's wrapper gets `z-index: -1000 + sectionIndex` (sections counted in document order from 0) and the page's own `.r-bg` gets `z-index: -2000`; the page gets `isolation: isolate` whenever any section on it has an active blend.
+
+**Alternatives:**
+- Make featherTop/featherBottom required fields.
+- Apply overlap on the section element rather than the `.r-bg` wrapper.
+- Give blended sections their own `isolation: isolate` stacking context.
+
+**Reason:** SectionBlend: overlap = overlap with previous section; featherTop/featherBottom optional, fall back to feather. All blend px values round to whole numbers to avoid sub-pixel seams, and `usesLayeredPath(node)` (visible layers && (needsLayeredPath || blendActive)) is used in both compileStyles and renderNode so they can't disagree.

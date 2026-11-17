@@ -151,6 +151,8 @@ export interface SectionBlend {
   enabled: boolean;
   feather: number; // px
   overlap: number; // px (negative overlap via top: -Npx on .r-bg wrapper)
+  featherTop?: number; // px; falls back to feather
+  featherBottom?: number; // px; falls back to feather
 }
 
 export interface DesignToken {

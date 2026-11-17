@@ -7,7 +7,8 @@
 // one .r-bg-layer per visible layer in REVERSE DOM order (bottom layer first).
 // The shared .r-bg rule is emitted once in compileBaseStyles (compileStyles.ts),
 // not per node.
-import type { BackgroundLayer, BackgroundLayerType, SlideshowLayer } from '../types';
+import type { BackgroundLayer, BackgroundLayerType, Node, SlideshowLayer } from '../types';
+import { isPageNode, isSectionNode } from '../types';
 import { classFor } from './classFor';
 import { nanoid } from 'nanoid';
 
@@ -94,6 +95,22 @@ export function compileLayerRules(layers: BackgroundLayer[]): string {
     css += '}';
     return css;
   }).join('\n');
+}
+
+export function blendActive(node: Node): boolean {
+  if (!isSectionNode(node)) return false;
+  const b = node.sectionBlend;
+  if (!b.enabled) return false;
+  const top = b.featherTop ?? b.feather;
+  const bottom = b.featherBottom ?? b.feather;
+  return top > 0 || bottom > 0 || b.overlap > 0;
+}
+
+export function usesLayeredPath(node: Node): boolean {
+  if (!isPageNode(node) && !isSectionNode(node)) return false;
+  const layers = visibleLayers(node.backgroundLayers);
+  if (!layers.length) return false;
+  return needsLayeredPath(layers) || blendActive(node);
 }
 
 export function clampSlideshow(layer: SlideshowLayer): {

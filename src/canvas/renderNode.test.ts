@@ -335,6 +335,38 @@ describe('lengthToCss', () => {
   });
 });
 
+describe('renderNode — section blend forces the layered path', () => {
+  const BLEND_SEC: Node = {
+    id: 'sec-blend',
+    type: 'section',
+    parentId: 'page-1',
+    children: [],
+    styles: {},
+    hidden: {},
+    locked: false,
+    backgroundLayers: [{ id: 'bg-c', type: 'color', enabled: true, opacity: 1, blendMode: 'normal', color: '#ff0000' }],
+    sectionBlend: { enabled: true, feather: 120, overlap: 0 },
+  };
+
+  it('renders .r-bg for a blended section even when its layers take the fast path', () => {
+    const html = renderToStaticMarkup(
+      renderNode(BLEND_SEC, { mode: 'export', breakpoint: 'desktop', nodes: { [BLEND_SEC.id]: BLEND_SEC } }),
+    );
+    expect(html).toContain('<div class="r-bg" aria-hidden="true">');
+    expect(html).toContain(`class="r-bg-layer ${layerClass(BLEND_SEC.backgroundLayers[0]!)}"`);
+    expect(html).not.toMatch(/style=/);
+  });
+
+  it('renders no .r-bg for a fast-path section with blend disabled', () => {
+    const noBlend = { ...BLEND_SEC, id: 'sec-noblend', sectionBlend: { enabled: false, feather: 0, overlap: 0 } };
+    const html = renderToStaticMarkup(
+      renderNode(noBlend, { mode: 'export', breakpoint: 'desktop', nodes: { [noBlend.id]: noBlend } }),
+    );
+    expect(html).not.toContain('r-bg');
+    expect(html).toMatch(/<section[^>]*class="r-[0-9a-f]+"[^>]*>/);
+  });
+});
+
 describe('renderNode — background layers', () => {
   const BG_COLOR: BackgroundLayer = {
     id: 'bg-c', type: 'color', enabled: true, opacity: 1, blendMode: 'normal', color: '#ff0000',

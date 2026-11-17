@@ -27,9 +27,11 @@ import { classFor } from './classFor';
 import { resolveStyle } from './resolveStyle';
 import { resolveResponsive } from '../types';
 import {
+  blendActive,
   compileLayerRules,
   fastBackground,
   needsLayeredPath,
+  usesLayeredPath,
   visibleLayers,
 } from './backgrounds';
 
@@ -54,11 +56,21 @@ export function compileStyles(
   parts.push(compileBaseStyles());
 
   const seen = new Set<NodeId>();
+
+  // True when any section on this page has an active blend: the page then
+  // becomes the stacking context (isolation: isolate) that contains every
+  // section background.
+  const pageHasBlend = Object.values(nodes).some(
+    (node) => isSectionNode(node) && blendActive(node),
+  );
+  let sectionIndex = 0; // counts sections in document order, from 0
+
   const walk = (id: NodeId) => {
     const node = nodes[id];
     if (!node || seen.has(id)) return;
     seen.add(id);
-    const css = compileNode(node);
+    const index = isSectionNode(node) ? sectionIndex++ : undefined;
+    const css = compileNode(node, index, pageHasBlend);
     if (css) parts.push(css);
     for (const child of node.children) walk(child);
   };
@@ -95,7 +107,7 @@ function compileBaseStyles(): string {
   ].join('\n');
 }
 
-function compileNode(node: Node): string {
+function compileNode(node: Node, sectionIndex?: number, pageHasBlend = false): string {
   const cls = classFor(node.id);
   const base: Bucket = new Map();
   const tablet: Bucket = new Map();
@@ -140,21 +152,62 @@ function compileNode(node: Node): string {
 
   const out: string[] = [];
 
-  // Background layers (page and section nodes only). Fast path: one `background:`
-  // list on the element. Layered path: relative + isolated containment plus
-  // per-layer rules appended below; the shared .r-bg rule comes from
-  // compileBaseStyles and is emitted once for the whole page.
+  // Background layers (page and section nodes only).
+  //
+  // Z-order scheme for section blends:
+  //   - the page gets position:relative + isolation:isolate whenever any section
+  //     on it has an active blend, so it becomes the stacking context that
+  //     contains every section background;
+  //   - a blended section gets position:relative but NOT isolation (its .r-bg
+  //     joins the page's stacking context) plus overflow:visible so an
+  //     overlapped background can paint outside the section;
+  //   - each blended section's wrapper gets
+  //     `.r-<hash> > .r-bg{z-index:-1000+sectionIndex}` (sections counted in
+  //     document order from 0) so later sections' backgrounds sit above earlier
+  //     ones while every background stays below in-flow content; the page's own
+  //     .r-bg gets z-index -2000;
+  //   - blend CSS (feather mask-image, overlap top:) goes on the bg wrapper
+  //     only (`.r-<hash> > .r-bg`), never on the section itself; all blend px
+  //     values round to whole numbers to avoid sub-pixel seams.
+  //
+  // Fast path: one `background:` list on the element. Layered path: relative
+  // containment plus per-layer rules appended below; the shared .r-bg rule
+  // comes from compileBaseStyles and is emitted once for the whole page.
   if (isPageNode(node) || isSectionNode(node)) {
     const layers = visibleLayers(node.backgroundLayers);
-    if (layers.length) {
-      if (needsLayeredPath(layers)) {
-        base.set('position', 'relative');
-        base.set('isolation', 'isolate');
-        const layerCss = compileLayerRules(layers);
-        if (layerCss) out.push(layerCss);
-      } else {
-        base.set('background', fastBackground(layers));
+    const isBlend = isSectionNode(node) && blendActive(node);
+    const layered = layers.length > 0 && usesLayeredPath(node);
+
+    if (layered || (isPageNode(node) && pageHasBlend)) {
+      base.set('position', 'relative');
+    }
+    if (isPageNode(node)) {
+      if (needsLayeredPath(layers) || pageHasBlend) base.set('isolation', 'isolate');
+    } else if (layered && !isBlend) {
+      if (needsLayeredPath(layers)) base.set('isolation', 'isolate');
+    }
+    if (layered) {
+      if (isBlend) base.set('overflow', 'visible');
+      const layerCss = compileLayerRules(layers);
+      if (layerCss) out.push(layerCss);
+      if (isPageNode(node) && pageHasBlend) {
+        out.push(`.${cls} > .r-bg{z-index:-2000}`);
       }
+      if (isBlend && sectionIndex !== undefined) {
+        const wrapper: string[] = [`z-index:${-1000 + sectionIndex}`];
+        const b = node.sectionBlend;
+        const top = Math.round(b.featherTop ?? b.feather);
+        const bottom = Math.round(b.featherBottom ?? b.feather);
+        const overlap = Math.round(b.overlap);
+        if (top > 0 || bottom > 0) {
+          const mask = `linear-gradient(to bottom, transparent 0, #000 ${top}px, #000 calc(100% - ${bottom}px), transparent 100%)`;
+          wrapper.push(`mask-image:${mask}`, `-webkit-mask-image:${mask}`);
+        }
+        if (overlap > 0) wrapper.push(`top:-${overlap}px`);
+        out.push(`.${cls} > .r-bg{${wrapper.join(';')}};`);
+      }
+    } else if (layers.length > 0) {
+      base.set('background', fastBackground(layers));
     }
   }
 
