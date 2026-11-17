@@ -121,6 +121,29 @@ describe('New project dialog', () => {
     expect(Object.keys(stored!.nodes).length).toBeGreaterThan(0)
   })
 
+  it('creates a project from the local-trades template and loads it into the store', async () => {
+    const container = renderDialog()
+    await flush()
+
+    act(() => {
+      const card = container.querySelector('[data-choice="local-trades"]') as HTMLButtonElement | null
+      if (!card) throw new Error('no local-trades template card')
+      card.click()
+    })
+    clickCreate(container)
+    await flush()
+    await flush()
+
+    expect(createdIds).toHaveLength(1)
+    const id = createdIds[0]!
+    expect(useEditorStore.getState().projectId).toBe(id)
+
+    const stored = await getProject(id)
+    expect(stored).toBeDefined()
+    expect(stored!.pages.length).toBeGreaterThan(0)
+    expect(Object.keys(stored!.nodes).length).toBeGreaterThan(0)
+  })
+
   it('creates twice with different page-node ids', async () => {
     const container = renderDialog()
     await flush()
@@ -161,6 +184,12 @@ describe('newProjectFromTemplate', () => {
   it('returns a light-professional project whose validation is clean', async () => {
     const project = await newProjectFromTemplate('light-professional', 'Cape & Karoo Accounting')
     expect(project.name).toBe('Cape & Karoo Accounting')
+    expect(validateTemplate(project)).toEqual([])
+  })
+
+  it('returns a local-trades project whose validation is clean', async () => {
+    const project = await newProjectFromTemplate('local-trades', 'Cape Town Trades')
+    expect(project.name).toBe('Cape Town Trades')
     expect(validateTemplate(project)).toEqual([])
   })
 })

@@ -1,0 +1,1031 @@
+{
+  "id": "local-trades",
+  "name": "Local Trades",
+  "createdAt": "2026-11-17T00:00:00.000Z",
+  "updatedAt": "2026-11-17T00:00:00.000Z",
+  "pages": [
+    {
+      "id": "page-home",
+      "title": "Home",
+      "slug": "home",
+      "rootId": "page-home",
+      "useGlobalHeader": true,
+      "useGlobalFooter": true,
+      "backgroundLayers": []
+    },
+    {
+      "id": "page-about",
+      "title": "About",
+      "slug": "about",
+      "rootId": "page-about",
+      "useGlobalHeader": true,
+      "useGlobalFooter": true,
+      "backgroundLayers": []
+    },
+    {
+      "id": "page-services",
+      "title": "Services",
+      "slug": "services",
+      "rootId": "page-services",
+      "useGlobalHeader": true,
+      "useGlobalFooter": true,
+      "backgroundLayers": []
+    },
+    {
+      "id": "page-contact",
+      "title": "Contact",
+      "slug": "contact",
+      "rootId": "page-contact",
+      "useGlobalHeader": true,
+      "useGlobalFooter": true,
+      "backgroundLayers": []
+    },
+    {
+      "id": "page-pricing",
+      "title": "Pricing",
+      "slug": "pricing",
+      "rootId": "page-pricing",
+      "useGlobalHeader": true,
+      "useGlobalFooter": true,
+      "backgroundLayers": []
+    }
+  ],
+  "tokens": {
+    "byName": {
+      "color-ink": { "name": "color-ink", "value": "#0f172a", "type": "color" },
+      "color-surface": { "name": "color-surface", "value": "#ffffff", "type": "color" },
+      "color-accent": { "name": "color-accent", "value": "#b45309", "type": "color" },
+      "color-accent-light": { "name": "color-accent-light", "value": "#f59e0b", "type": "color" },
+      "color-muted": { "name": "color-muted", "value": "#4b5563", "type": "color" },
+      "color-bg": { "name": "color-bg", "value": "#f8fafc", "type": "color" },
+      "color-border": { "name": "color-border", "value": "#e2e8f0", "type": "color" },
+      "color-whatsapp": { "name": "color-whatsapp", "value": "#25d366", "type": "color" },
+      "font-heading": { "name": "font-heading", "value": "Inter, sans-serif", "type": "font" },
+      "font-body": { "name": "font-body", "value": "Inter, sans-serif", "type": "font" },
+      "space-4": { "name": "space-4", "value": "1rem", "type": "spacing" },
+      "space-8": { "name": "space-8", "value": "1.5rem", "type": "spacing" },
+      "space-16": { "name": "space-16", "value": "3rem", "type": "spacing" },
+      "space-24": { "name": "space-24", "value": "4rem", "type": "spacing" },
+      "radius-md": { "name": "radius-md", "value": "8", "type": "length" },
+      "radius-lg": { "name": "radius-lg", "value": "12", "type": "length" },
+      "radius-full": { "name": "radius-full", "value": "9999", "type": "length" },
+      "size-button": { "name": "size-button", "value": "16", "type": "length" },
+      "tap-min": { "name": "tap-min", "value": "44", "type": "length" }
+    }
+  },
+  "nodes": {
+    "page-home": {
+      "id": "page-home",
+      "type": "page",
+      "parentId": null,
+      "children": ["sec-hero", "sec-services", "sec-beforeafter", "sec-contact"],
+      "styles": {},
+      "hidden": {},
+      "locked": false,
+      "rootId": "page-home",
+      "title": "Home",
+      "slug": "home",
+      "backgroundLayers": []
+    },
+    "nav-global": {
+      "id": "nav-global",
+      "type": "nav",
+      "parentId": null,
+      "children": ["gheader-inner"],
+      "styles": {
+        "display": { "desktop": "flex", "tablet": "flex", "mobile": "flex" },
+        "flexDirection": { "desktop": "row", "tablet": "row", "mobile": "column" },
+        "justifyContent": { "desktop": "space-between", "tablet": "space-between", "mobile": "flex-start" },
+        "alignItems": { "desktop": "center", "tablet": "center", "mobile": "center" },
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-surface)", "tablet": "var(--color-surface)", "mobile": "var(--color-surface)" },
+        "borderBottom": { "desktop": "1px solid var(--color-border)", "tablet": "1px solid var(--color-border)", "mobile": "1px solid var(--color-border)" }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "nav-brand": {
+      "id": "nav-brand",
+      "type": "link",
+      "parentId": "gheader-inner",
+      "children": [],
+      "styles": {
+        "color": { "desktop": "var(--color-accent)" },
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 20 }, "tablet": { "kind": "px", "value": 18 }, "mobile": { "kind": "px", "value": 16 } },
+        "fontWeight": { "desktop": 700 },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "href": "#",
+      "text": "Local Trades"
+    },
+    "gheader-inner": {
+      "id": "gheader-inner",
+      "type": "container",
+      "parentId": "nav-global",
+      "children": ["link-home", "link-about", "link-services", "link-contact", "link-pricing"],
+      "styles": {
+        "display": { "desktop": "flex", "tablet": "flex", "mobile": "flex" },
+        "flexDirection": { "desktop": "row", "tablet": "row", "mobile": "column" },
+        "justifyContent": { "desktop": "flex-end", "tablet": "flex-end", "mobile": "flex-start" },
+        "alignItems": { "desktop": "center", "tablet": "center", "mobile": "center" },
+        "gap": { "desktop": { "kind": "token", "value": 3, "token": "space-16" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "link-home": {
+      "id": "link-home",
+      "type": "link",
+      "parentId": "gheader-inner",
+      "children": [],
+      "styles": {
+        "color": { "desktop": "var(--color-ink)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 14 } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "href": "#",
+      "text": "Home"
+    },
+    "link-about": {
+      "id": "link-about",
+      "type": "link",
+      "parentId": "gheader-inner",
+      "children": [],
+      "styles": {
+        "color": { "desktop": "var(--color-ink)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 14 } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "href": "#",
+      "text": "About"
+    },
+    "link-services": {
+      "id": "link-services",
+      "type": "link",
+      "parentId": "gheader-inner",
+      "children": [],
+      "styles": {
+        "color": { "desktop": "var(--color-ink)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 14 } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "href": "#",
+      "text": "Services"
+    },
+    "link-contact": {
+      "id": "link-contact",
+      "type": "link",
+      "parentId": "gheader-inner",
+      "children": [],
+      "styles": {
+        "color": { "desktop": "var(--color-ink)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 14 } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "href": "#",
+      "text": "Contact"
+    },
+    "link-pricing": {
+      "id": "link-pricing",
+      "type": "link",
+      "parentId": "gheader-inner",
+      "children": [],
+      "styles": {
+        "color": { "desktop": "var(--color-ink)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 14 } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "href": "#",
+      "text": "Pricing"
+    },
+    "btn-cta": {
+      "id": "btn-cta",
+      "type": "button",
+      "parentId": "gheader-inner",
+      "children": [],
+      "styles": {
+        "backgroundColor": { "desktop": "var(--color-accent)", "tablet": "var(--color-accent)", "mobile": "var(--color-accent)" },
+        "color": { "desktop": "var(--color-surface)", "tablet": "var(--color-surface)", "mobile": "var(--color-surface)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 15 }, "tablet": { "kind": "px", "value": 14 }, "mobile": { "kind": "px", "value": 14 } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "tablet": { "kind": "token", "value": 2, "token": "space-4" }, "mobile": { "kind": "token", "value": 2, "token": "space-4" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "tablet": { "kind": "token", "value": 2, "token": "space-4" }, "mobile": { "kind": "token", "value": 2, "token": "space-4" } },
+        "paddingLeft": { "desktop": { "kind": "token", "value": 4, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 3, "token": "space-8" } },
+        "paddingRight": { "desktop": { "kind": "token", "value": 4, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 3, "token": "space-8" } },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-full" }, "tablet": { "kind": "token", "value": 8, "token": "radius-full" }, "mobile": { "kind": "token", "value": 8, "token": "radius-full" } },
+        "minWidth": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Get a quote",
+      "href": "#"
+    },
+    "sec-hero": {
+      "id": "sec-hero",
+      "type": "section",
+      "parentId": "page-home",
+      "children": ["h-hero", "p-hero", "btn-hero", "btn-whatsapp"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 5, "token": "space-24" }, "tablet": { "kind": "token", "value": 4, "token": "space-16" }, "mobile": { "kind": "token", "value": 3, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-accent)", "tablet": "var(--color-accent)", "mobile": "var(--color-accent)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [
+        {
+          "id": "grad-hero",
+          "type": "gradient",
+          "name": "Hero gradient",
+          "enabled": true,
+          "opacity": 1,
+          "blendMode": "normal",
+          "angle": 135,
+          "stops": [
+            { "offset": 0, "color": "var(--color-accent)" },
+            { "offset": 55, "color": "var(--color-accent-light)" },
+            { "offset": 100, "color": "#d97706" }
+          ]
+        },
+        {
+          "id": "noise-hero",
+          "type": "noise",
+          "name": "Hero noise",
+          "enabled": true,
+          "opacity": 0.05,
+          "blendMode": "normal",
+          "intensity": 0.1,
+          "scale": 0.8
+        }
+      ],
+      "sectionBlend": { "enabled": false, "feather": 0, "overlap": 0 }
+    },
+    "h-hero": {
+      "id": "h-hero",
+      "type": "heading",
+      "parentId": "sec-hero",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-surface)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 52 }, "tablet": { "kind": "px", "value": 42 }, "mobile": { "kind": "px", "value": 32 } },
+        "lineHeight": { "desktop": 1.1, "tablet": 1.15, "mobile": 1.2 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 60, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 1,
+      "text": "Plumbing, electrical and building in Stellenbosch."
+    },
+    "p-hero": {
+      "id": "p-hero",
+      "type": "paragraph",
+      "parentId": "sec-hero",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-surface)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 18 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.6, "tablet": 1.6, "mobile": 1.5 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 50, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "We fix leaks, wire homes and build walls from R450 a job. Call us on +27 00 000 0000 or WhatsApp us any time."
+    },
+    "btn-hero": {
+      "id": "btn-hero",
+      "type": "button",
+      "parentId": "sec-hero",
+      "children": [],
+      "styles": {
+        "backgroundColor": { "desktop": "var(--color-surface)", "tablet": "var(--color-surface)", "mobile": "var(--color-surface)" },
+        "color": { "desktop": "var(--color-accent)", "tablet": "var(--color-accent)", "mobile": "var(--color-accent)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 15 } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 4, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 3, "token": "space-8" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 4, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 3, "token": "space-8" } },
+        "paddingLeft": { "desktop": { "kind": "token", "value": 5, "token": "space-16" }, "tablet": { "kind": "token", "value": 4, "token": "space-16" }, "mobile": { "kind": "token", "value": 4, "token": "space-16" } },
+        "paddingRight": { "desktop": { "kind": "token", "value": 5, "token": "space-16" }, "tablet": { "kind": "token", "value": 4, "token": "space-16" }, "mobile": { "kind": "token", "value": 4, "token": "space-16" } },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-full" }, "tablet": { "kind": "token", "value": 8, "token": "radius-full" }, "mobile": { "kind": "token", "value": 8, "token": "radius-full" } },
+        "minWidth": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Get a quote",
+      "href": "#"
+    },
+    "btn-whatsapp": {
+      "id": "btn-whatsapp",
+      "type": "button",
+      "parentId": "sec-hero",
+      "children": [],
+      "styles": {
+        "backgroundColor": { "desktop": "var(--color-whatsapp)", "tablet": "var(--color-whatsapp)", "mobile": "var(--color-whatsapp)" },
+        "color": { "desktop": "var(--color-ink)", "tablet": "var(--color-ink)", "mobile": "var(--color-ink)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 15 } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 4, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 3, "token": "space-8" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 4, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 3, "token": "space-8" } },
+        "paddingLeft": { "desktop": { "kind": "token", "value": 5, "token": "space-16" }, "tablet": { "kind": "token", "value": 4, "token": "space-16" }, "mobile": { "kind": "token", "value": 4, "token": "space-16" } },
+        "paddingRight": { "desktop": { "kind": "token", "value": 5, "token": "space-16" }, "tablet": { "kind": "token", "value": 4, "token": "space-16" }, "mobile": { "kind": "token", "value": 4, "token": "space-16" } },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-full" }, "tablet": { "kind": "token", "value": 8, "token": "radius-full" }, "mobile": { "kind": "token", "value": 8, "token": "radius-full" } },
+        "minWidth": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "marginLeft": { "desktop": { "kind": "token", "value": 3, "token": "space-8" }, "tablet": { "kind": "token", "value": 2, "token": "space-8" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "WhatsApp us",
+      "href": "https://wa.me/27000000000"
+    },
+    "sec-services": {
+      "id": "sec-services",
+      "type": "section",
+      "parentId": "page-home",
+      "children": ["h-services", "p-services", "card-plumbing", "card-electrical", "card-building"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-bg)", "tablet": "var(--color-bg)", "mobile": "var(--color-bg)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": true, "feather": 40, "overlap": 24 }
+    },
+    "h-services": {
+      "id": "h-services",
+      "type": "heading",
+      "parentId": "sec-services",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 40 }, "tablet": { "kind": "px", "value": 32 }, "mobile": { "kind": "px", "value": 26 } },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 2,
+      "text": "What we do"
+    },
+    "p-services": {
+      "id": "p-services",
+      "type": "paragraph",
+      "parentId": "sec-services",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Plumbing, electrical and general building for homes and small businesses around Stellenbosch, Paarl and Somerset West."
+    },
+    "card-plumbing": {
+      "id": "card-plumbing",
+      "type": "card",
+      "parentId": "sec-services",
+      "children": ["h-card-plumbing", "p-card-plumbing", "price-plumbing"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-16" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-surface)" },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-md" } },
+        "border": { "desktop": "1px solid var(--color-border)", "tablet": "1px solid var(--color-border)", "mobile": "1px solid var(--color-border)" },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "h-card-plumbing": {
+      "id": "h-card-plumbing",
+      "type": "heading",
+      "parentId": "card-plumbing",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 22 }, "tablet": { "kind": "px", "value": 20 }, "mobile": { "kind": "px", "value": 18 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 3,
+      "text": "Plumbing"
+    },
+    "p-card-plumbing": {
+      "id": "p-card-plumbing",
+      "type": "paragraph",
+      "parentId": "card-plumbing",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 14 } },
+        "lineHeight": { "desktop": 1.6, "tablet": 1.6, "mobile": 1.5 }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Leak repairs, geyser servicing and pipe replacement."
+    },
+    "price-plumbing": {
+      "id": "price-plumbing",
+      "type": "paragraph",
+      "parentId": "card-plumbing",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-accent)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 14 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "From R450."
+    },
+    "card-electrical": {
+      "id": "card-electrical",
+      "type": "card",
+      "parentId": "sec-services",
+      "children": ["h-card-electrical", "p-card-electrical", "price-electrical"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-16" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-surface)" },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-md" } },
+        "border": { "desktop": "1px solid var(--color-border)", "tablet": "1px solid var(--color-border)", "mobile": "1px solid var(--color-border)" },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "h-card-electrical": {
+      "id": "h-card-electrical",
+      "type": "heading",
+      "parentId": "card-electrical",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 22 }, "tablet": { "kind": "px", "value": 20 }, "mobile": { "kind": "px", "value": 18 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 3,
+      "text": "Electrical"
+    },
+    "p-card-electrical": {
+      "id": "p-card-electrical",
+      "type": "paragraph",
+      "parentId": "card-electrical",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 14 } },
+        "lineHeight": { "desktop": 1.6, "tablet": 1.6, "mobile": 1.5 }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Rewiring, certificates of compliance and fault finding."
+    },
+    "price-electrical": {
+      "id": "price-electrical",
+      "type": "paragraph",
+      "parentId": "card-electrical",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-accent)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 14 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "From R650."
+    },
+    "card-building": {
+      "id": "card-building",
+      "type": "card",
+      "parentId": "sec-services",
+      "children": ["h-card-building", "p-card-building", "price-building"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-16" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-surface)" },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-md" } },
+        "border": { "desktop": "1px solid var(--color-border)", "tablet": "1px solid var(--color-border)", "mobile": "1px solid var(--color-border)" },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "h-card-building": {
+      "id": "h-card-building",
+      "type": "heading",
+      "parentId": "card-building",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 22 }, "tablet": { "kind": "px", "value": 20 }, "mobile": { "kind": "px", "value": 18 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 3,
+      "text": "Building"
+    },
+    "p-card-building": {
+      "id": "p-card-building",
+      "type": "paragraph",
+      "parentId": "card-building",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 14 } },
+        "lineHeight": { "desktop": 1.6, "tablet": 1.6, "mobile": 1.5 }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Extensions, renovations and brickwork."
+    },
+    "price-building": {
+      "id": "price-building",
+      "type": "paragraph",
+      "parentId": "card-building",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-accent)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 14 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "From R800."
+    },
+    "sec-beforeafter": {
+      "id": "sec-beforeafter",
+      "type": "section",
+      "parentId": "page-home",
+      "children": ["h-beforeafter", "p-beforeafter", "img-before", "img-after", "img-wall"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-surface)" },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": false, "feather": 0, "overlap": 0 }
+    },
+    "h-beforeafter": {
+      "id": "h-beforeafter",
+      "type": "heading",
+      "parentId": "sec-beforeafter",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 40 }, "tablet": { "kind": "px", "value": 32 }, "mobile": { "kind": "px", "value": 26 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 2,
+      "text": "Before & after"
+    },
+    "p-beforeafter": {
+      "id": "p-beforeafter",
+      "type": "paragraph",
+      "parentId": "sec-beforeafter",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "See the difference a proper repair makes — we leave every job clean and finished."
+    },
+    "img-before": {
+      "id": "img-before",
+      "type": "image",
+      "parentId": "sec-beforeafter",
+      "children": [],
+      "styles": {
+        "width": { "desktop": { "kind": "pct", "value": 40 }, "tablet": { "kind": "pct", "value": 80 }, "mobile": { "kind": "pct", "value": 90 } },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-md" } },
+        "border": { "desktop": "1px solid var(--color-border)", "tablet": "1px solid var(--color-border)", "mobile": "1px solid var(--color-border)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "src": "/templates/gallery-before-leak.svg",
+      "alt": "Leaking pipe before repair"
+    },
+    "img-after": {
+      "id": "img-after",
+      "type": "image",
+      "parentId": "sec-beforeafter",
+      "children": [],
+      "styles": {
+        "width": { "desktop": { "kind": "pct", "value": 40 }, "tablet": { "kind": "pct", "value": 80 }, "mobile": { "kind": "pct", "value": 90 } },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-md" } },
+        "border": { "desktop": "1px solid var(--color-border)", "tablet": "1px solid var(--color-border)", "mobile": "1px solid var(--color-border)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "src": "/templates/gallery-after-fixed.svg",
+      "alt": "Pipe fixed and clean"
+    },
+    "img-wall": {
+      "id": "img-wall",
+      "type": "image",
+      "parentId": "sec-beforeafter",
+      "children": [],
+      "styles": {
+        "width": { "desktop": { "kind": "pct", "value": 40 }, "tablet": { "kind": "pct", "value": 80 }, "mobile": { "kind": "pct", "value": 90 } },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-md" } },
+        "border": { "desktop": "1px solid var(--color-border)", "tablet": "1px solid var(--color-border)", "mobile": "1px solid var(--color-border)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "src": "/templates/gallery-wall-repaired.svg",
+      "alt": "Cracked wall repaired"
+    },
+    "sec-contact": {
+      "id": "sec-contact",
+      "type": "section",
+      "parentId": "page-home",
+      "children": ["h-contact", "p-contact"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-bg)" },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": false, "feather": 0, "overlap": 0 }
+    },
+    "h-contact": {
+      "id": "h-contact",
+      "type": "heading",
+      "parentId": "sec-contact",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 40 }, "tablet": { "kind": "px", "value": 32 }, "mobile": { "kind": "px", "value": 26 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 2,
+      "text": "Get in touch"
+    },
+    "p-contact": {
+      "id": "p-contact",
+      "type": "paragraph",
+      "parentId": "sec-contact",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Call us on +27 00 000 0000. We reply within one business day."
+    },
+    "footer-global": {
+      "id": "footer-global",
+      "type": "footer",
+      "parentId": null,
+      "children": ["gfooter-inner"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-16" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-bg)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 14 }, "tablet": { "kind": "px", "value": 13 }, "mobile": { "kind": "px", "value": 13 } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "gfooter-inner": {
+      "id": "gfooter-inner",
+      "type": "container",
+      "parentId": "footer-global",
+      "children": ["foot-brand", "foot-phone"],
+      "styles": {
+        "display": { "desktop": "flex", "tablet": "flex", "mobile": "flex" },
+        "flexDirection": { "desktop": "column", "tablet": "column", "mobile": "column" },
+        "gap": { "desktop": { "kind": "token", "value": 2, "token": "space-8" }, "tablet": { "kind": "token", "value": 2, "token": "space-8" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-16" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "foot-brand": {
+      "id": "foot-brand",
+      "type": "heading",
+      "parentId": "gfooter-inner",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-accent)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 18 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 14 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 3,
+      "text": "Local Trades"
+    },
+    "foot-phone": {
+      "id": "foot-phone",
+      "type": "paragraph",
+      "parentId": "gfooter-inner",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 14 }, "tablet": { "kind": "px", "value": 13 }, "mobile": { "kind": "px", "value": 13 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "+27 00 000 0000"
+    },
+    "page-about": {
+      "id": "page-about",
+      "type": "page",
+      "parentId": null,
+      "children": ["sec-about-page"],
+      "styles": {},
+      "hidden": {},
+      "locked": false,
+      "rootId": "page-about",
+      "title": "About",
+      "slug": "about",
+      "backgroundLayers": []
+    },
+    "sec-about-page": {
+      "id": "sec-about-page",
+      "type": "section",
+      "parentId": "page-about",
+      "children": ["h-about-page", "p-about-page"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-surface)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": false, "feather": 0, "overlap": 0 }
+    },
+    "h-about-page": {
+      "id": "h-about-page",
+      "type": "heading",
+      "parentId": "sec-about-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 48 }, "tablet": { "kind": "px", "value": 38 }, "mobile": { "kind": "px", "value": 28 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 1,
+      "text": "About us"
+    },
+    "p-about-page": {
+      "id": "p-about-page",
+      "type": "paragraph",
+      "parentId": "sec-about-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "We are a small team of plumbers, electricians and builders serving Stellenbosch, Paarl and Somerset West. From burst pipes to full renovations, we handle it."
+    },
+    "page-services": {
+      "id": "page-services",
+      "type": "page",
+      "parentId": null,
+      "children": ["sec-services-page"],
+      "styles": {},
+      "hidden": {},
+      "locked": false,
+      "rootId": "page-services",
+      "title": "Services",
+      "slug": "services",
+      "backgroundLayers": []
+    },
+    "sec-services-page": {
+      "id": "sec-services-page",
+      "type": "section",
+      "parentId": "page-services",
+      "children": ["h-services-page", "p-services-page"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-bg)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": false, "feather": 0, "overlap": 0 }
+    },
+    "h-services-page": {
+      "id": "h-services-page",
+      "type": "heading",
+      "parentId": "sec-services-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 48 }, "tablet": { "kind": "px", "value": 38 }, "mobile": { "kind": "px", "value": 28 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 1,
+      "text": "Our services"
+    },
+    "p-services-page": {
+      "id": "p-services-page",
+      "type": "paragraph",
+      "parentId": "sec-services-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Plumbing, electrical and building for homes and small businesses around Stellenbosch, Paarl and Somerset West."
+    },
+    "page-contact": {
+      "id": "page-contact",
+      "type": "page",
+      "parentId": null,
+      "children": ["sec-contact-page"],
+      "styles": {},
+      "hidden": {},
+      "locked": false,
+      "rootId": "page-contact",
+      "title": "Contact",
+      "slug": "contact",
+      "backgroundLayers": []
+    },
+    "sec-contact-page": {
+      "id": "sec-contact-page",
+      "type": "section",
+      "parentId": "page-contact",
+      "children": ["h-contact-page", "p-contact-page"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-surface)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": false, "feather": 0, "overlap": 0 }
+    },
+    "h-contact-page": {
+      "id": "h-contact-page",
+      "type": "heading",
+      "parentId": "sec-contact-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 48 }, "tablet": { "kind": "px", "value": 38 }, "mobile": { "kind": "px", "value": 28 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 1,
+      "text": "Contact"
+    },
+    "p-contact-page": {
+      "id": "p-contact-page",
+      "type": "paragraph",
+      "parentId": "sec-contact-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Call us on +27 00 000 0000. We reply within one business day."
+    },
+    "page-pricing": {
+      "id": "page-pricing",
+      "type": "page",
+      "parentId": null,
+      "children": ["sec-pricing-page"],
+      "styles": {},
+      "hidden": {},
+      "locked": false,
+      "rootId": "page-pricing",
+      "title": "Pricing",
+      "slug": "pricing",
+      "backgroundLayers": []
+    },
+    "sec-pricing-page": {
+      "id": "sec-pricing-page",
+      "type": "section",
+      "parentId": "page-pricing",
+      "children": ["h-pricing-page", "p-pricing-page"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-bg)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": false, "feather": 0, "overlap": 0 }
+    },
+    "h-pricing-page": {
+      "id": "h-pricing-page",
+      "type": "heading",
+      "parentId": "sec-pricing-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 48 }, "tablet": { "kind": "px", "value": 38 }, "mobile": { "kind": "px", "value": 28 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 1,
+      "text": "Pricing"
+    },
+    "p-pricing-page": {
+      "id": "p-pricing-page",
+      "type": "paragraph",
+      "parentId": "sec-pricing-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Plumbing from R450. Electrical from R650. Building from R800."
+    }
+  },
+  "blocks": [],
+  "globalHeaderId": "nav-global",
+  "globalFooterId": "footer-global",
+  "schemaVersion": 2
+}

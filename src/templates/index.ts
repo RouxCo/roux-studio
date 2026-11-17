@@ -17,6 +17,11 @@ const LOADERS = {
       import('./light-professional/project.json'),
       import('./light-professional/meta'),
     ]),
+  'local-trades': () =>
+    Promise.all([
+      import('./local-trades/project.json'),
+      import('./local-trades/meta'),
+    ]),
 } as const;
 
 export const TEMPLATE_IDS = Object.keys(LOADERS) as Array<keyof typeof LOADERS>;

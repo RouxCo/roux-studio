@@ -10,14 +10,17 @@ import type { StoredProject } from '../db/stores';
 
 let darkPremium: StoredProject;
 let lightProfessional: StoredProject;
+let localTrades: StoredProject;
 
 beforeAll(async () => {
-  const [darkLoaded, lightLoaded] = await Promise.all([
+  const [darkLoaded, lightLoaded, localLoaded] = await Promise.all([
     loadTemplate('dark-premium'),
     loadTemplate('light-professional'),
+    loadTemplate('local-trades'),
   ]);
   darkPremium = darkLoaded.project as StoredProject;
   lightProfessional = lightLoaded.project as StoredProject;
+  localTrades = localLoaded.project as StoredProject;
 });
 
 function mutate(fn: (p: StoredProject) => void): string[] {
@@ -91,6 +94,14 @@ describe('template loading', () => {
 
   it('light-professional has a feathered section blend', () => {
     expect(featheredBlends(lightProfessional).length).toBeGreaterThan(0);
+  });
+
+  it('local-trades has five pages, all with global header and footer', () => {
+    pageGlobalChecks(localTrades);
+  });
+
+  it('local-trades has a feathered section blend', () => {
+    expect(featheredBlends(localTrades).length).toBeGreaterThan(0);
   });
 });
 
@@ -221,6 +232,23 @@ describe('contrast', () => {
       ['color-surface', 'color-accent'], // button text on accent background
     ];
     const token = tokenOf(lightProfessional);
+    for (const [fg, bg] of pairs) {
+      const ratio = contrast(token(fg), token(bg));
+      // All pairs clear 4.5:1, hence also the relaxed 3:1 large-heading threshold.
+      expect(ratio).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it('local-trades meets text-colour contrast ratios (4.5:1, 3:1 for large headings)', () => {
+    // Text-colour / background-colour token pairs actually used in the template.
+    const pairs: [string, string][] = [
+      ['color-ink', 'color-bg'], // heading and body text on light sections
+      ['color-muted', 'color-bg'], // muted text on light sections
+      ['color-surface', 'color-accent'], // hero text on accent background
+      ['color-accent', 'color-surface'], // price text on card surface
+      ['color-ink', 'color-whatsapp'], // WhatsApp button text on WhatsApp background
+    ];
+    const token = tokenOf(localTrades);
     for (const [fg, bg] of pairs) {
       const ratio = contrast(token(fg), token(bg));
       // All pairs clear 4.5:1, hence also the relaxed 3:1 large-heading threshold.
