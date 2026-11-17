@@ -74,7 +74,15 @@ export function compileStyles(
     if (css) parts.push(css);
     for (const child of node.children) walk(child);
   };
+
+  // The global header/footer subtrees live outside any page (parentId null)
+  // but are rendered by every page that opts in, so their r- classes must be
+  // in this page's CSS. Walk the header subtree before the page root's
+  // children and the footer after; the shared sectionIndex counts them in
+  // document order, just like the renderer.
+  if (page.useGlobalHeader && project.globalHeaderId) walk(project.globalHeaderId);
   walk(page.rootId);
+  if (page.useGlobalFooter && project.globalFooterId) walk(project.globalFooterId);
 
   return parts.join('\n');
 }

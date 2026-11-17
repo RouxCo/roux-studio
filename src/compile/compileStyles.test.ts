@@ -3,19 +3,36 @@
 // r-<hash> rules with desktop/base and breakpoint-only media queries, hidden,
 // length serialisation and kebab-case keys. Pure: no React/store/DOM.
 import { describe, expect, it } from 'vitest';
-import type { BackgroundLayer, Node, PageId, Project } from '../types';
+import type { BackgroundLayer, Node, NodeId, PageId, Project } from '../types';
 import { compileStyles } from './compileStyles';
 import { useEditorStore } from '../store/useEditorStore';
 
-function page(id: PageId, rootId: string, title = 'Home'): Project['pages'][number] {
-  return { id, title, slug: id, rootId };
+function page(
+  id: PageId,
+  rootId: string,
+  title = 'Home',
+  globals?: { header?: boolean; footer?: boolean },
+): Project['pages'][number] {
+  return {
+    id,
+    title,
+    slug: id,
+    rootId,
+    ...(globals?.header !== undefined ? { useGlobalHeader: globals.header } : {}),
+    ...(globals?.footer !== undefined ? { useGlobalFooter: globals.footer } : {}),
+  };
 }
 
 function token(name: string, value: string, type: Project['tokens']['byName'][string]['type'] = 'color') {
   return { name, value, type };
 }
 
-function project(pages: Project['pages'], tokens: Record<string, Project['tokens']['byName'][string]>): Project {
+function project(
+  pages: Project['pages'],
+  tokens: Record<string, Project['tokens']['byName'][string]>,
+  globalHeaderId: NodeId | null = null,
+  globalFooterId: NodeId | null = null,
+): Project {
   return {
     id: 'proj-1',
     name: 'Roux Studio',
@@ -24,8 +41,8 @@ function project(pages: Project['pages'], tokens: Record<string, Project['tokens
     pages,
     tokens: { byName: tokens },
     blocks: [],
-    globalHeaderId: null,
-    globalFooterId: null,
+    globalHeaderId,
+    globalFooterId,
   };
 }
 
@@ -430,5 +447,97 @@ describe('compileStyles — section blend', () => {
     const out = compileStyles(blendProject(tree), 'pg-2', tree);
     expect(wrapRule(out, BSA)).toContain('#000 13px');
     expect(wrapRule(out, BSA)).not.toContain('12.6');
+  });
+});
+
+describe('compileStyles — global header/footer', () => {
+  const HEAD = 'head-1';
+  const GH = 'gh-1';
+  const FOOT = 'foot-1';
+  const FP = 'fp-1';
+
+  function globalTree(): Record<string, Node> {
+    return {
+      ...TREE,
+      [HEAD]: {
+        id: HEAD, type: 'section', parentId: null, children: [GH],
+        styles: { backgroundColor: { desktop: '#0f766e' } },
+        hidden: {}, locked: false,
+        backgroundLayers: [], sectionBlend: { enabled: false, feather: 0, overlap: 0 },
+      },
+      [GH]: {
+        id: GH, type: 'heading', parentId: HEAD, children: [], styles: { color: { desktop: '#ffffff' } },
+        hidden: {}, locked: false, level: 1, text: 'Global header',
+      },
+      [FOOT]: {
+        id: FOOT, type: 'footer', parentId: null, children: [FP],
+        styles: { backgroundColor: { desktop: '#111827' } },
+        hidden: {}, locked: false,
+      },
+      [FP]: {
+        id: FP, type: 'paragraph', parentId: FOOT, children: [], styles: { color: { desktop: '#ffffff' } },
+        hidden: {}, locked: false, text: 'Global footer',
+      },
+    };
+  }
+
+  function headRule(out: string): string {
+    return out.match(new RegExp(`\\.${classFor(HEAD)}\\s*\\{[^}]*\\}`))?.[0] ?? '';
+  }
+
+  function footRule(out: string): string {
+    return out.match(new RegExp(`\\.${classFor(FOOT)}\\s*\\{[^}]*\\}`))?.[0] ?? '';
+  }
+
+  it('compiles the global header classes before the page root\'s children', () => {
+    const tree = globalTree();
+    const p = project([page('pg-1', ROOT, 'Home', { header: true })], {}, HEAD, null);
+    const out = compileStyles(p, 'pg-1', tree);
+    expect(headRule(out)).toContain('background-color: #0f766e');
+    expect(out).toContain(`.${classFor(GH)}`);
+    expect(out.indexOf(classFor(HEAD))).toBeLessThan(out.indexOf(classFor(BOX)));
+    expect(out.indexOf(classFor(GH))).toBeLessThan(out.indexOf(classFor(BOX)));
+  });
+
+  it('compiles the global footer classes after the page root\'s children', () => {
+    const tree = globalTree();
+    const p = project([page('pg-1', ROOT, 'Home', { footer: true })], {}, null, FOOT);
+    const out = compileStyles(p, 'pg-1', tree);
+    expect(footRule(out)).toContain('background-color: #111827');
+    expect(out).toContain(`.${classFor(FP)}`);
+    expect(out.indexOf(classFor(FOOT))).toBeGreaterThan(out.indexOf(classFor(BOX)));
+    expect(out.indexOf(classFor(FP))).toBeGreaterThan(out.indexOf(classFor(BOX)));
+  });
+
+  it('does not compile a global the page has opted out of', () => {
+    const tree = globalTree();
+    const out = compileStyles(
+      project([page('pg-1', ROOT, 'Home', { header: false, footer: false })], {}, HEAD, FOOT),
+      'pg-1',
+      tree,
+    );
+    expect(out).not.toContain(classFor(HEAD));
+    expect(out).not.toContain(classFor(GH));
+    expect(out).not.toContain(classFor(FOOT));
+    expect(out).not.toContain(classFor(FP));
+    // The page's own classes are still there.
+    expect(out).toContain(classFor(BOX));
+  });
+
+  it('opts each page in independently: header compiles only for pages that use it', () => {
+    const tree = globalTree();
+    const withHeader = compileStyles(
+      project([page('pg-1', ROOT, 'Home', { header: true })], {}, HEAD, null),
+      'pg-1',
+      tree,
+    );
+    const withoutHeader = compileStyles(
+      project([page('pg-2', ROOT, 'Home', { header: false })], {}, HEAD, null),
+      'pg-2',
+      tree,
+    );
+    expect(withHeader).toContain(classFor(HEAD));
+    expect(withoutHeader).not.toContain(classFor(HEAD));
+    expect(withoutHeader).toContain(classFor(BOX));
   });
 });
