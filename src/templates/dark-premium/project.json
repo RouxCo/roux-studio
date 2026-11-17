@@ -1,0 +1,867 @@
+{
+  "id": "dark-premium",
+  "name": "Dark Premium Service",
+  "createdAt": "2026-11-17T00:00:00.000Z",
+  "updatedAt": "2026-11-17T00:00:00.000Z",
+  "pages": [
+    {
+      "id": "page-home",
+      "title": "Home",
+      "slug": "home",
+      "rootId": "page-home",
+      "useGlobalHeader": true,
+      "useGlobalFooter": true,
+      "backgroundLayers": []
+    },
+    {
+      "id": "page-about",
+      "title": "About",
+      "slug": "about",
+      "rootId": "page-about",
+      "useGlobalHeader": true,
+      "useGlobalFooter": true,
+      "backgroundLayers": []
+    },
+    {
+      "id": "page-services",
+      "title": "Services",
+      "slug": "services",
+      "rootId": "page-services",
+      "useGlobalHeader": true,
+      "useGlobalFooter": true,
+      "backgroundLayers": []
+    },
+    {
+      "id": "page-contact",
+      "title": "Contact",
+      "slug": "contact",
+      "rootId": "page-contact",
+      "useGlobalHeader": true,
+      "useGlobalFooter": true,
+      "backgroundLayers": []
+    },
+    {
+      "id": "page-pricing",
+      "title": "Pricing",
+      "slug": "pricing",
+      "rootId": "page-pricing",
+      "useGlobalHeader": true,
+      "useGlobalFooter": true,
+      "backgroundLayers": []
+    }
+  ],
+  "tokens": {
+    "byName": {
+      "color-ink": { "name": "color-ink", "value": "#0a1128", "type": "color" },
+      "color-surface": { "name": "color-surface", "value": "#ffffff", "type": "color" },
+      "color-accent": { "name": "color-accent", "value": "#00f3ff", "type": "color" },
+      "color-muted": { "name": "color-muted", "value": "#9fb3d8", "type": "color" },
+      "space-4": { "name": "space-4", "value": "1rem", "type": "spacing" },
+      "space-8": { "name": "space-8", "value": "1.5rem", "type": "spacing" },
+      "space-16": { "name": "space-16", "value": "3rem", "type": "spacing" },
+      "space-24": { "name": "space-24", "value": "4rem", "type": "spacing" },
+      "radius-md": { "name": "radius-md", "value": "8", "type": "length" },
+      "radius-full": { "name": "radius-full", "value": "9999", "type": "length" },
+      "font-heading": { "name": "font-heading", "value": "Georgia, serif", "type": "font" },
+      "font-body": { "name": "font-body", "value": "Inter, sans-serif", "type": "font" },
+      "size-button": { "name": "size-button", "value": "16", "type": "length" },
+      "tap-min": { "name": "tap-min", "value": "44", "type": "length" }
+    }
+  },
+  "nodes": {
+    "page-home": {
+      "id": "page-home",
+      "type": "page",
+      "parentId": null,
+      "children": ["sec-hero", "sec-about", "sec-services", "sec-contact"],
+      "styles": {},
+      "hidden": {},
+      "locked": false,
+      "rootId": "page-home",
+      "title": "Home",
+      "slug": "home",
+      "backgroundLayers": []
+    },
+    "nav-global": {
+      "id": "nav-global",
+      "type": "nav",
+      "parentId": null,
+      "children": ["gheader-inner"],
+      "styles": {
+        "display": { "desktop": "flex", "tablet": "flex", "mobile": "flex" },
+        "flexDirection": { "desktop": "row", "tablet": "row", "mobile": "column" },
+        "justifyContent": { "desktop": "space-between", "tablet": "space-between", "mobile": "flex-start" },
+        "alignItems": { "desktop": "center", "tablet": "center", "mobile": "center" },
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-ink)", "tablet": "var(--color-ink)", "mobile": "var(--color-ink)" }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "nav-brand": {
+      "id": "nav-brand",
+      "type": "link",
+      "parentId": "gheader-inner",
+      "children": [],
+      "styles": {
+        "color": { "desktop": "var(--color-accent)" },
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 20 }, "tablet": { "kind": "px", "value": 18 }, "mobile": { "kind": "px", "value": 16 } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "href": "#",
+      "text": "Dark Premium Service"
+    },
+    "gheader-inner": {
+      "id": "gheader-inner",
+      "type": "container",
+      "parentId": "nav-global",
+      "children": ["nav-brand", "link-home", "link-about", "link-services", "link-contact", "link-pricing"],
+      "styles": {
+        "display": { "desktop": "flex", "tablet": "flex", "mobile": "flex" },
+        "flexDirection": { "desktop": "row", "tablet": "row", "mobile": "column" },
+        "justifyContent": { "desktop": "space-between", "tablet": "space-between", "mobile": "flex-start" },
+        "alignItems": { "desktop": "center", "tablet": "center", "mobile": "center" },
+        "gap": { "desktop": { "kind": "token", "value": 3, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "link-home": {
+      "id": "link-home",
+      "type": "link",
+      "parentId": "gheader-inner",
+      "children": [],
+      "styles": {
+        "color": { "desktop": "var(--color-surface)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 14 } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "href": "#",
+      "text": "Home"
+    },
+    "link-about": {
+      "id": "link-about",
+      "type": "link",
+      "parentId": "gheader-inner",
+      "children": [],
+      "styles": {
+        "color": { "desktop": "var(--color-surface)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 14 } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "href": "#",
+      "text": "About"
+    },
+    "link-services": {
+      "id": "link-services",
+      "type": "link",
+      "parentId": "gheader-inner",
+      "children": [],
+      "styles": {
+        "color": { "desktop": "var(--color-surface)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 14 } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "href": "#",
+      "text": "Services"
+    },
+    "link-contact": {
+      "id": "link-contact",
+      "type": "link",
+      "parentId": "gheader-inner",
+      "children": [],
+      "styles": {
+        "color": { "desktop": "var(--color-surface)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 14 } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "href": "#",
+      "text": "Contact"
+    },
+    "link-pricing": {
+      "id": "link-pricing",
+      "type": "link",
+      "parentId": "gheader-inner",
+      "children": [],
+      "styles": {
+        "color": { "desktop": "var(--color-surface)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 14 } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "href": "#",
+      "text": "Pricing"
+    },
+    "sec-hero": {
+      "id": "sec-hero",
+      "type": "section",
+      "parentId": "page-home",
+      "children": ["h-hero", "p-hero", "btn-hero"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-ink)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [
+        {
+          "id": "grad-hero",
+          "type": "gradient",
+          "name": "Hero gradient",
+          "enabled": true,
+          "opacity": 1,
+          "blendMode": "normal",
+          "angle": 135,
+          "stops": [
+            { "offset": 0, "color": "var(--color-ink)" },
+            { "offset": 60, "color": "#0d1d42" },
+            { "offset": 100, "color": "var(--color-accent)" }
+          ]
+        },
+        {
+          "id": "noise-hero",
+          "type": "noise",
+          "name": "Hero noise",
+          "enabled": true,
+          "opacity": 0.1,
+          "blendMode": "normal",
+          "intensity": 0.15,
+          "scale": 0.8
+        }
+      ],
+      "sectionBlend": { "enabled": false, "feather": 0, "overlap": 0 }
+    },
+    "h-hero": {
+      "id": "h-hero",
+      "type": "heading",
+      "parentId": "sec-hero",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-surface)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 56 }, "tablet": { "kind": "px", "value": 44 }, "mobile": { "kind": "px", "value": 32 } },
+        "lineHeight": { "desktop": 1.1, "tablet": 1.15, "mobile": 1.2 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 60, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 1,
+      "text": "We build websites that last."
+    },
+    "p-hero": {
+      "id": "p-hero",
+      "type": "paragraph",
+      "parentId": "sec-hero",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 18 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.6, "tablet": 1.6, "mobile": 1.5 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 50, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "We craft fast, accessible sites for growing teams in Johannesburg, Cape Town and Durban."
+    },
+    "btn-hero": {
+      "id": "btn-hero",
+      "type": "button",
+      "parentId": "sec-hero",
+      "children": [],
+      "styles": {
+        "backgroundColor": { "desktop": "var(--color-accent)", "tablet": "var(--color-accent)", "mobile": "var(--color-accent)" },
+        "color": { "desktop": "var(--color-ink)", "tablet": "var(--color-ink)", "mobile": "var(--color-ink)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 15 } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 4, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 3, "token": "space-8" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 4, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 3, "token": "space-8" } },
+        "paddingLeft": { "desktop": { "kind": "token", "value": 5, "token": "space-16" }, "tablet": { "kind": "token", "value": 4, "token": "space-16" }, "mobile": { "kind": "token", "value": 4, "token": "space-16" } },
+        "paddingRight": { "desktop": { "kind": "token", "value": 5, "token": "space-16" }, "tablet": { "kind": "token", "value": 4, "token": "space-16" }, "mobile": { "kind": "token", "value": 4, "token": "space-16" } },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-full" }, "tablet": { "kind": "token", "value": 8, "token": "radius-full" }, "mobile": { "kind": "token", "value": 8, "token": "radius-full" } },
+        "minWidth": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Get a quote",
+      "href": "#"
+    },
+    "sec-about": {
+      "id": "sec-about",
+      "type": "section",
+      "parentId": "page-home",
+      "children": ["h-about", "p-about"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-ink)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": true, "feather": 40, "overlap": 24 }
+    },
+    "h-about": {
+      "id": "h-about",
+      "type": "heading",
+      "parentId": "sec-about",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-accent)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 40 }, "tablet": { "kind": "px", "value": 32 }, "mobile": { "kind": "px", "value": 26 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 2,
+      "text": "About us"
+    },
+    "p-about": {
+      "id": "p-about",
+      "type": "paragraph",
+      "parentId": "sec-about",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "We are a small team of designers and developers building premium sites for South African businesses. From brand identity to launch, we handle it."
+    },
+    "sec-services": {
+      "id": "sec-services",
+      "type": "section",
+      "parentId": "page-home",
+      "children": ["h-services", "p-services", "card-web", "card-brand"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-ink)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": true, "feather": 40, "overlap": 24 }
+    },
+    "h-services": {
+      "id": "h-services",
+      "type": "heading",
+      "parentId": "sec-services",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-surface)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 40 }, "tablet": { "kind": "px", "value": 32 }, "mobile": { "kind": "px", "value": 26 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 2,
+      "text": "What we build"
+    },
+    "p-services": {
+      "id": "p-services",
+      "type": "paragraph",
+      "parentId": "sec-services",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Brand sites, marketing pages and online stores that convert. We build them fast and accessible."
+    },
+    "card-web": {
+      "id": "card-web",
+      "type": "card",
+      "parentId": "sec-services",
+      "children": ["h-card-web", "p-card-web", "price-web"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-16" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-ink)" },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-md" } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "h-card-web": {
+      "id": "h-card-web",
+      "type": "heading",
+      "parentId": "card-web",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-accent)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 22 }, "tablet": { "kind": "px", "value": 20 }, "mobile": { "kind": "px", "value": 18 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 3,
+      "text": "Brand sites"
+    },
+    "p-card-web": {
+      "id": "p-card-web",
+      "type": "paragraph",
+      "parentId": "card-web",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 14 } },
+        "lineHeight": { "desktop": 1.6, "tablet": 1.6, "mobile": 1.5 }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Custom marketing sites that reflect your brand."
+    },
+    "price-web": {
+      "id": "price-web",
+      "type": "paragraph",
+      "parentId": "card-web",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-surface)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 14 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "From R450."
+    },
+    "card-brand": {
+      "id": "card-brand",
+      "type": "card",
+      "parentId": "sec-services",
+      "children": ["h-card-brand", "p-card-brand", "price-brand"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-16" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-ink)" },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-md" } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "h-card-brand": {
+      "id": "h-card-brand",
+      "type": "heading",
+      "parentId": "card-brand",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-accent)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 22 }, "tablet": { "kind": "px", "value": 20 }, "mobile": { "kind": "px", "value": 18 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 3,
+      "text": "Online stores"
+    },
+    "p-card-brand": {
+      "id": "p-card-brand",
+      "type": "paragraph",
+      "parentId": "card-brand",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 14 } },
+        "lineHeight": { "desktop": 1.6, "tablet": 1.6, "mobile": 1.5 }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Online stores built to convert."
+    },
+    "price-brand": {
+      "id": "price-brand",
+      "type": "paragraph",
+      "parentId": "card-brand",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-surface)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 14 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "From R800."
+    },
+    "sec-contact": {
+      "id": "sec-contact",
+      "type": "section",
+      "parentId": "page-home",
+      "children": ["h-contact", "p-contact"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-ink)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": false, "feather": 0, "overlap": 0 }
+    },
+    "h-contact": {
+      "id": "h-contact",
+      "type": "heading",
+      "parentId": "sec-contact",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-accent)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 40 }, "tablet": { "kind": "px", "value": 32 }, "mobile": { "kind": "px", "value": 26 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 2,
+      "text": "Get in touch"
+    },
+    "p-contact": {
+      "id": "p-contact",
+      "type": "paragraph",
+      "parentId": "sec-contact",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Call us on +27 00 000 0000. We reply within one business day."
+    },
+    "footer-global": {
+      "id": "footer-global",
+      "type": "footer",
+      "parentId": null,
+      "children": ["gfooter-inner"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-16" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-ink)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 14 }, "tablet": { "kind": "px", "value": 13 }, "mobile": { "kind": "px", "value": 13 } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "gfooter-inner": {
+      "id": "gfooter-inner",
+      "type": "container",
+      "parentId": "footer-global",
+      "children": ["foot-brand", "foot-phone"],
+      "styles": {
+        "display": { "desktop": "flex", "tablet": "flex", "mobile": "flex" },
+        "flexDirection": { "desktop": "column", "tablet": "column", "mobile": "column" },
+        "gap": { "desktop": { "kind": "token", "value": 2, "token": "space-8" }, "tablet": { "kind": "token", "value": 2, "token": "space-8" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-16" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "foot-brand": {
+      "id": "foot-brand",
+      "type": "heading",
+      "parentId": "gfooter-inner",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-accent)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 18 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 14 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 3,
+      "text": "Dark Premium Service"
+    },
+    "foot-phone": {
+      "id": "foot-phone",
+      "type": "paragraph",
+      "parentId": "gfooter-inner",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 14 }, "tablet": { "kind": "px", "value": 13 }, "mobile": { "kind": "px", "value": 13 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "+27 00 000 0000"
+    },
+    "page-about": {
+      "id": "page-about",
+      "type": "page",
+      "parentId": null,
+      "children": ["sec-about-page"],
+      "styles": {},
+      "hidden": {},
+      "locked": false,
+      "rootId": "page-about",
+      "title": "About",
+      "slug": "about",
+      "backgroundLayers": []
+    },
+    "sec-about-page": {
+      "id": "sec-about-page",
+      "type": "section",
+      "parentId": "page-about",
+      "children": ["h-about-page", "p-about-page"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-ink)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": false, "feather": 0, "overlap": 0 }
+    },
+    "h-about-page": {
+      "id": "h-about-page",
+      "type": "heading",
+      "parentId": "sec-about-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-surface)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 48 }, "tablet": { "kind": "px", "value": 38 }, "mobile": { "kind": "px", "value": 28 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 1,
+      "text": "About us"
+    },
+    "p-about-page": {
+      "id": "p-about-page",
+      "type": "paragraph",
+      "parentId": "sec-about-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "We are a small team of designers and developers building premium sites for South African businesses. From brand identity to launch, we handle it."
+    },
+    "page-services": {
+      "id": "page-services",
+      "type": "page",
+      "parentId": null,
+      "children": ["sec-services-page"],
+      "styles": {},
+      "hidden": {},
+      "locked": false,
+      "rootId": "page-services",
+      "title": "Services",
+      "slug": "services",
+      "backgroundLayers": []
+    },
+    "sec-services-page": {
+      "id": "sec-services-page",
+      "type": "section",
+      "parentId": "page-services",
+      "children": ["h-services-page", "p-services-page"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-ink)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": false, "feather": 0, "overlap": 0 }
+    },
+    "h-services-page": {
+      "id": "h-services-page",
+      "type": "heading",
+      "parentId": "sec-services-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-surface)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 48 }, "tablet": { "kind": "px", "value": 38 }, "mobile": { "kind": "px", "value": 28 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 1,
+      "text": "Our services"
+    },
+    "p-services-page": {
+      "id": "p-services-page",
+      "type": "paragraph",
+      "parentId": "sec-services-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Brand sites, marketing pages and online stores that convert. We build them fast and accessible."
+    },
+    "page-contact": {
+      "id": "page-contact",
+      "type": "page",
+      "parentId": null,
+      "children": ["sec-contact-page"],
+      "styles": {},
+      "hidden": {},
+      "locked": false,
+      "rootId": "page-contact",
+      "title": "Contact",
+      "slug": "contact",
+      "backgroundLayers": []
+    },
+    "sec-contact-page": {
+      "id": "sec-contact-page",
+      "type": "section",
+      "parentId": "page-contact",
+      "children": ["h-contact-page", "p-contact-page"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-ink)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": false, "feather": 0, "overlap": 0 }
+    },
+    "h-contact-page": {
+      "id": "h-contact-page",
+      "type": "heading",
+      "parentId": "sec-contact-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-surface)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 48 }, "tablet": { "kind": "px", "value": 38 }, "mobile": { "kind": "px", "value": 28 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 1,
+      "text": "Contact"
+    },
+    "p-contact-page": {
+      "id": "p-contact-page",
+      "type": "paragraph",
+      "parentId": "sec-contact-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Call us on +27 00 000 0000. We reply within one business day."
+    },
+    "page-pricing": {
+      "id": "page-pricing",
+      "type": "page",
+      "parentId": null,
+      "children": ["sec-pricing-page"],
+      "styles": {},
+      "hidden": {},
+      "locked": false,
+      "rootId": "page-pricing",
+      "title": "Pricing",
+      "slug": "pricing",
+      "backgroundLayers": []
+    },
+    "sec-pricing-page": {
+      "id": "sec-pricing-page",
+      "type": "section",
+      "parentId": "page-pricing",
+      "children": ["h-pricing-page", "p-pricing-page"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-ink)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": false, "feather": 0, "overlap": 0 }
+    },
+    "h-pricing-page": {
+      "id": "h-pricing-page",
+      "type": "heading",
+      "parentId": "sec-pricing-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-surface)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 48 }, "tablet": { "kind": "px", "value": 38 }, "mobile": { "kind": "px", "value": 28 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 1,
+      "text": "Pricing"
+    },
+    "p-pricing-page": {
+      "id": "p-pricing-page",
+      "type": "paragraph",
+      "parentId": "sec-pricing-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Brand sites from R450. Online stores from R800."
+    }
+  },
+  "blocks": [],
+  "globalHeaderId": "nav-global",
+  "globalFooterId": "footer-global",
+  "schemaVersion": 2
+}

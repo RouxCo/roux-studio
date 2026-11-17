@@ -72,7 +72,7 @@ export default function NewProjectDialog({
       }
       const template = templates.find((t) => t.id === choice)
       let projectName = name
-      if (choice === 'sample' && name === 'Untitled' && template) {
+      if (choice === 'dark-premium' && name === 'Untitled' && template) {
         projectName = `${template.meta.name} site`
       }
       const project = await newProjectFromTemplate(choice, projectName)

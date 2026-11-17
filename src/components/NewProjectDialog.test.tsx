@@ -80,7 +80,7 @@ describe('New project dialog', () => {
     await flush()
 
     act(() => {
-      const card = container.querySelector('[data-choice="sample"]') as HTMLButtonElement | null
+      const card = container.querySelector('[data-choice="dark-premium"]') as HTMLButtonElement | null
       if (!card) throw new Error('no Sample template card')
       card.click()
     })
@@ -104,7 +104,7 @@ describe('New project dialog', () => {
 
     async function createOnce() {
       act(() => {
-        const card = container.querySelector('[data-choice="sample"]') as HTMLButtonElement | null
+        const card = container.querySelector('[data-choice="dark-premium"]') as HTMLButtonElement | null
         if (!card) throw new Error('no Sample template card')
         card.click()
       })
@@ -130,7 +130,7 @@ describe('New project dialog', () => {
 
 describe('newProjectFromTemplate', () => {
   it('returns an Acme-named project whose validation is clean', async () => {
-    const project = await newProjectFromTemplate('sample', 'Acme')
+    const project = await newProjectFromTemplate('dark-premium', 'Acme')
     expect(project.name).toBe('Acme')
     expect(validateTemplate(project)).toEqual([])
   })

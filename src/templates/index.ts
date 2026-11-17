@@ -7,10 +7,10 @@
 import type { LoadedTemplate, TemplateMeta } from './types';
 
 const LOADERS = {
-  sample: () =>
+  'dark-premium': () =>
     Promise.all([
-      import('./sample/project.json'),
-      import('./sample/meta'),
+      import('./dark-premium/project.json'),
+      import('./dark-premium/meta'),
     ]),
 } as const;
 
