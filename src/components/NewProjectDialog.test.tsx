@@ -51,6 +51,20 @@ async function flush() {
   await new Promise((resolve) => setTimeout(resolve, 50))
 }
 
+// Template cards render only after the dynamic template imports resolve, which
+// can take longer than a flush or two when the full suite is busy. Poll for the
+// card instead of timing out on a null querySelector.
+async function waitForChoice(container: HTMLElement, id: string) {
+  const deadline = Date.now() + 5000
+  const selector = '[data-choice="' + id + '"]'
+  for (;;) {
+    const card = container.querySelector(selector) as HTMLButtonElement | null
+    if (card) return card
+    if (Date.now() >= deadline) throw new Error('no template card: ' + id)
+    await new Promise((resolve) => setTimeout(resolve, 25))
+  }
+}
+
 function clickCreate(container: HTMLElement) {
   const button = Array.from(container.querySelectorAll('button')).find(
     (b) => b.textContent === 'Create',
@@ -77,13 +91,9 @@ describe('New project dialog', () => {
 
   it('creates a project from the Sample template and loads it into the store', async () => {
     const container = renderDialog()
-    await flush()
 
-    act(() => {
-      const card = container.querySelector('[data-choice="dark-premium"]') as HTMLButtonElement | null
-      if (!card) throw new Error('no Sample template card')
-      card.click()
-    })
+    const card = await waitForChoice(container, 'dark-premium')
+    act(() => card.click())
     clickCreate(container)
     await flush()
     await flush()
@@ -146,14 +156,10 @@ describe('New project dialog', () => {
 
   it('creates twice with different page-node ids', async () => {
     const container = renderDialog()
-    await flush()
 
     async function createOnce() {
-      act(() => {
-        const card = container.querySelector('[data-choice="dark-premium"]') as HTMLButtonElement | null
-        if (!card) throw new Error('no Sample template card')
-        card.click()
-      })
+      const card = await waitForChoice(container, 'dark-premium')
+      act(() => card.click())
       clickCreate(container)
       await flush()
       await flush()
