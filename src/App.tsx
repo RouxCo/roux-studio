@@ -5,6 +5,7 @@ import Canvas from './canvas/Canvas'
 import Inspector from './components/Inspector'
 import LayersTree from './components/LayersTree'
 import TokensPanel from './components/TokensPanel'
+import BlocksPanel from './components/BlocksPanel'
 import TopBar from './components/TopBar'
 import ContextMenu from './components/ContextMenu'
 import { useEditorStore } from './store/useEditorStore'
@@ -51,8 +52,8 @@ export default function App() {
     y: 0,
   })
 
-  // Left panel tabs: Layers or Tokens. Defaults to Layers.
-  const [tab, setTab] = useState<'layers' | 'tokens'>('layers')
+  // Left panel tabs: Layers, Tokens or Blocks. Defaults to Layers.
+  const [tab, setTab] = useState<'layers' | 'tokens' | 'blocks'>('layers')
 
   // Seed the store with the built-in page so the layers tree (and canvas) share
   // one source of truth. Runs once on mount.
@@ -150,13 +151,21 @@ export default function App() {
             >
               Tokens
             </button>
+            <button
+              onClick={() => setTab('blocks')}
+              className={`px-3 py-1.5 text-xs rounded-t-lg transition ${tab === 'blocks' ? 'bg-slate-800 text-slate-100' : 'text-slate-500 hover:text-slate-200'}`}
+            >
+              Blocks
+            </button>
           </div>
         </div>
         <div className="flex-1 overflow-y-auto">
           {tab === 'layers' ? (
             <LayersTree onContextMenu={openMenu} />
-          ) : (
+          ) : tab === 'tokens' ? (
             <TokensPanel />
+          ) : (
+            <BlocksPanel />
           )}
         </div>
       </aside>

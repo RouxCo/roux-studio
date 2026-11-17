@@ -6,7 +6,7 @@
 // override with a dot. Clicking reset removes that override so the value falls
 // back to the base/default. With nothing selected, an empty state is shown.
 import { useCallback, useState } from 'react';
-import { RotateCw, Tag } from 'lucide-react';
+import { Blocks, RotateCw, Tag } from 'lucide-react';
 import { useEditorStore } from '../store/useEditorStore';
 import type { DesignToken, Node, NodeId, Breakpoint, Length, ResponsiveStyles } from '../types';
 import { resolveStyle } from '../compile/resolveStyle';
@@ -306,6 +306,7 @@ export default function Inspector() {
 
   const selectedId = selection.length > 0 ? (selection[0] ?? null) : null;
   const node = selectedId ? nodes[selectedId] : undefined;
+  const saveAsBlock = useEditorStore((state) => state.saveAsBlock);
 
   if (!selectedId || !node) {
     return (
@@ -321,6 +322,20 @@ export default function Inspector() {
 
   return (
     <div className="h-full overflow-y-auto">
+      {node && (node.type === 'section' || node.type === 'container') && (
+        <div className="px-2 pb-2">
+          <button
+            onClick={() => {
+              const defaultName = `${node.type} block`;
+              const name = window.prompt('Name the block', defaultName);
+              if (name !== null) saveAsBlock(selectedId!, name);
+            }}
+            className="w-full py-2 text-xs text-slate-200 bg-slate-800 border border-slate-700 rounded-md flex items-center justify-center gap-2 hover:bg-slate-700 transition"
+          >
+            <Blocks size={14} strokeWidth={2} /> Save as block
+          </button>
+        </div>
+      )}
       <Section title="Layout" fields={LAYOUT} nodeId={selectedId} breakpoint={breakpoint} nodes={nodes} />
       <Section title="Typography" fields={TYPOGRAPHY} nodeId={selectedId} breakpoint={breakpoint} nodes={nodes} />
       <Section title="Colors" fields={COLORS} nodeId={selectedId} breakpoint={breakpoint} nodes={nodes} />

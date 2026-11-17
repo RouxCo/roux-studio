@@ -4,7 +4,7 @@
 // Redo. Paste is gated by the store's containment rules, so a node can never be
 // pasted where it isn't allowed to be contained.
 import { useCallback } from 'react';
-import { ClipboardPaste, Copy, CopyPlus, Redo2, Scissors, Trash2, Undo2 } from 'lucide-react';
+import { ClipboardPaste, Copy, CopyPlus, Redo2, Scissors, Trash2, Undo2, Blocks } from 'lucide-react';
 import { useEditorStore } from '../store/useEditorStore';
 
 interface ContextMenuProps {
@@ -21,7 +21,8 @@ type MenuAction =
   | 'copy'
   | 'paste'
   | 'duplicate'
-  | 'delete';
+  | 'delete'
+  | 'saveBlock';
 
 const ITEMS: {
   id: MenuAction;
@@ -36,6 +37,7 @@ const ITEMS: {
   { id: 'paste', label: 'Paste', icon: ClipboardPaste, shortcut: 'Ctrl+V' },
   { id: 'duplicate', label: 'Duplicate', icon: CopyPlus, shortcut: 'Ctrl+D' },
   { id: 'delete', label: 'Delete', icon: Trash2, shortcut: 'Delete' },
+  { id: 'saveBlock', label: 'Save as block', icon: Blocks, shortcut: '' },
 ];
 
 export default function ContextMenu({
@@ -57,9 +59,14 @@ export default function ContextMenu({
   const duplicate = useEditorStore((state) => state.duplicate);
   const undo = useEditorStore((state) => state.undo);
   const redo = useEditorStore((state) => state.redo);
+  const saveAsBlock = useEditorStore((state) => state.saveAsBlock);
 
   const hasSelection = selection.length > 0;
   const canPaste = !!clipboard?.roots.length;
+
+  const singleSectionOrContainer =
+    selection.length === 1 &&
+    (nodes[selection[0]!]?.type === 'section' || nodes[selection[0]!]?.type === 'container');
 
   const handleAction = useCallback(
     (action: MenuAction) => {
@@ -88,6 +95,14 @@ export default function ContextMenu({
             removeNodes(selection);
             setSelection([]);
             break;
+          case 'saveBlock': {
+            const id = selection[0]!;
+            const node = nodes[id];
+            const defaultName = `${node?.type ?? 'section'} block`;
+            const name = window.prompt('Name the block', defaultName);
+            if (name !== null) saveAsBlock(id, name);
+            break;
+          }
         }
       } catch {
         // Containment rejected or nothing to do — leave the store untouched.
@@ -96,7 +111,8 @@ export default function ContextMenu({
     },
     [
       selection,
-      undo, redo, cut, copy, paste, duplicate, removeNodes, setSelection,
+      nodes,
+      undo, redo, cut, copy, paste, duplicate, removeNodes, setSelection, saveAsBlock,
     ],
   );
 
@@ -119,7 +135,8 @@ export default function ContextMenu({
             (item.id === 'redo' && !canRedo()) ||
             ((item.id === 'cut' || item.id === 'copy' || item.id === 'duplicate' || item.id === 'delete') &&
               !hasSelection) ||
-            (item.id === 'paste' && !canPaste);
+            (item.id === 'paste' && !canPaste) ||
+            (item.id === 'saveBlock' && !singleSectionOrContainer);
           const Icon = item.icon;
           return (
             <button
