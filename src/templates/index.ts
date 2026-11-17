@@ -12,6 +12,11 @@ const LOADERS = {
       import('./dark-premium/project.json'),
       import('./dark-premium/meta'),
     ]),
+  'light-professional': () =>
+    Promise.all([
+      import('./light-professional/project.json'),
+      import('./light-professional/meta'),
+    ]),
 } as const;
 
 export const TEMPLATE_IDS = Object.keys(LOADERS) as Array<keyof typeof LOADERS>;
