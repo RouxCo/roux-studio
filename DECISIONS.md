@@ -98,3 +98,5 @@ Hover/focus-visible compile deferred until a hover field is added to the node ty
 - Have `compileStyles(project, pageId)` look nodes up from a global store.
 
 **Reason:** `Project`/`Page` have no `nodes` field — nodes live in `EditorData.nodes` — so the pure function receives the tree as its third argument. This is a small spec deviation logged here per §17 rule 8. Output: `:root` token variables use `--<name>`; base element styles emitted once at the top; one `r-{hash}` rule per node walked in document order, desktop-first; `@media (max-width: 1023px)` and `@media (max-width: 767px)` blocks hold only keys whose resolved value differs (hidden → `display:none` only where it takes effect).
+
+Optional layer fields added for M4 Job 4 (name, blur, brightness, intensity, scale, transition)

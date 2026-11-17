@@ -7,13 +7,17 @@
 // one .r-bg-layer per visible layer in REVERSE DOM order (bottom layer first).
 // The shared .r-bg rule is emitted once in compileBaseStyles (compileStyles.ts),
 // not per node.
-import type { BackgroundLayer } from '../types';
+import type { BackgroundLayer, BackgroundLayerType, SlideshowLayer } from '../types';
 import { classFor } from './classFor';
+import { nanoid } from 'nanoid';
 
-const NOISE_SVG =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">' +
-  '<filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/></filter>' +
-  '<rect width="100%" height="100%" filter="url(#n)"/></svg>';
+function noiseSVG(scale: number): string {
+  return (
+    '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">' +
+    `<filter id="n"><feTurbulence type="fractalNoise" baseFrequency="${scale}" numOctaves="2" stitchTiles="stitch"/></filter>` +
+    '<rect width="100%" height="100%" filter="url(#n)"/></svg>'
+  );
+}
 
 export function visibleLayers(layers: BackgroundLayer[]): BackgroundLayer[] {
   return layers.filter((layer) => layer.enabled !== false);
@@ -25,7 +29,9 @@ export function needsLayeredPath(layers: BackgroundLayer[]): boolean {
     layer.blendMode !== 'normal' ||
     layer.type === 'video' ||
     layer.type === 'slideshow' ||
-    layer.type === 'noise'
+    layer.type === 'noise' ||
+    (layer.type === 'image' &&
+      ((layer.blur ?? 0) > 0 || (layer.brightness ?? 1) !== 1))
   );
 }
 
@@ -46,7 +52,7 @@ export function layerImage(layer: BackgroundLayer): string {
     case 'slideshow':
       return `url("${layer.srcs[0]}")`;
     case 'noise':
-      return `url("data:image/svg+xml,${encodeURIComponent(NOISE_SVG)}")`;
+      return `url("data:image/svg+xml,${encodeURIComponent(noiseSVG(layer.scale ?? 0.8))}")`;
   }
 }
 
@@ -67,10 +73,67 @@ export function layerClass(layer: BackgroundLayer): string {
 export function compileLayerRules(layers: BackgroundLayer[]): string {
   return visibleLayers(layers).map((layer) => {
     const cls = layerClass(layer);
-    let css = `.${cls}{position:absolute;inset:0;background:${layerImage(layer)}`;
-    if (layer.opacity < 1) css += `;opacity:${layer.opacity}`;
+    let css = `.${cls}{position:absolute;`;
+    let inset = 'inset:0';
+    let filter = '';
+    if (layer.type === 'image') {
+      const blur = layer.blur ?? 0;
+      const brightness = layer.brightness ?? 1;
+      if (blur > 0) {
+        filter += `blur(${blur}px)`;
+        inset = `inset:-${2 * blur}px`;
+      }
+      if (brightness !== 1) filter += `brightness(${brightness})`;
+    }
+    css += `${inset};background:${layerImage(layer)}`;
+    if (filter) css += `;filter:${filter}`;
+    let opacity = layer.opacity;
+    if (layer.type === 'noise') opacity *= layer.intensity ?? 0.15;
+    if (opacity < 1) css += `;opacity:${opacity}`;
     if (layer.blendMode !== 'normal') css += `;mix-blend-mode:${layer.blendMode}`;
     css += '}';
     return css;
   }).join('\n');
+}
+
+export function clampSlideshow(layer: SlideshowLayer): {
+  interval: number;
+  transition: number;
+} {
+  const interval = Math.max(2000, layer.interval);
+  const transition = Math.min(Math.max(layer.transition ?? 600, 200), interval / 2);
+  return { interval, transition };
+}
+
+export function defaultLayer(type: BackgroundLayerType): BackgroundLayer {
+  const base = {
+    id: nanoid(),
+    enabled: true,
+    opacity: 1,
+    blendMode: 'normal',
+  } as const;
+  switch (type) {
+    case 'color':
+      return { ...base, type: 'color', color: '#000000' };
+    case 'gradient':
+      return {
+        ...base,
+        type: 'gradient',
+        angle: 180,
+        stops: [
+          { offset: 0, color: '#111111' },
+          { offset: 100, color: '#333333' },
+        ],
+      };
+    case 'image':
+      return { ...base, type: 'image', src: '', size: 'cover', position: 'center', repeat: 'no-repeat' };
+    case 'video':
+      return { ...base, type: 'video', src: '', loop: true, muted: true, poster: '' };
+    case 'noise':
+      return { ...base, type: 'noise', intensity: 0.15, scale: 0.8 };
+    case 'tint':
+      return { ...base, type: 'tint', color: 'rgba(0,0,0,0.4)' };
+    case 'slideshow':
+      return { ...base, type: 'slideshow', srcs: [], interval: 5000 };
+  }
 }

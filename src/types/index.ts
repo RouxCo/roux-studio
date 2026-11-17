@@ -85,6 +85,7 @@ export function resolveResponsive<T>(bp: Breakpoint, value?: Responsive<T>): T |
 export interface BackgroundLayerBase {
   id: string;
   type: BackgroundLayerType;
+  name?: string;
   enabled: boolean;
   opacity: number; // 0..1
   blendMode: BlendMode;
@@ -107,6 +108,8 @@ export interface ImageLayer extends BackgroundLayerBase {
   size: 'cover' | 'contain' | 'auto';
   position: string;
   repeat: 'repeat' | 'no-repeat' | 'repeat-x' | 'repeat-y';
+  blur?: number; // px, 0 = none
+  brightness?: number; // 1 = normal
 }
 
 export interface VideoLayer extends BackgroundLayerBase {
@@ -119,6 +122,8 @@ export interface VideoLayer extends BackgroundLayerBase {
 
 export interface NoiseLayer extends BackgroundLayerBase {
   type: 'noise';
+  intensity?: number; // 0..1, default 0.15
+  scale?: number; // default 0.8
 }
 
 export interface TintLayer extends BackgroundLayerBase {
@@ -130,6 +135,7 @@ export interface SlideshowLayer extends BackgroundLayerBase {
   type: 'slideshow';
   srcs: string[];
   interval: number; // ms
+  transition?: number; // ms
 }
 
 export type BackgroundLayer =

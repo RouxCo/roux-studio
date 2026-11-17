@@ -6,6 +6,7 @@ import { classFor } from './classFor';
 import type { BackgroundLayer, Node, PageId, Project } from '../types';
 import { compileStyles } from './compileStyles';
 import {
+  clampSlideshow,
   compileLayerRules,
   fastBackground,
   layerClass,
@@ -197,6 +198,67 @@ function cssFor(layers: BackgroundLayer[]): string {
   };
   return compileStyles(project, 'pg-1' as PageId, { [page.id]: page });
 }
+
+describe('image blur and brightness (layered path)', () => {
+  const BLURRED: BackgroundLayer = { ...IMAGE, id: 'bg-blur', blur: 10 };
+
+  it('needsLayeredPath is true for blur > 0 or brightness !== 1', () => {
+    expect(needsLayeredPath([{ ...IMAGE, blur: 4 }])).toBe(true);
+    expect(needsLayeredPath([{ ...IMAGE, brightness: 1.2 }])).toBe(true);
+    expect(needsLayeredPath([IMAGE])).toBe(false);
+    expect(needsLayeredPath([{ ...IMAGE, blur: 0 }])).toBe(false);
+  });
+
+  it('blur 10 adds filter:blur(10px) and inset:-20px so edges stay sharp', () => {
+    const out = compileLayerRules([BLURRED]);
+    const cls = layerClass(BLURRED);
+    expect(out).toContain(`.${cls}{position:absolute;inset:-20px;`);
+    expect(out).toContain('filter:blur(10px)');
+    expect(out).not.toContain('inset:0');
+  });
+
+  it('brightness joins blur in the same filter', () => {
+    const out = compileLayerRules([{ ...IMAGE, id: 'bg-bri', blur: 3, brightness: 1.2 }]);
+    expect(out).toContain('filter:blur(3px)brightness(1.2)');
+  });
+});
+
+describe('noise opacity and scale', () => {
+  it('multiplies opacity by intensity', () => {
+    const layer: BackgroundLayer = { ...NOISE, id: 'bg-noise-2', intensity: 0.5 };
+    const out = compileLayerRules([layer]);
+    const cls = layerClass(layer);
+    expect(out).toContain(`.${cls}`);
+    expect(out).toContain('opacity:0.5');
+  });
+
+  it('defaults intensity to 0.15', () => {
+    const out = compileLayerRules([NOISE]);
+    expect(out).toContain('opacity:0.15');
+  });
+
+  it('scale drives the noise baseFrequency', () => {
+    expect(layerImage({ ...NOISE, scale: 0.3 })).toContain('baseFrequency%3D%220.3%22');
+    expect(layerImage(NOISE)).toContain('baseFrequency%3D%220.8%22');
+  });
+});
+
+describe('clampSlideshow', () => {
+  it('clamps interval to >= 2000 and transition to [200, interval/2]', () => {
+    expect(clampSlideshow({ ...SLIDESHOW, interval: 500, transition: 5000 })).toEqual({
+      interval: 2000,
+      transition: 1000,
+    });
+    expect(clampSlideshow({ ...SLIDESHOW, interval: 10000, transition: 100 })).toEqual({
+      interval: 10000,
+      transition: 200,
+    });
+    expect(clampSlideshow({ ...SLIDESHOW, interval: 10000 })).toEqual({
+      interval: 10000,
+      transition: 600,
+    });
+  });
+});
 
 describe('compileStyles integration', () => {
   it('emits one background list, top first, for color + gradient at opacity 1', () => {

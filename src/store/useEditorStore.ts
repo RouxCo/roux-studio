@@ -17,9 +17,10 @@ import {
 enablePatches();
 import { nanoid } from 'nanoid';
 import type {
-  Node, NodeId, PageId, Page, DesignTokens, Breakpoint,
+  BackgroundLayer, BackgroundLayerType, Node, NodeId, PageId, Page, DesignTokens, Breakpoint,
   DesignToken, Length, ResponsiveStyles,
 } from '../types';
+import { defaultLayer } from '../compile/backgrounds';
 import { projectBroadcast } from '../db/broadcast';
 import {
   assertCanContain,
@@ -97,6 +98,15 @@ export interface EditorStore extends ProjectData {
   removeNode: (nodeId: NodeId) => void;
   moveNode: (nodeId: NodeId, parentId: NodeId | null, index?: number) => void;
   patchNode: (nodeId: NodeId, recipe: (node: Draft<Node>) => void) => void;
+
+  // Background layer actions (each is one history step unless batched;
+  // no-ops when the node has no backgroundLayers)
+  addLayer: (nodeId: NodeId, type: BackgroundLayerType) => void;
+  updateLayer: (nodeId: NodeId, layerId: string, patch: Partial<BackgroundLayer>) => void;
+  removeLayer: (nodeId: NodeId, layerId: string) => void;
+  duplicateLayer: (nodeId: NodeId, layerId: string) => void;
+  moveLayer: (nodeId: NodeId, fromIndex: number, toIndex: number) => void;
+  toggleLayer: (nodeId: NodeId, layerId: string) => void;
 
   // Clipboard / editing actions (each one history step unless batched)
   removeNodes: (ids: NodeId[]) => void;
@@ -397,6 +407,84 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       const node = draft.nodes[nodeId];
       if (!node) return;
       recipe(node);
+    });
+  },
+
+  addLayer: (nodeId, type) => {
+    const node = get().nodes[nodeId];
+    if (!node || !('backgroundLayers' in node)) return;
+    get().patchNode(nodeId, (draft) => {
+      const layers = 'backgroundLayers' in draft ? draft.backgroundLayers : null;
+      if (!layers) return;
+      layers.unshift(defaultLayer(type));
+    });
+  },
+
+  updateLayer: (nodeId, layerId, patch) => {
+    const node = get().nodes[nodeId];
+    if (!node || !('backgroundLayers' in node)) return;
+    get().patchNode(nodeId, (draft) => {
+      const layers = 'backgroundLayers' in draft ? draft.backgroundLayers : null;
+      if (!layers) return;
+      const layer = layers.find((l) => l.id === layerId);
+      if (!layer) return;
+      Object.assign(layer as BackgroundLayer, patch);
+    });
+  },
+
+  removeLayer: (nodeId, layerId) => {
+    const node = get().nodes[nodeId];
+    if (!node || !('backgroundLayers' in node)) return;
+    get().patchNode(nodeId, (draft) => {
+      const layers = 'backgroundLayers' in draft ? draft.backgroundLayers : null;
+      if (!layers) return;
+      const i = layers.findIndex((l) => l.id === layerId);
+      if (i < 0) return;
+      layers.splice(i, 1);
+    });
+  },
+
+  duplicateLayer: (nodeId, layerId) => {
+    const node = get().nodes[nodeId];
+    if (!node || !('backgroundLayers' in node)) return;
+    get().patchNode(nodeId, (draft) => {
+      const layers = 'backgroundLayers' in draft ? draft.backgroundLayers : null;
+      if (!layers) return;
+      const i = layers.findIndex((l) => l.id === layerId);
+      if (i < 0) return;
+      const source = layers[i] as unknown as BackgroundLayer;
+      const copy: BackgroundLayer = {
+        ...source,
+        id: nanoid(),
+        name: `${source.name ?? source.type} copy`,
+      };
+      layers.splice(i, 0, copy);
+    });
+  },
+
+  moveLayer: (nodeId, fromIndex, toIndex) => {
+    const node = get().nodes[nodeId];
+    if (!node || !('backgroundLayers' in node)) return;
+    get().patchNode(nodeId, (draft) => {
+      const layers = 'backgroundLayers' in draft ? draft.backgroundLayers : null;
+      if (!layers) return;
+      if (fromIndex < 0 || fromIndex >= layers.length) return;
+      const [removed] = layers.splice(fromIndex, 1);
+      if (!removed) return;
+      const to = Math.max(0, Math.min(toIndex, layers.length));
+      layers.splice(to, 0, removed);
+    });
+  },
+
+  toggleLayer: (nodeId, layerId) => {
+    const node = get().nodes[nodeId];
+    if (!node || !('backgroundLayers' in node)) return;
+    get().patchNode(nodeId, (draft) => {
+      const layers = 'backgroundLayers' in draft ? draft.backgroundLayers : null;
+      if (!layers) return;
+      const layer = layers.find((l) => l.id === layerId);
+      if (!layer) return;
+      layer.enabled = !layer.enabled;
     });
   },
 
