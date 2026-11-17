@@ -17,8 +17,8 @@ import {
 enablePatches();
 import { nanoid } from 'nanoid';
 import type {
-  BackgroundLayer, BackgroundLayerType, Node, NodeId, PageId, Page, DesignTokens, Breakpoint,
-  DesignToken, Length, ResponsiveStyles,
+  BackgroundLayer, BackgroundLayerType, Block, Node, NodeId, PageId, Page, DesignTokens,
+  Breakpoint, DesignToken, Length, ResponsiveStyles,
 } from '../types';
 import { defaultLayer } from '../compile/backgrounds';
 import { projectBroadcast } from '../db/broadcast';
@@ -42,6 +42,9 @@ interface ProjectData {
   tokens: DesignTokens;
   nodes: Record<NodeId, Node>;
   currentPageId: PageId | null;
+  blocks: Block[];
+  globalHeaderId: NodeId | null;
+  globalFooterId: NodeId | null;
 }
 
 export interface EditorStore extends ProjectData {
@@ -122,6 +125,12 @@ export interface EditorStore extends ProjectData {
   cut: (ids: NodeId[]) => void;
   paste: (targetParentId: NodeId | null) => void;
   duplicate: (ids: NodeId[]) => void;
+
+  // Block actions (each one history step unless batched)
+  saveAsBlock: (nodeId: NodeId, name: string) => void;
+  insertBlock: (blockId: string, parentId: NodeId | null, index?: number) => void;
+  renameBlock: (blockId: string, name: string) => void;
+  deleteBlock: (blockId: string) => void;
 }
 
 function projectDataOf(state: EditorStore): ProjectData {
@@ -132,6 +141,9 @@ function projectDataOf(state: EditorStore): ProjectData {
     tokens: state.tokens,
     nodes: state.nodes,
     currentPageId: state.currentPageId,
+    blocks: state.blocks,
+    globalHeaderId: state.globalHeaderId,
+    globalFooterId: state.globalFooterId,
   };
 }
 
@@ -143,6 +155,9 @@ export const useEditorStore = create<EditorStore>((set, get) => {
   tokens: { byName: {} },
   nodes: {},
   currentPageId: null,
+  blocks: [],
+  globalHeaderId: null,
+  globalFooterId: null,
 
   breakpoint: 'desktop',
   selection: [],
@@ -678,6 +693,67 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       }
     });
   },
+
+  saveAsBlock: (nodeId, name) => {
+    const state = get();
+    const node = state.nodes[nodeId];
+    if (!node || (node.type !== 'section' && node.type !== 'container')) return;
+    // Clone from plain state so structuredClone never sees an Immer draft proxy.
+    const { nodes: remapped, rootId: newRootId } = remapSubtree(state.nodes, nodeId, null);
+    get().updateData((draft) => {
+      draft.blocks.push({ id: nanoid(), name, rootId: newRootId, nodes: remapped });
+    });
+  },
+
+  insertBlock: (blockId, parentId, index) => {
+    const state = get();
+    const block = state.blocks.find((b) => b.id === blockId);
+    if (!block) return;
+    const parentType = parentId === null ? 'root' : state.nodes[parentId]?.type;
+    if (parentId !== null && !parentType) {
+      throw new ContainmentError(`Insert target ${parentId} does not exist.`);
+    }
+    const root = block.nodes[block.rootId];
+    if (!root) return;
+    assertCanContain(parentType ?? 'root', root.type);
+    // Fresh copy on every insert, cloned from plain state.
+    const { nodes: remapped, rootId: newRootId } = remapSubtree(
+      block.nodes,
+      block.rootId,
+      parentId,
+    );
+    get().updateData((draft) => {
+      if (parentId !== null) {
+        const parent = draft.nodes[parentId];
+        if (parent) {
+          const at =
+            index === undefined
+              ? parent.children.length
+              : Math.max(0, Math.min(index, parent.children.length));
+          parent.children.splice(at, 0, newRootId);
+        }
+      }
+      for (const id of Object.keys(remapped)) {
+        const value = remapped[id];
+        if (!value) continue;
+        draft.nodes[id] = value;
+      }
+    });
+    set({ selection: [newRootId] });
+  },
+
+  renameBlock: (blockId, name) => {
+    get().updateData((draft) => {
+      const block = draft.blocks.find((b) => b.id === blockId);
+      if (block) block.name = name;
+    });
+  },
+
+  deleteBlock: (blockId) => {
+    get().updateData((draft) => {
+      draft.blocks = draft.blocks.filter((b) => b.id !== blockId);
+    });
+  },
 };
   projectBroadcast.subscribe((notice) => {
     const state = get();
@@ -735,6 +811,32 @@ function cloneSubtree(nodes: Record<NodeId, Node>, rootId: NodeId): Record<NodeI
     for (const childId of node.children) stack.push(childId);
   }
   return out;
+}
+
+// Clone a subtree and remap every id to a fresh nanoid, so the copy is fully
+// independent of its source. The root's parentId becomes newParentId. Used by
+// both saveAsBlock (snapshot) and insertBlock (fresh copy on every insert).
+function remapSubtree(
+  nodes: Record<NodeId, Node>,
+  rootId: NodeId,
+  newParentId: NodeId | null,
+): { nodes: Record<NodeId, Node>; rootId: NodeId } {
+  const sub = cloneSubtree(nodes, rootId);
+  const idMap = new Map<NodeId, NodeId>();
+  for (const oldId of Object.keys(sub)) idMap.set(oldId, nanoid());
+  const newRootId = idMap.get(rootId)!;
+  const remapped: Record<NodeId, Node> = {};
+  for (const oldId of Object.keys(sub)) {
+    const source = sub[oldId];
+    if (!source) continue;
+    const newId = idMap.get(oldId)!;
+    const n: Node = { ...source };
+    n.id = newId;
+    n.parentId = oldId === rootId ? newParentId : source.parentId === null ? null : idMap.get(source.parentId)!;
+    n.children = source.children.map((c) => idMap.get(c)!);
+    remapped[newId] = n;
+  }
+  return { nodes: remapped, rootId: newRootId };
 }
 
 // Keep only the selected ids that are not descendants of another selected id,

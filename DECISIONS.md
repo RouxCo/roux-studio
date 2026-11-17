@@ -103,6 +103,17 @@ Optional layer fields added for M4 Job 4 (name, blur, brightness, intensity, sca
 
 ---
 
+## 2026-11-17 — Project schema v2: blocks, globalHeaderId, globalFooterId
+
+**Decision:** Added `blocks: Block[]`, `globalHeaderId` and `globalFooterId` to Project/StoredProject/EditorData/ProjectData plus `useGlobalHeader`/`useGlobalFooter` on Page, and `schemaVersion` on stored projects. Migration in `src/db/migrate.ts` fills missing v2 fields on read; IndexedDB DB_VERSION stays 1 (object stores unchanged). New store actions: saveAsBlock/insertBlock/renameBlock/deleteBlock, sharing one `remapSubtree` helper that clones with fresh nanoid ids on every insert.
+
+**Alternatives:**
+- Store block nodes in the main nodes map (rejected: blocks are frozen snapshots, not part of the live tree).
+- Link inserts to the block (rejected: each insert is an independent copy per spec).
+
+**Reason:** Matches the M4 Job 6 step-1 spec exactly; migration keeps v1 records readable with no IndexedDB version change.
+---
+
 ## 2026-11-17 — SectionBlend: optional featherTop/featherBottom, overlap = previous section
 
 **Decision:** SectionBlend gains optional `featherTop`/`featherBottom` (px) that fall back to `feather`; `overlap` is the overlap with the PREVIOUS section, applied as `top: -Npx` on the section's `.r-bg` wrapper. Blend CSS (feather `mask-image`/`-webkit-mask-image`, overlap `top`) goes on `.r-<hash> > .r-bg` only, never on the section itself, so the text content is never masked. A blended section gets `position:relative` without `isolation` so its `.r-bg` joins the page's stacking context; each blended section's wrapper gets `z-index: -1000 + sectionIndex` (sections counted in document order from 0) and the page's own `.r-bg` gets `z-index: -2000`; the page gets `isolation: isolate` whenever any section on it has an active blend.

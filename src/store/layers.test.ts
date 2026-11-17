@@ -52,6 +52,9 @@ const PROJECT: Project = {
   createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z',
   pages: [{ id: 'pg-1', title: 'Home', slug: 'home', rootId: 'page-1' }],
   tokens: { byName: {} },
+  blocks: [],
+  globalHeaderId: null,
+  globalFooterId: null,
 };
 
 function storeCss(): string {

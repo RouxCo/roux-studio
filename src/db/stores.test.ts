@@ -33,6 +33,9 @@ function storedProject(overrides: Partial<StoredProject> = {}): StoredProject {
     pages: [],
     tokens,
     nodes: {},
+    blocks: [],
+    globalHeaderId: null,
+    globalFooterId: null,
     ...overrides,
   };
 }

@@ -11,7 +11,7 @@
 // IndexedDB connection is opened once per tab.
 
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
-import type { Asset, DesignTokens, Node, NodeId, Page } from '../types';
+import type { Asset, Block, DesignTokens, Node, NodeId, Page } from '../types';
 
 const DB_NAME = 'roux-studio';
 const DB_VERSION = 1;
@@ -25,6 +25,10 @@ export interface StoredProject {
   pages: Page[];
   tokens: DesignTokens;
   nodes: Record<NodeId, Node>;
+  blocks: Block[];
+  globalHeaderId: NodeId | null;
+  globalFooterId: NodeId | null;
+  schemaVersion?: number;
 }
 
 /** Lightweight project listing entry (id + name + updatedAt). */

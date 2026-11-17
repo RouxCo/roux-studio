@@ -67,6 +67,9 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1, onContextMen
       updatedAt: '2026-01-01T00:00:00Z',
       pages,
       tokens,
+      blocks: [],
+      globalHeaderId: null,
+      globalFooterId: null,
     }),
     [projectId, projectName, pages, tokens]
   );

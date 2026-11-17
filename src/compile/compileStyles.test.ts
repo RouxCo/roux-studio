@@ -23,6 +23,9 @@ function project(pages: Project['pages'], tokens: Record<string, Project['tokens
     updatedAt: '2026-01-01T00:00:00Z',
     pages,
     tokens: { byName: tokens },
+    blocks: [],
+    globalHeaderId: null,
+    globalFooterId: null,
   };
 }
 

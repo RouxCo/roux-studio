@@ -398,11 +398,20 @@ export interface Asset {
   size: number; // bytes; stored as a Blob in the IndexedDB assets store
 }
 
+export interface Block {
+  id: string;
+  name: string;
+  rootId: NodeId; // block root node id; a frozen snapshot, not in the main nodes map
+  nodes: Record<NodeId, Node>;
+}
+
 export interface Page {
   id: PageId;
   title: string;
   slug: string;
   rootId: NodeId; // page node id
+  useGlobalHeader?: boolean;
+  useGlobalFooter?: boolean;
 }
 
 export interface Project {
@@ -412,6 +421,9 @@ export interface Project {
   updatedAt: string; // ISO
   pages: Page[];
   tokens: DesignTokens;
+  blocks: Block[];
+  globalHeaderId: NodeId | null;
+  globalFooterId: NodeId | null;
 }
 
 export interface EditorData {
@@ -423,6 +435,9 @@ export interface EditorData {
   currentPageId: PageId | null;
   breakpoint: Breakpoint;
   selection: NodeId[];
+  blocks: Block[];
+  globalHeaderId: NodeId | null;
+  globalFooterId: NodeId | null;
 }
 
 export function emptyEditorData(): EditorData {
@@ -435,5 +450,8 @@ export function emptyEditorData(): EditorData {
     currentPageId: null,
     breakpoint: 'desktop',
     selection: [],
+    blocks: [],
+    globalHeaderId: null,
+    globalFooterId: null,
   };
 }

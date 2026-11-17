@@ -20,6 +20,7 @@ import {
 import { emptyEditorData } from '../types';
 import { nanoid } from 'nanoid';
 import { projectBroadcast } from './broadcast';
+import { migrateStored, SCHEMA_VERSION } from './migrate';
 
 const now = () => new Date().toISOString();
 
@@ -38,11 +39,23 @@ function editorDataFromStored(p: StoredProject): Partial<EditorStore> {
     selection: [],
     history: [],
     historyIndex: -1,
+    blocks: p.blocks,
+    globalHeaderId: p.globalHeaderId,
+    globalFooterId: p.globalFooterId,
   };
 }
 
 async function storedProjectFromStore(get: StoreGet): Promise<StoredProject> {
-  const { projectId, projectName, pages, tokens, nodes } = get();
+  const {
+    projectId,
+    projectName,
+    pages,
+    tokens,
+    nodes,
+    blocks,
+    globalHeaderId,
+    globalFooterId,
+  } = get();
   const existing = projectId ? await dbGetProject(projectId) : undefined;
   return {
     id: projectId!,
@@ -52,6 +65,10 @@ async function storedProjectFromStore(get: StoreGet): Promise<StoredProject> {
     pages,
     tokens,
     nodes,
+    blocks: blocks ?? [],
+    globalHeaderId: globalHeaderId ?? null,
+    globalFooterId: globalFooterId ?? null,
+    schemaVersion: SCHEMA_VERSION,
   };
 }
 
@@ -66,6 +83,10 @@ export async function createProject(set: StoreSet): Promise<string> {
     pages: [],
     tokens: { byName: {} },
     nodes: {},
+    blocks: [],
+    globalHeaderId: null,
+    globalFooterId: null,
+    schemaVersion: SCHEMA_VERSION,
   };
   await dbPutProject(stored);
   set(editorDataFromStored(stored));
@@ -77,7 +98,7 @@ export async function createProject(set: StoreSet): Promise<string> {
 export async function loadProject(set: StoreSet, id: string): Promise<boolean> {
   const stored = await dbGetProject(id);
   if (!stored) return false;
-  set(editorDataFromStored(stored));
+  set(editorDataFromStored(migrateStored(stored)));
   return true;
 }
 
