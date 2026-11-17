@@ -146,3 +146,16 @@ Optional layer fields added for M4 Job 4 (name, blur, brightness, intensity, sca
 **Alternatives:** Leave `container`/`box`/`card`/`slide` as `NONE` and keep the old workaround of using `form` nodes as visual cards (deleted with the sample template in Job 8); let `pricingTable` hold cards outside sections.
 
 **Reason:** `CONTAINMENT_RULES` in `src/store/containment.ts` is widened before any real template is written: `container`, `box`, `card` and `slide` get `CONTENT_ALLOWED`, `faqItem` gains phrasing/content children, `form` gains `container` and `box`, while `pricingTable` stays `rule('card')`, sections stay section-level only, and `src/templates/validate.ts` checks every parent/child pair against the same table.
+
+---
+
+## 2026-11-17 — M5 export pipeline: deferrals and out-of-scope items
+
+**Decision:** M5 Task 1-4 implemented as a core export slice (`src/export/`): `exportProject` (per-page HTML via `renderNode(mode:'export')` + `compileStyles`), `runtimeSource` (tree-shaken vanilla JS), `zipExport` (JSZip blob per spec §11.1 structure), and `runPreExportChecks` (errors/warnings with nodeId). Multi-page manager UI, SEO panel, image optimisation/WebP, sitemap absolute URLs requiring `baseUrl`, and `.roux.zip` import/export are deferred to follow-up M5 tasks.
+
+**Alternatives:**
+- Implement the full M5 UI slice (multi-page manager, SEO panel) in this session.
+- Defer all M5 UI work to a separate milestone.
+
+**Reason:** Per the M5 plan (docs/superpowers/plans/2026-11-17-m5-export-pipeline.md), the core export slice is complete and verified (tsc -b --noEmit clean, vitest 374 passed, build 390.95 kB). The `c-{hash}` dedupe remains deferred to M5 (logged in compileStyles.ts). Size/contrast/font/meta-description pre-export checks need asset metadata not yet on the Page/Asset types and are deferred to a follow-up. The M4 sign-off check ("export has no style=/data-node-id/1440/768/390") required an export serializer that did not exist; that gap is now closed by Task 1.
+
