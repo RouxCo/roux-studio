@@ -110,6 +110,12 @@ export interface EditorStore extends ProjectData {
   moveLayer: (nodeId: NodeId, fromIndex: number, toIndex: number) => void;
   toggleLayer: (nodeId: NodeId, layerId: string) => void;
 
+  // Section blend controls (each is one history step unless batched;
+  // blendWithPrevious/blendWithNext no-op when there is no such sibling section)
+  blendWithPrevious: (sectionId: NodeId) => void;
+  blendWithNext: (sectionId: NodeId) => void;
+  clearBlend: (sectionId: NodeId) => void;
+
   // Clipboard / editing actions (each one history step unless batched)
   removeNodes: (ids: NodeId[]) => void;
   copy: (ids: NodeId[]) => void;
@@ -490,6 +496,71 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       const layer = layers.find((l) => l.id === layerId);
       if (!layer) return;
       layer.enabled = !layer.enabled;
+    });
+  },
+
+  blendWithPrevious: (sectionId) => {
+    const state = get();
+    const node = state.nodes[sectionId];
+    if (!node || node.type !== 'section') return;
+    const parent = node.parentId === null ? null : state.nodes[node.parentId];
+    if (!parent) return;
+    const idx = parent.children.indexOf(sectionId);
+    if (idx < 0) return;
+    let prevId: NodeId | undefined;
+    for (let i = idx - 1; i >= 0; i--) {
+      const sibling = state.nodes[parent.children[i]!];
+      if (sibling && sibling.type === 'section') {
+        prevId = sibling.id;
+        break;
+      }
+    }
+    if (prevId === undefined) return;
+    get().updateData((draft) => {
+      const target = draft.nodes[sectionId];
+      if (!target || target.type !== 'section') return;
+      target.sectionBlend = {
+        ...target.sectionBlend,
+        enabled: true,
+        overlap: 120,
+        featherTop: 120,
+      };
+    });
+  },
+
+  blendWithNext: (sectionId) => {
+    const state = get();
+    const node = state.nodes[sectionId];
+    if (!node || node.type !== 'section') return;
+    const parent = node.parentId === null ? null : state.nodes[node.parentId];
+    if (!parent) return;
+    const idx = parent.children.indexOf(sectionId);
+    if (idx < 0) return;
+    let nextId: NodeId | undefined;
+    for (let i = idx + 1; i < parent.children.length; i++) {
+      const sibling = state.nodes[parent.children[i]!];
+      if (sibling && sibling.type === 'section') {
+        nextId = sibling.id;
+        break;
+      }
+    }
+    if (nextId === undefined) return;
+    get().updateData((draft) => {
+      const target = draft.nodes[sectionId];
+      if (!target || target.type !== 'section') return;
+      target.sectionBlend = { ...target.sectionBlend, enabled: true, featherBottom: 120 };
+      const next = draft.nodes[nextId];
+      if (!next || next.type !== 'section') return;
+      next.sectionBlend = { ...next.sectionBlend, enabled: true, overlap: 120, featherTop: 120 };
+    });
+  },
+
+  clearBlend: (sectionId) => {
+    const node = get().nodes[sectionId];
+    if (!node || node.type !== 'section') return;
+    get().patchNode(sectionId, (draft) => {
+      if (!('sectionBlend' in draft)) return;
+      draft.sectionBlend = { enabled: false, feather: 0, overlap: 0 };
     });
   },
 

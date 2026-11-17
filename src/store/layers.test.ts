@@ -258,3 +258,104 @@ describe('toggleLayer', () => {
     expect(get().historyIndex).toBe(-1);
   });
 });
+
+describe('blendWithPrevious', () => {
+  it('sets overlap and featherTop on this section in ONE undo step', () => {
+    useEditorStore.setState((s) => ({
+      nodes: { ...s.nodes, 'page-1': page('page-1') },
+    }));
+    get().addNode(section('sec-1'), 'page-1');
+    get().addNode(section('sec-2'), 'page-1');
+    useEditorStore.setState({ history: [], historyIndex: -1 });
+    get().blendWithPrevious('sec-2');
+
+    expect(get().history).toHaveLength(1);
+    const blend = (get().nodes['sec-2'] as SectionNode).sectionBlend;
+    expect(blend.enabled).toBe(true);
+    expect(blend.overlap).toBe(120);
+    expect(blend.featherTop).toBe(120);
+    expect(blend.featherBottom).toBeUndefined();
+
+    get().undo();
+    expect((get().nodes['sec-2'] as SectionNode).sectionBlend).toEqual({
+      enabled: false, feather: 0, overlap: 0,
+    });
+    expect(get().historyIndex).toBe(-1);
+    expect(get().canUndo()).toBe(false);
+  });
+
+  it('is a no-op when there is no previous section', () => {
+    useEditorStore.setState((s) => ({
+      nodes: { ...s.nodes, 'page-1': page('page-1') },
+    }));
+    get().addNode(section('sec-1'), 'page-1');
+    useEditorStore.setState({ history: [], historyIndex: -1 });
+    get().blendWithPrevious('sec-1');
+    expect(get().history).toHaveLength(0);
+    expect(get().canUndo()).toBe(false);
+  });
+});
+
+describe('blendWithNext', () => {
+  it('changes both sections and one undo restores both', () => {
+    useEditorStore.setState((s) => ({
+      nodes: { ...s.nodes, 'page-1': page('page-1') },
+    }));
+    get().addNode(section('sec-1'), 'page-1');
+    get().addNode(section('sec-2'), 'page-1');
+    useEditorStore.setState({ history: [], historyIndex: -1 });
+    get().blendWithNext('sec-1');
+
+    expect(get().history).toHaveLength(1);
+    const first = (get().nodes['sec-1'] as SectionNode).sectionBlend;
+    const second = (get().nodes['sec-2'] as SectionNode).sectionBlend;
+    expect(first.enabled).toBe(true);
+    expect(first.featherBottom).toBe(120);
+    expect(first.overlap).toBe(0);
+    expect(second.enabled).toBe(true);
+    expect(second.overlap).toBe(120);
+    expect(second.featherTop).toBe(120);
+
+    get().undo();
+    expect((get().nodes['sec-1'] as SectionNode).sectionBlend).toEqual({
+      enabled: false, feather: 0, overlap: 0,
+    });
+    expect((get().nodes['sec-2'] as SectionNode).sectionBlend).toEqual({
+      enabled: false, feather: 0, overlap: 0,
+    });
+    expect(get().historyIndex).toBe(-1);
+  });
+
+  it('is a no-op when there is no next section', () => {
+    useEditorStore.setState((s) => ({
+      nodes: { ...s.nodes, 'page-1': page('page-1') },
+    }));
+    get().addNode(section('sec-1'), 'page-1');
+    useEditorStore.setState({ history: [], historyIndex: -1 });
+    get().blendWithNext('sec-1');
+    expect(get().history).toHaveLength(0);
+  });
+});
+
+describe('clearBlend', () => {
+  it('resets the blend and drops featherTop/featherBottom in ONE undo step', () => {
+    useEditorStore.setState((s) => ({
+      nodes: { ...s.nodes, 'page-1': page('page-1') },
+    }));
+    get().addNode(section('sec-1'), 'page-1');
+    get().addNode(section('sec-2'), 'page-1');
+    get().blendWithNext('sec-1');
+    useEditorStore.setState({ history: [], historyIndex: -1 });
+    get().clearBlend('sec-2');
+
+    expect(get().history).toHaveLength(1);
+    const blend = (get().nodes['sec-2'] as SectionNode).sectionBlend;
+    expect(blend).toEqual({ enabled: false, feather: 0, overlap: 0 });
+    expect(blend.featherTop).toBeUndefined();
+    expect(blend.featherBottom).toBeUndefined();
+
+    get().undo();
+    expect((get().nodes['sec-2'] as SectionNode).sectionBlend.featherTop).toBe(120);
+    expect(get().historyIndex).toBe(-1);
+  });
+});

@@ -32,14 +32,16 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useEditorStore } from '../store/useEditorStore';
+import { isSectionNode } from '../types';
 import type {
   BackgroundLayer,
   BackgroundLayerType,
   BlendMode,
   Node,
   NodeId,
+  SectionNode,
 } from '../types';
-import { clampSlideshow } from '../compile/backgrounds';
+import { clampSlideshow, visibleLayers } from '../compile/backgrounds';
 
 const LAYER_KINDS: BackgroundLayerType[] = [
   'color',
@@ -190,7 +192,129 @@ export default function BackgroundPanel({ nodeId }: BackgroundPanelProps) {
           <DragOverlay />
         </SortableContext>
       </DndContext>
+
+      {isSectionNode(node) && <SectionBlendControls nodeId={nodeId} node={node} layers={layers} />}
     </section>
+  );
+}
+
+interface SectionBlendControlsProps {
+  nodeId: NodeId;
+  node: SectionNode;
+  layers: BackgroundLayer[];
+}
+
+function SectionBlendControls({ nodeId, node, layers }: SectionBlendControlsProps) {
+  const blend = node.sectionBlend;
+  const patchNode = useEditorStore((state) => state.patchNode);
+  const blendWithPrevious = useEditorStore((state) => state.blendWithPrevious);
+  const blendWithNext = useEditorStore((state) => state.blendWithNext);
+  const clearBlend = useEditorStore((state) => state.clearBlend);
+  const nodes = useEditorStore((state) => state.nodes);
+
+  const parent = node.parentId ? nodes[node.parentId] : null;
+  const children = parent ? parent.children : [];
+  const idx = children.indexOf(nodeId);
+  const hasPrevious = idx > 0 && children.slice(0, idx).some((id) => nodes[id]?.type === 'section');
+  const hasNext = idx >= 0 && children.slice(idx + 1).some((id) => nodes[id]?.type === 'section');
+  const hasVisibleLayers = visibleLayers(layers).length > 0;
+
+  const handleEnabledChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    patchNode(nodeId, (draft) => {
+      if (!('sectionBlend' in draft)) return;
+      draft.sectionBlend.enabled = event.target.checked;
+    });
+  };
+
+  const handleNumberChange =
+    (key: 'featherTop' | 'featherBottom' | 'overlap') =>
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      patchNode(nodeId, (draft) => {
+        if (!('sectionBlend' in draft)) return;
+        draft.sectionBlend[key] = Math.max(0, Number(event.target.value) || 0);
+      });
+    };
+
+  const button = (label: string, onClick: () => void, disabled: boolean) => (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`rounded-md border border-slate-700 text-xs px-3 py-1 ${
+        disabled ? 'bg-slate-950 text-slate-600' : 'bg-slate-900 text-slate-200 hover:bg-slate-800'
+      }`}
+    >
+      {label}
+    </button>
+  );
+
+  return (
+    <div className="px-2 pt-4 border-t border-slate-800">
+      <h3 className="px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-2">
+        Section blend
+      </h3>
+
+      <div className="flex flex-wrap gap-2 mb-3">
+        {button('Blend with previous', () => blendWithPrevious(nodeId), !hasPrevious)}
+        {button('Blend with next', () => blendWithNext(nodeId), !hasNext)}
+        <button
+          onClick={() => clearBlend(nodeId)}
+          className="rounded-md border border-slate-700 bg-slate-900 text-xs text-slate-200 px-3 py-1 hover:bg-slate-800 hover:text-red-400"
+        >
+          Clear
+        </button>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        <div className="col-span-3">
+          <label className="block text-[10px] text-slate-500 mb-1">Enabled</label>
+          <input
+            type="checkbox"
+            checked={blend.enabled}
+            onChange={handleEnabledChange}
+            className="rounded-md border border-slate-700 bg-slate-950 text-xs focus:ring-cyan-500"
+          />
+        </div>
+        <div>
+          <label className="block text-[10px] text-slate-500 mb-1">Feather top (px)</label>
+          <input
+            type="number"
+            min="0"
+            step="1"
+            value={blend.featherTop ?? 0}
+            onChange={handleNumberChange('featherTop')}
+            className="rounded-md border border-slate-700 bg-slate-950 text-xs text-slate-200 px-2 py-1 focus:border-cyan-500 focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-[10px] text-slate-500 mb-1">Feather bottom (px)</label>
+          <input
+            type="number"
+            min="0"
+            step="1"
+            value={blend.featherBottom ?? 0}
+            onChange={handleNumberChange('featherBottom')}
+            className="rounded-md border border-slate-700 bg-slate-950 text-xs text-slate-200 px-2 py-1 focus:border-cyan-500 focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-[10px] text-slate-500 mb-1">Overlap (px)</label>
+          <input
+            type="number"
+            min="0"
+            step="1"
+            value={blend.overlap}
+            onChange={handleNumberChange('overlap')}
+            className="rounded-md border border-slate-700 bg-slate-950 text-xs text-slate-200 px-2 py-1 focus:border-cyan-500 focus:outline-none"
+          />
+        </div>
+      </div>
+
+      {!hasVisibleLayers && (
+        <p className="px-2 pt-2 text-[10px] text-slate-500 italic">
+          Add a background layer to see the blend.
+        </p>
+      )}
+    </div>
   );
 }
 
