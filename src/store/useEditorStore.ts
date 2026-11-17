@@ -18,6 +18,7 @@ enablePatches();
 import { nanoid } from 'nanoid';
 import type {
   Node, NodeId, PageId, Page, DesignTokens, Breakpoint,
+  DesignToken, Length, ResponsiveStyles,
 } from '../types';
 import { projectBroadcast } from '../db/broadcast';
 import {
@@ -85,6 +86,10 @@ export interface EditorStore extends ProjectData {
   setCurrentPageId: (id: PageId | null) => void;
   setProjectName: (name: string) => void;
   setTokens: (tokens: DesignTokens) => void;
+  addToken: (token: DesignToken) => void;
+  updateToken: (name: string, value: string) => void;
+  renameToken: (oldName: string, newName: string) => void;
+  deleteToken: (name: string, strategy: { replaceWith: string } | 'detach') => void;
   addPage: (page: Page) => void;
   removePage: (pageId: PageId) => void;
   renamePage: (pageId: PageId, title: string) => void;
@@ -222,6 +227,63 @@ export const useEditorStore = create<EditorStore>((set, get) => {
   setTokens: (tokens) => {
     get().updateData((draft) => {
       draft.tokens = tokens;
+    });
+  },
+
+  addToken: (token) => {
+    get().updateData((draft) => {
+      draft.tokens.byName[token.name] = token;
+    });
+  },
+
+  updateToken: (name, value) => {
+    get().updateData((draft) => {
+      const token = draft.tokens.byName[name];
+      if (token) token.value = value;
+    });
+  },
+
+  renameToken: (oldName, newName) => {
+    get().updateData((draft) => {
+      const token = draft.tokens.byName[oldName];
+      if (!token || oldName === newName) return;
+      token.name = newName;
+      draft.tokens.byName[newName] = token;
+      delete draft.tokens.byName[oldName];
+
+      const oldColour = `var(--${oldName})`;
+      const newColour = `var(--${newName})`;
+      for (const node of Object.values(draft.nodes)) {
+        rewriteTokenRefs(node.styles, (val) => {
+          if (isLengthTokenRef(val, oldName)) return { ...val, token: newName };
+          if (val === oldColour) return newColour;
+          return val;
+        });
+      }
+    });
+  },
+
+  deleteToken: (name, strategy) => {
+    get().updateData((draft) => {
+      const token = draft.tokens.byName[name];
+      if (!token) return;
+
+      const replaceWith =
+        typeof strategy === 'object' ? strategy.replaceWith : null;
+      for (const node of Object.values(draft.nodes)) {
+        rewriteTokenRefs(node.styles, (val) => {
+          if (isLengthTokenRef(val, name)) {
+            if (replaceWith) return { ...val, token: replaceWith };
+            return { kind: 'px', value: parseFloat(token.value) || 0 };
+          }
+          if (typeof val === 'string' && val === `var(--${name})`) {
+            if (replaceWith) return `var(--${replaceWith})`;
+            return token.value;
+          }
+          return val;
+        });
+      }
+      delete draft.tokens.byName[name];
     });
   },
 
@@ -508,4 +570,58 @@ function filterTopLevel(nodes: Record<NodeId, Node>, ids: NodeId[]): NodeId[] {
     if (!isDescendant) out.push(id);
   }
   return out;
+}
+
+function isLengthTokenRef(val: unknown, name: string): val is Draft<Length> {
+  return (
+    typeof val === 'object' &&
+    val !== null &&
+    (val as Length).kind === 'token' &&
+    (val as Length).token === name
+  );
+}
+
+// Map every style value across all breakpoints of a node's responsive styles,
+// replacing values for which `map` returns something different from the input.
+function rewriteTokenRefs(
+  styles: Draft<ResponsiveStyles>,
+  map: (val: unknown) => unknown,
+): void {
+  for (const key of Object.keys(styles) as Array<keyof ResponsiveStyles>) {
+    const responsive = styles[key];
+    if (!responsive) continue;
+    for (const bp of ['desktop', 'tablet', 'mobile'] as const) {
+      const val = responsive[bp];
+      if (val === undefined) continue;
+      const next = map(val);
+      if (next !== val) {
+        (responsive as Record<Breakpoint, unknown>)[bp] = next;
+      }
+    }
+  }
+}
+
+// Count how many nodes reference the token, in any style property at any
+// breakpoint. A node counts once even if it references the token multiple times.
+export function tokenUsage(nodes: Record<NodeId, Node>, name: string): number {
+  const colour = `var(--${name})`;
+  let count = 0;
+  for (const node of Object.values(nodes)) {
+    let used = false;
+    for (const key of Object.keys(node.styles) as Array<keyof ResponsiveStyles>) {
+      const responsive = node.styles[key];
+      if (!responsive) continue;
+      for (const bp of ['desktop', 'tablet', 'mobile'] as const) {
+        const val = responsive[bp];
+        if (val === undefined) continue;
+        if (isLengthTokenRef(val, name) || (typeof val === 'string' && val === colour)) {
+          used = true;
+          break;
+        }
+      }
+      if (used) break;
+    }
+    if (used) count++;
+  }
+  return count;
 }
