@@ -8,7 +8,7 @@
 // fire in this environment).
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { useEditorStore } from '../store/useEditorStore';
 import type { BoxNode, Breakpoint, NodeId } from '../types';
 import { emptyEditorData } from '../types';
@@ -137,5 +137,75 @@ describe('Inspector', () => {
       styles.width = { ...(styles.width ?? {}), desktop: { kind: 'px', value: 200 } };
     });
     expect(get().nodes['box1']?.styles.width).toEqual({ desktop: { kind: 'px', value: 200 } });
+  });
+});
+
+describe('Inspector: design tokens', () => {
+  it('writes a token ref when a token is picked from the dropdown', () => {
+    const node = box('box1');
+    node.styles = { width: { desktop: { kind: 'px', value: 100 } } } as never;
+    const { container, get } = renderInspector({ box1: node }, ['box1'], 'desktop');
+    act(() => {
+      get().setTokens({
+        byName: { 'space-4': { name: 'space-4', value: '1rem', type: 'spacing' } },
+      });
+    });
+    const input = inputFor(container, 'e.g. 100%');
+    act(() => {
+      input.parentElement!.querySelector<HTMLButtonElement>('button[aria-label="Tokens"]')!.click();
+    });
+    act(() => {
+      const option = Array.from(container.querySelectorAll('button')).find((b) => b.textContent === 'space-4')!;
+      option.click();
+    });
+    expect(get().nodes['box1']?.styles.width).toEqual({ desktop: { kind: 'token', value: 0, token: 'space-4' } });
+    expect(container.querySelector('input[placeholder="e.g. 100%"]')).toBeNull();
+    expect(container.textContent).toContain('space-4');
+  });
+
+  it('detaches a token ref back to the raw value', () => {
+    const node = box('box1');
+    node.styles = { width: { desktop: { kind: 'token', value: 0, token: 'space-4' } } } as never;
+    const { container, get } = renderInspector({ box1: node }, ['box1'], 'desktop');
+    act(() => {
+      get().setTokens({
+        byName: { 'space-4': { name: 'space-4', value: '1rem', type: 'spacing' } },
+      });
+    });
+    expect(container.querySelector('input[placeholder="e.g. 100%"]')).toBeNull();
+    expect(container.textContent).toContain('space-4');
+    act(() => {
+      const detach = Array.from(container.querySelectorAll('button')).find((b) => b.textContent === 'Detach')!;
+      detach.click();
+    });
+    expect(get().nodes['box1']?.styles.width).toEqual({ desktop: { kind: 'rem', value: 1 } });
+    expect(inputFor(container, 'e.g. 100%').value).toBe('1rem');
+  });
+
+  it('creates a token from a raw value and undoes both in one step', () => {
+    vi.stubGlobal('prompt', () => 'space-8');
+    const node = box('box1');
+    node.styles = { width: { desktop: { kind: 'px', value: 16 } } } as never;
+    const { container, get } = renderInspector({ box1: node }, ['box1'], 'desktop');
+    const input = inputFor(container, 'e.g. 100%');
+    act(() => {
+      input.parentElement!.querySelector<HTMLButtonElement>('button[aria-label="Tokens"]')!.click();
+    });
+    act(() => {
+      const create = Array.from(container.querySelectorAll('button')).find(
+        (b) => b.textContent === 'Create token from value…',
+      )!;
+      create.click();
+    });
+    expect(get().tokens.byName['space-8']).toEqual({ name: 'space-8', value: '16px', type: 'length' });
+    expect(get().nodes['box1']?.styles.width).toEqual({ desktop: { kind: 'token', value: 0, token: 'space-8' } });
+    expect(container.querySelector('input[placeholder="e.g. 100%"]')).toBeNull();
+    expect(get().canUndo()).toBe(true);
+    act(() => {
+      get().undo();
+    });
+    expect(get().tokens.byName).toEqual({});
+    expect(get().nodes['box1']?.styles.width).toEqual({ desktop: { kind: 'px', value: 16 } });
+    expect(input.value).toBe('16px');
   });
 });

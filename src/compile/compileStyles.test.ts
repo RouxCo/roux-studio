@@ -5,6 +5,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Node, PageId, Project } from '../types';
 import { compileStyles } from './compileStyles';
+import { useEditorStore } from '../store/useEditorStore';
 
 function page(id: PageId, rootId: string, title = 'Home'): Project['pages'][number] {
   return { id, title, slug: id, rootId };
@@ -215,6 +216,19 @@ describe('compileStyles', () => {
     const out = compileStyles(p, 'pg-1', TREE);
     expect(out).not.toMatch(/style=/);
     expect(out).toMatch(/r-[a-f0-9]{6,}/);
+  });
+
+  it('reflects updateToken in compiled :root token variables', () => {
+    useEditorStore.setState({ tokens: { byName: {} } });
+    const get = useEditorStore.getState;
+    get().addToken({ name: 'space-4', value: '1rem', type: 'spacing' });
+    const before = compileStyles(project([page('pg-1', ROOT)], get().tokens.byName), 'pg-1', TREE);
+    expect(before).toContain('--space-4: 1rem;');
+
+    get().updateToken('space-4', '2rem');
+    const after = compileStyles(project([page('pg-1', ROOT)], get().tokens.byName), 'pg-1', TREE);
+    expect(after).toContain('--space-4: 2rem;');
+    expect(after).not.toContain('--space-4: 1rem;');
   });
 });
 

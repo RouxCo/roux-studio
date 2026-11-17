@@ -5,10 +5,10 @@
 // (desktop-first: mobile ?? tablet ?? desktop) and marks an explicit breakpoint
 // override with a dot. Clicking reset removes that override so the value falls
 // back to the base/default. With nothing selected, an empty state is shown.
-import { useCallback } from 'react';
-import { RotateCw } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { RotateCw, Tag } from 'lucide-react';
 import { useEditorStore } from '../store/useEditorStore';
-import type { Node, NodeId, Breakpoint, Length, ResponsiveStyles } from '../types';
+import type { DesignToken, Node, NodeId, Breakpoint, Length, ResponsiveStyles } from '../types';
 import { resolveStyle } from '../compile/resolveStyle';
 import { lengthToCss } from '../canvas/renderNode';
 
@@ -19,12 +19,13 @@ interface StyleField {
   label: string;
   kind: Kind;
   placeholder?: string;
+  tokenType?: 'color' | 'length' | 'spacing';
 }
 
 const LAYOUT: StyleField[] = [
   { key: 'display', label: 'Display', kind: 'text', placeholder: 'flex | block | grid | none' },
-  { key: 'width', label: 'Width', kind: 'length', placeholder: 'e.g. 100%' },
-  { key: 'height', label: 'Height', kind: 'length', placeholder: 'e.g. auto' },
+  { key: 'width', label: 'Width', kind: 'length', placeholder: 'e.g. 100%', tokenType: 'length' },
+  { key: 'height', label: 'Height', kind: 'length', placeholder: 'e.g. auto', tokenType: 'length' },
   { key: 'flexDirection', label: 'Flex direction', kind: 'text', placeholder: 'row | column' },
   { key: 'justifyContent', label: 'Justify content', kind: 'text', placeholder: 'flex-start | center | space-between' },
   { key: 'alignItems', label: 'Align items', kind: 'text', placeholder: 'stretch | center | flex-start' },
@@ -34,7 +35,7 @@ const LAYOUT: StyleField[] = [
 
 const TYPOGRAPHY: StyleField[] = [
   { key: 'fontFamily', label: 'Font family', kind: 'text', placeholder: 'e.g. Inter' },
-  { key: 'fontSize', label: 'Font size', kind: 'length', placeholder: 'e.g. 16px' },
+  { key: 'fontSize', label: 'Font size', kind: 'length', placeholder: 'e.g. 16px', tokenType: 'length' },
   { key: 'fontWeight', label: 'Font weight', kind: 'number', placeholder: 'e.g. 400' },
   { key: 'lineHeight', label: 'Line height', kind: 'text', placeholder: 'e.g. 1.5' },
   { key: 'letterSpacing', label: 'Letter spacing', kind: 'text', placeholder: 'e.g. 0px' },
@@ -43,15 +44,15 @@ const TYPOGRAPHY: StyleField[] = [
 ];
 
 const COLORS: StyleField[] = [
-  { key: 'color', label: 'Color', kind: 'text', placeholder: '#hex' },
-  { key: 'backgroundColor', label: 'Background', kind: 'text', placeholder: '#hex' },
+  { key: 'color', label: 'Color', kind: 'text', placeholder: '#hex', tokenType: 'color' },
+  { key: 'backgroundColor', label: 'Background', kind: 'text', placeholder: '#hex', tokenType: 'color' },
   { key: 'opacity', label: 'Opacity', kind: 'number', placeholder: '0..1' },
 ];
 
 const SPACING: StyleField[] = [
-  { key: 'margin', label: 'Margin', kind: 'length', placeholder: 'e.g. 16px' },
-  { key: 'padding', label: 'Padding', kind: 'length', placeholder: 'e.g. 24px' },
-  { key: 'gap', label: 'Gap', kind: 'length', placeholder: 'e.g. 8px' },
+  { key: 'margin', label: 'Margin', kind: 'length', placeholder: 'e.g. 16px', tokenType: 'spacing' },
+  { key: 'padding', label: 'Padding', kind: 'length', placeholder: 'e.g. 24px', tokenType: 'spacing' },
+  { key: 'gap', label: 'Gap', kind: 'length', placeholder: 'e.g. 8px', tokenType: 'spacing' },
 ];
 
 interface SectionProps {
@@ -65,6 +66,12 @@ interface SectionProps {
 function Section({ title, fields, nodeId, breakpoint, nodes }: SectionProps) {
   const patchNode = useEditorStore((state) => state.patchNode);
   const node = nodes[nodeId];
+
+  const tokens = useEditorStore((state) => state.tokens.byName);
+  const addToken = useEditorStore((state) => state.addToken);
+  const beginBatch = useEditorStore((state) => state.beginBatch);
+  const endBatch = useEditorStore((state) => state.endBatch);
+  const [openField, setOpenField] = useState<string | null>(null);
 
   const setValue = useCallback(
     (field: StyleField, next: unknown) => {
@@ -124,6 +131,72 @@ function Section({ title, fields, nodeId, breakpoint, nodes }: SectionProps) {
           // Override dots are shown only on tablet and mobile, never on desktop.
           const overridden =
             breakpoint !== 'desktop' && node !== undefined && node.styles[field.key]?.[breakpoint] !== undefined;
+
+          // The name of the design token behind `value`, or null when it is a raw value.
+          const refName = tokenRef(field, current);
+          const token = refName ? tokens[refName] : undefined;
+
+          /** Tokens this field can reference: colours for colour fields, spacing & length for length fields. */
+          const matchingTokens = (): DesignToken[] => {
+            const all = Object.values(tokens);
+            return field.kind === 'text'
+              ? all.filter((t) => t.type === 'color')
+              : all.filter((t) => t.type === 'spacing' || t.type === 'length');
+          };
+
+          function tokenRef(field: StyleField, value: unknown): string | null {
+            if (field.kind === 'text') {
+              if (typeof value === 'string') {
+                const m = value.match(/^var\(--([a-zA-Z0-9_-]+)\)$/);
+                if (m) return m[1] ?? null;
+              }
+              return null;
+            }
+            if (field.kind === 'length' && typeof value === 'object' && value !== null) {
+              const v = value as Length;
+              if (v.kind === 'token') return v.token ?? null;
+            }
+            return null;
+          }
+
+          function pickToken(token: DesignToken) {
+            const ref: unknown =
+              field.kind === 'text' ? `var(--${token.name})` : { kind: 'token', value: 0, token: token.name };
+            setValue(field, ref);
+            setOpenField(null);
+          }
+
+          function detachToken() {
+            if (!refName) return;
+            const t = tokens[refName]!;
+            const next: unknown = field.kind === 'length' ? parse(field, t.value) : t.value;
+            setValue(field, next);
+            setOpenField(null);
+          }
+
+          function promptTokenName(): string | null {
+            let name = window.prompt('Name the token (kebab-case, e.g. space-8)', '');
+            while (name !== null && !/^[a-z][a-z0-9-]*$/.test(name.trim())) {
+              window.alert('Token names must be kebab-case (lowercase letters, numbers, hyphens).');
+              name = window.prompt('Name the token (kebab-case, e.g. space-8)', '');
+            }
+            return name === null ? null : name.trim();
+          }
+
+          function createToken() {
+            if (current === undefined || current === null) return;
+            const name = promptTokenName();
+            if (name === null) return;
+            const type = field.kind === 'text' ? 'color' : (field.tokenType ?? 'length');
+            const ref: unknown =
+              field.kind === 'text' ? `var(--${name})` : { kind: 'token', value: 0, token: name };
+            beginBatch();
+            addToken({ name, value: format(field, current), type });
+            setValue(field, ref);
+            endBatch();
+            setOpenField(null);
+          }
+
           return (
             <div
               key={field.key}
@@ -135,13 +208,71 @@ function Section({ title, fields, nodeId, breakpoint, nodes }: SectionProps) {
               >
                 {field.label}
               </label>
-              <input
-                className="flex-1 shrink-0 w-0 rounded-md border border-slate-700 bg-slate-950 text-xs text-slate-200 px-2 py-1 focus:border-cyan-500 focus:outline-none transition-colors"
-                value={format(field, current)}
-                placeholder={field.placeholder}
-                onChange={(e) => setValue(field, parse(field, e.target.value))}
-                title={field.label}
-              />
+              <div className="flex-1 shrink-0 w-0 relative flex items-center gap-2">
+                {refName && token ? (
+                  <>
+                    <span
+                      className="flex-1 shrink-0 w-0 min-w-0 truncate rounded-md border border-slate-700 bg-slate-900 text-xs text-slate-400 px-2 py-1"
+                      title={refName}
+                    >
+                      {refName}
+                    </span>
+                    <button
+                      onClick={detachToken}
+                      className="rounded-md border border-slate-700 bg-slate-900 text-slate-400 text-[10px] px-2 py-1 hover:bg-slate-800 hover:text-slate-200"
+                      title="Detach token"
+                      aria-label={`Detach ${field.label} token`}
+                    >
+                      Detach
+                    </button>
+                  </>
+                ) : (
+                  <input
+                    className="flex-1 shrink-0 w-0 rounded-md border border-slate-700 bg-slate-950 text-xs text-slate-200 px-2 py-1 focus:border-cyan-500 focus:outline-none transition-colors"
+                    value={format(field, current)}
+                    placeholder={field.placeholder}
+                    onChange={(e) => setValue(field, parse(field, e.target.value))}
+                    title={field.label}
+                  />
+                )}
+                {field.tokenType !== undefined && (
+                  <>
+                    <button
+                      onClick={() => setOpenField(openField === field.key ? null : field.key)}
+                      className="w-6 h-6 shrink-0 rounded-md border border-slate-700 bg-slate-900 text-slate-400 flex items-center justify-center text-[10px] hover:bg-slate-800 hover:text-slate-200"
+                      title="Design tokens"
+                      aria-label="Tokens"
+                    >
+                      <Tag size={10} strokeWidth={2} />
+                    </button>
+                    {openField === field.key && (
+                      <div className="absolute left-0 top-full z-20 mt-1 w-48 rounded-md border border-slate-700 bg-slate-950 text-xs text-slate-200 shadow-lg">
+                        {matchingTokens().map((t) => (
+                          <button
+                            key={t.name}
+                            onClick={() => pickToken(t)}
+                            className="w-full text-left px-3 py-2 hover:bg-slate-800"
+                            title={t.name}
+                          >
+                            {t.name}
+                          </button>
+                        ))}
+                        {!refName && (
+                          <>
+                            <div className="border-t border-slate-800/50" />
+                            <button
+                              onClick={createToken}
+                              className="w-full text-left px-3 py-2 text-cyan-400 hover:bg-slate-800"
+                            >
+                              Create token from value…
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
               {overridden && (
                 <>
                   <span
