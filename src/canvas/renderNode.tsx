@@ -53,6 +53,9 @@ export interface RenderContext {
   onStartEditing?: (id: NodeId) => void;
   onSaveText?: (id: NodeId, text: string) => void;
   onCancelEditing?: () => void;
+  // Canvas-only: when true, video background layers render a <video> so they
+  // play on the canvas. Not persisted, not undoable.
+  playBackgrounds?: boolean;
 }
 
 const DATA_NODE_ID = 'data-node-id';
@@ -382,7 +385,21 @@ export function renderNode(node: Node, ctx: RenderContext): JSX.Element {
         needsLayeredPath(layers) ? (
           <div className="r-bg" aria-hidden="true">
             {[...layers].reverse().map((layer) => (
-              <div key={layer.id} className={`r-bg-layer ${layerClass(layer)}`} />
+              <div key={layer.id} className={`r-bg-layer ${layerClass(layer)}`}>
+                {ctx.mode === 'canvas' &&
+                  ctx.playBackgrounds &&
+                  layer.type === 'video' ? (
+                  <video
+                    src={layer.src}
+                    poster={layer.poster}
+                    muted
+                    loop
+                    playsInline
+                    autoPlay
+                    className="r-bg-video"
+                  />
+                ) : null}
+              </div>
             ))}
           </div>
         ) : null;

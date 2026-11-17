@@ -11,6 +11,7 @@ import { useEditorStore } from '../store/useEditorStore';
 import type { DesignToken, Node, NodeId, Breakpoint, Length, ResponsiveStyles } from '../types';
 import { resolveStyle } from '../compile/resolveStyle';
 import { lengthToCss } from '../canvas/renderNode';
+import BackgroundPanel from './BackgroundPanel';
 
 type Kind = 'length' | 'number' | 'text';
 
@@ -324,6 +325,9 @@ export default function Inspector() {
       <Section title="Typography" fields={TYPOGRAPHY} nodeId={selectedId} breakpoint={breakpoint} nodes={nodes} />
       <Section title="Colors" fields={COLORS} nodeId={selectedId} breakpoint={breakpoint} nodes={nodes} />
       <Section title="Spacing" fields={SPACING} nodeId={selectedId} breakpoint={breakpoint} nodes={nodes} />
+      {node && (node.type === 'page' || node.type === 'section') && (
+        <BackgroundPanel nodeId={selectedId} />
+      )}
     </div>
   );
 }

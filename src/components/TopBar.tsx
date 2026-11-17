@@ -5,7 +5,7 @@
 // zoom) is not history-tracked, so toggling them never creates undo steps.
 import { useCallback } from 'react';
 import type { ElementType } from 'react';
-import { Undo2, Redo2, Maximize2, Minimize2, Monitor, Smartphone, Tablet } from 'lucide-react';
+import { Undo2, Redo2, Maximize2, Minimize2, Monitor, Smartphone, Tablet, Play, Pause } from 'lucide-react';
 import { useEditorStore } from '../store/useEditorStore';
 import type { Breakpoint } from '../types';
 
@@ -31,6 +31,8 @@ export default function TopBar() {
   const redo = useEditorStore((state) => state.redo);
   const canUndo = useEditorStore((state) => state.canUndo());
   const canRedo = useEditorStore((state) => state.canRedo());
+  const playBackgrounds = useEditorStore((state) => state.playBackgrounds);
+  const setPlayBackgrounds = useEditorStore((state) => state.setPlayBackgrounds);
 
   const handleZoomChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -125,6 +127,19 @@ export default function TopBar() {
             aria-label="Redo"
           >
             <Redo2 size={13} strokeWidth={2} />
+          </button>
+          {/* Play backgrounds — preview video layers on the canvas */}
+          <button
+            onClick={() => setPlayBackgrounds(!playBackgrounds)}
+            aria-pressed={playBackgrounds}
+            title="Play backgrounds"
+            className={`w-8 h-8 shrink-0 rounded-md flex items-center justify-center ${
+              playBackgrounds
+                ? 'bg-slate-700 text-slate-100'
+                : 'bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+            }`}
+          >
+            {playBackgrounds ? <Pause size={13} strokeWidth={2} /> : <Play size={13} strokeWidth={2} />}
           </button>
         </div>
       </div>

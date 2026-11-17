@@ -53,6 +53,7 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1, onContextMen
   const pages = useEditorStore((state) => state.pages);
   const tokens = useEditorStore((state) => state.tokens);
   const currentPageId = useEditorStore((state) => state.currentPageId);
+  const playBackgrounds = useEditorStore((state) => state.playBackgrounds);
   // PageId (e.g. 'pg-1'), not the page node id (e.g. 'page-1'): fall back to the
   // page whose rootId matches the rendered page node.
   const pageId =
@@ -118,6 +119,7 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1, onContextMen
           breakpoint,
           nodes,
           editingNodeId,
+          playBackgrounds,
           onStartEditing: startEditing,
           onSaveText: (id, text) => saveText(id, text),
           onCancelEditing: cancelEditing,
@@ -133,7 +135,7 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1, onContextMen
       </>,
       container,
     );
-  }, [page, nodes, breakpoint, loaded, editingNodeId, startEditing, saveText, cancelEditing, menu]);
+  }, [page, nodes, breakpoint, loaded, editingNodeId, startEditing, saveText, cancelEditing, menu, playBackgrounds]);
 
   const [element, setElement] = useState<React.ReactNode>(null);
 

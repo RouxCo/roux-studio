@@ -49,6 +49,7 @@ export interface EditorStore extends ProjectData {
   breakpoint: Breakpoint;
   selection: NodeId[];
   zoom: number;
+  playBackgrounds: boolean;
 
   // In-memory clipboard: a forest of copied nodes keyed by their (original) ids,
   // plus the root ids of the copied selection. Not history-tracked.
@@ -70,6 +71,7 @@ export interface EditorStore extends ProjectData {
   setBreakpoint: (bp: Breakpoint) => void;
   setSelection: (ids: NodeId[]) => void;
   setZoom: (z: number) => void;
+  setPlayBackgrounds: (play: boolean) => void;
   beginBatch: () => void;
   endBatch: () => void;
 
@@ -139,6 +141,7 @@ export const useEditorStore = create<EditorStore>((set, get) => {
   breakpoint: 'desktop',
   selection: [],
   zoom: 1,
+  playBackgrounds: false,
   clipboard: null,
   readOnly: false,
   remoteRevision: 0,
@@ -154,6 +157,8 @@ export const useEditorStore = create<EditorStore>((set, get) => {
   setSelection: (ids) => set({ selection: ids }),
 
   setZoom: (z) => set({ zoom: z }),
+
+  setPlayBackgrounds: (play) => set({ playBackgrounds: play }),
 
   takeOver: () => {
     const { projectId } = get();

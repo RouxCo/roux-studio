@@ -405,3 +405,55 @@ describe('renderNode — background layers', () => {
     expect(html).not.toContain('disabled.png');
   });
 });
+
+describe('renderNode — play backgrounds (video)', () => {
+  const BG_VIDEO: BackgroundLayer = {
+    id: 'bg-v', type: 'video', enabled: true, opacity: 1, blendMode: 'normal',
+    src: 'clip.mp4', poster: 'poster.png', loop: true, muted: true,
+  };
+  const BG_HALF: BackgroundLayer = {
+    id: 'bg-h', type: 'color', enabled: true, opacity: 0.5, blendMode: 'normal', color: '#ff0000',
+  };
+
+  function videoPage(layers: BackgroundLayer[]): Node {
+    return {
+      id: 'page-vid', type: 'page', parentId: null, children: [], styles: {},
+      hidden: {}, locked: false, title: 'Home', slug: 'home', backgroundLayers: layers,
+    };
+  }
+
+  function renderVid(layers: BackgroundLayer[], ctx: Partial<RenderContext> = {}): string {
+    const page = videoPage(layers);
+    return renderToStaticMarkup(
+      renderNode(page, {
+        mode: 'canvas', breakpoint: 'desktop', nodes: { [page.id]: page }, ...ctx,
+      }),
+    );
+  }
+
+  it('renders a playing <video> inside the layer div in canvas mode only when playBackgrounds is true', () => {
+    const withPlay = renderVid([BG_VIDEO], { playBackgrounds: true });
+    expect(withPlay).toContain('<video');
+    expect(withPlay).toContain('src="clip.mp4"');
+    expect(withPlay).toContain('poster="poster.png"');
+    expect(withPlay).toContain('muted');
+    expect(withPlay).toContain('loop');
+    expect(withPlay).toContain('playsInline');
+    expect(withPlay).toContain('autoPlay');
+    expect(withPlay).toContain('class="r-bg-video"');
+    // video sits inside its .r-bg-layer div
+    expect(withPlay.indexOf('r-bg-layer')).toBeLessThan(withPlay.indexOf('<video'));
+
+    const withoutPlay = renderVid([BG_VIDEO], { playBackgrounds: false });
+    expect(withoutPlay).not.toContain('<video');
+
+    const exported = renderVid([BG_VIDEO], { mode: 'export', playBackgrounds: true });
+    expect(exported).not.toContain('<video');
+  });
+
+  it('emits no inline style in export mode with layered background layers', () => {
+    const html = renderVid([BG_HALF], { mode: 'export' });
+    expect(html).toContain('<div class="r-bg" aria-hidden="true">');
+    expect(html).not.toMatch(/style=/);
+  });
+});

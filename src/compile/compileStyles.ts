@@ -91,6 +91,7 @@ function compileBaseStyles(): string {
     // nodes with layered backgrounds establish position:relative + isolate so
     // their .r-bg layers stack inside them (z-index: -1 on .r-bg).
     '.r-bg{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none}',
+    '.r-bg-video{width:100%;height:100%;object-fit:cover}',
   ].join('\n');
 }
 
