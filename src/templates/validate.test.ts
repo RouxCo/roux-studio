@@ -11,16 +11,19 @@ import type { StoredProject } from '../db/stores';
 let darkPremium: StoredProject;
 let lightProfessional: StoredProject;
 let localTrades: StoredProject;
+let beautyClinic: StoredProject;
 
 beforeAll(async () => {
-  const [darkLoaded, lightLoaded, localLoaded] = await Promise.all([
+  const [darkLoaded, lightLoaded, localLoaded, beautyLoaded] = await Promise.all([
     loadTemplate('dark-premium'),
     loadTemplate('light-professional'),
     loadTemplate('local-trades'),
+    loadTemplate('beauty-clinic'),
   ]);
   darkPremium = darkLoaded.project as StoredProject;
   lightProfessional = lightLoaded.project as StoredProject;
   localTrades = localLoaded.project as StoredProject;
+  beautyClinic = beautyLoaded.project as StoredProject;
 });
 
 function mutate(fn: (p: StoredProject) => void): string[] {
@@ -102,6 +105,14 @@ describe('template loading', () => {
 
   it('local-trades has a feathered section blend', () => {
     expect(featheredBlends(localTrades).length).toBeGreaterThan(0);
+  });
+
+  it('beauty-clinic has five pages, all with global header and footer', () => {
+    pageGlobalChecks(beautyClinic);
+  });
+
+  it('beauty-clinic has a feathered section blend', () => {
+    expect(featheredBlends(beautyClinic).length).toBeGreaterThan(0);
   });
 });
 
@@ -249,6 +260,23 @@ describe('contrast', () => {
       ['color-ink', 'color-whatsapp'], // WhatsApp button text on WhatsApp background
     ];
     const token = tokenOf(localTrades);
+    for (const [fg, bg] of pairs) {
+      const ratio = contrast(token(fg), token(bg));
+      // All pairs clear 4.5:1, hence also the relaxed 3:1 large-heading threshold.
+      expect(ratio).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it('beauty-clinic meets text-colour contrast ratios (4.5:1, 3:1 for large headings)', () => {
+    // Text-colour / background-colour token pairs actually used in the template.
+    const pairs: [string, string][] = [
+      ['color-ink', 'color-bg'], // heading and body text on cream sections
+      ['color-accent', 'color-bg'], // accent headings on cream sections
+      ['color-muted', 'color-bg'], // muted text on cream sections
+      ['color-surface', 'color-booking'], // booking text on deep warm background
+      ['color-surface', 'color-accent'], // hero text on accent background
+    ];
+    const token = tokenOf(beautyClinic);
     for (const [fg, bg] of pairs) {
       const ratio = contrast(token(fg), token(bg));
       // All pairs clear 4.5:1, hence also the relaxed 3:1 large-heading threshold.

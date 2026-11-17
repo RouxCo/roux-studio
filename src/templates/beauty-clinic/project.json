@@ -1,0 +1,1111 @@
+{
+  "id": "beauty-clinic",
+  "name": "Beauty / Clinic",
+  "createdAt": "2026-11-17T00:00:00.000Z",
+  "updatedAt": "2026-11-17T00:00:00.000Z",
+  "pages": [
+    {
+      "id": "page-home",
+      "title": "Home",
+      "slug": "home",
+      "rootId": "page-home",
+      "useGlobalHeader": true,
+      "useGlobalFooter": true,
+      "backgroundLayers": []
+    },
+    {
+      "id": "page-about",
+      "title": "About",
+      "slug": "about",
+      "rootId": "page-about",
+      "useGlobalHeader": true,
+      "useGlobalFooter": true,
+      "backgroundLayers": []
+    },
+    {
+      "id": "page-services",
+      "title": "Services",
+      "slug": "services",
+      "rootId": "page-services",
+      "useGlobalHeader": true,
+      "useGlobalFooter": true,
+      "backgroundLayers": []
+    },
+    {
+      "id": "page-contact",
+      "title": "Contact",
+      "slug": "contact",
+      "rootId": "page-contact",
+      "useGlobalHeader": true,
+      "useGlobalFooter": true,
+      "backgroundLayers": []
+    },
+    {
+      "id": "page-pricing",
+      "title": "Pricing",
+      "slug": "pricing",
+      "rootId": "page-pricing",
+      "useGlobalHeader": true,
+      "useGlobalFooter": true,
+      "backgroundLayers": []
+    }
+  ],
+  "tokens": {
+    "byName": {
+      "color-ink": { "name": "color-ink", "value": "#3e2723", "type": "color" },
+      "color-surface": { "name": "color-surface", "value": "#ffffff", "type": "color" },
+      "color-accent": { "name": "color-accent", "value": "#a63d2f", "type": "color" },
+      "color-accent-light": { "name": "color-accent-light", "value": "#d97b65", "type": "color" },
+      "color-muted": { "name": "color-muted", "value": "#7a5a46", "type": "color" },
+      "color-bg": { "name": "color-bg", "value": "#faf6f1", "type": "color" },
+      "color-border": { "name": "color-border", "value": "#e7dccf", "type": "color" },
+      "color-booking": { "name": "color-booking", "value": "#5d4037", "type": "color" },
+      "font-heading": { "name": "font-heading", "value": "\"Georgia\", serif", "type": "font" },
+      "font-body": { "name": "font-body", "value": "Inter, sans-serif", "type": "font" },
+      "space-4": { "name": "space-4", "value": "1rem", "type": "spacing" },
+      "space-8": { "name": "space-8", "value": "1.5rem", "type": "spacing" },
+      "space-16": { "name": "space-16", "value": "3rem", "type": "spacing" },
+      "space-24": { "name": "space-24", "value": "4rem", "type": "spacing" },
+      "radius-md": { "name": "radius-md", "value": "8", "type": "length" },
+      "radius-lg": { "name": "radius-lg", "value": "12", "type": "length" },
+      "radius-full": { "name": "radius-full", "value": "9999", "type": "length" },
+      "size-button": { "name": "size-button", "value": "16", "type": "length" },
+      "tap-min": { "name": "tap-min", "value": "44", "type": "length" }
+    }
+  },
+  "nodes": {
+    "page-home": {
+      "id": "page-home",
+      "type": "page",
+      "parentId": null,
+      "children": ["sec-hero", "sec-treatments", "sec-booking", "sec-testimonials"],
+      "styles": {},
+      "hidden": {},
+      "locked": false,
+      "rootId": "page-home",
+      "title": "Home",
+      "slug": "home",
+      "backgroundLayers": []
+    },
+    "nav-global": {
+      "id": "nav-global",
+      "type": "nav",
+      "parentId": null,
+      "children": ["gheader-inner"],
+      "styles": {
+        "display": { "desktop": "flex", "tablet": "flex", "mobile": "flex" },
+        "flexDirection": { "desktop": "row", "tablet": "row", "mobile": "column" },
+        "justifyContent": { "desktop": "space-between", "tablet": "space-between", "mobile": "flex-start" },
+        "alignItems": { "desktop": "center", "tablet": "center", "mobile": "center" },
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-surface)", "tablet": "var(--color-surface)", "mobile": "var(--color-surface)" },
+        "borderBottom": { "desktop": "1px solid var(--color-border)", "tablet": "1px solid var(--color-border)", "mobile": "1px solid var(--color-border)" }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "nav-brand": {
+      "id": "nav-brand",
+      "type": "link",
+      "parentId": "gheader-inner",
+      "children": [],
+      "styles": {
+        "color": { "desktop": "var(--color-accent)" },
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 20 }, "tablet": { "kind": "px", "value": 18 }, "mobile": { "kind": "px", "value": 16 } },
+        "fontWeight": { "desktop": 700 },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "href": "#",
+      "text": "Bloom Studio"
+    },
+    "gheader-inner": {
+      "id": "gheader-inner",
+      "type": "container",
+      "parentId": "nav-global",
+      "children": ["link-home", "link-about", "link-services", "link-contact", "link-pricing", "btn-book"],
+      "styles": {
+        "display": { "desktop": "flex", "tablet": "flex", "mobile": "flex" },
+        "flexDirection": { "desktop": "row", "tablet": "row", "mobile": "column" },
+        "justifyContent": { "desktop": "flex-end", "tablet": "flex-end", "mobile": "flex-start" },
+        "alignItems": { "desktop": "center", "tablet": "center", "mobile": "center" },
+        "gap": { "desktop": { "kind": "token", "value": 3, "token": "space-16" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "link-home": {
+      "id": "link-home",
+      "type": "link",
+      "parentId": "gheader-inner",
+      "children": [],
+      "styles": {
+        "color": { "desktop": "var(--color-ink)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 14 } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "href": "#",
+      "text": "Home"
+    },
+    "link-about": {
+      "id": "link-about",
+      "type": "link",
+      "parentId": "gheader-inner",
+      "children": [],
+      "styles": {
+        "color": { "desktop": "var(--color-ink)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 14 } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "href": "#",
+      "text": "About"
+    },
+    "link-services": {
+      "id": "link-services",
+      "type": "link",
+      "parentId": "gheader-inner",
+      "children": [],
+      "styles": {
+        "color": { "desktop": "var(--color-ink)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 14 } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "href": "#",
+      "text": "Services"
+    },
+    "link-contact": {
+      "id": "link-contact",
+      "type": "link",
+      "parentId": "gheader-inner",
+      "children": [],
+      "styles": {
+        "color": { "desktop": "var(--color-ink)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 14 } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "href": "#",
+      "text": "Contact"
+    },
+    "link-pricing": {
+      "id": "link-pricing",
+      "type": "link",
+      "parentId": "gheader-inner",
+      "children": [],
+      "styles": {
+        "color": { "desktop": "var(--color-ink)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 14 } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "mobile": { "kind": "token", "value": 3, "token": "space-4" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "href": "#",
+      "text": "Pricing"
+    },
+    "btn-book": {
+      "id": "btn-book",
+      "type": "button",
+      "parentId": "gheader-inner",
+      "children": [],
+      "styles": {
+        "backgroundColor": { "desktop": "var(--color-accent)", "tablet": "var(--color-accent)", "mobile": "var(--color-accent)" },
+        "color": { "desktop": "var(--color-surface)", "tablet": "var(--color-surface)", "mobile": "var(--color-surface)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 15 }, "tablet": { "kind": "px", "value": 14 }, "mobile": { "kind": "px", "value": 14 } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "tablet": { "kind": "token", "value": 2, "token": "space-4" }, "mobile": { "kind": "token", "value": 2, "token": "space-4" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 3, "token": "space-4" }, "tablet": { "kind": "token", "value": 2, "token": "space-4" }, "mobile": { "kind": "token", "value": 2, "token": "space-4" } },
+        "paddingLeft": { "desktop": { "kind": "token", "value": 4, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 3, "token": "space-8" } },
+        "paddingRight": { "desktop": { "kind": "token", "value": 4, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 3, "token": "space-8" } },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-full" }, "tablet": { "kind": "token", "value": 8, "token": "radius-full" }, "mobile": { "kind": "token", "value": 8, "token": "radius-full" } },
+        "minWidth": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Book now",
+      "href": "#"
+    },
+    "sec-hero": {
+      "id": "sec-hero",
+      "type": "section",
+      "parentId": "page-home",
+      "children": ["h-hero", "p-hero", "btn-hero"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 5, "token": "space-24" }, "tablet": { "kind": "token", "value": 4, "token": "space-16" }, "mobile": { "kind": "token", "value": 3, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-accent)", "tablet": "var(--color-accent)", "mobile": "var(--color-accent)" },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [
+        {
+          "id": "grad-hero",
+          "type": "gradient",
+          "name": "Hero gradient",
+          "enabled": true,
+          "opacity": 1,
+          "blendMode": "normal",
+          "angle": 135,
+          "stops": [
+            { "offset": 0, "color": "var(--color-accent)" },
+            { "offset": 55, "color": "var(--color-accent-light)" },
+            { "offset": 100, "color": "#8f3527" }
+          ]
+        },
+        {
+          "id": "noise-hero",
+          "type": "noise",
+          "name": "Hero noise",
+          "enabled": true,
+          "opacity": 0.06,
+          "blendMode": "normal",
+          "intensity": 0.1,
+          "scale": 0.8
+        }
+      ],
+      "sectionBlend": { "enabled": false, "feather": 0, "overlap": 0 }
+    },
+    "h-hero": {
+      "id": "h-hero",
+      "type": "heading",
+      "parentId": "sec-hero",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-surface)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 52 }, "tablet": { "kind": "px", "value": 42 }, "mobile": { "kind": "px", "value": 32 } },
+        "lineHeight": { "desktop": 1.1, "tablet": 1.15, "mobile": 1.2 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 60, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 1,
+      "text": "Glowing skin, calm mind."
+    },
+    "p-hero": {
+      "id": "p-hero",
+      "type": "paragraph",
+      "parentId": "sec-hero",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-surface)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 18 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.6, "tablet": 1.6, "mobile": 1.5 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 50, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "We offer facials, massage and skin treatments from R450 in a quiet Cape Town studio. Book your treatment on +27 00 000 0000."
+    },
+    "btn-hero": {
+      "id": "btn-hero",
+      "type": "button",
+      "parentId": "sec-hero",
+      "children": [],
+      "styles": {
+        "backgroundColor": { "desktop": "var(--color-surface)", "tablet": "var(--color-surface)", "mobile": "var(--color-surface)" },
+        "color": { "desktop": "var(--color-accent)", "tablet": "var(--color-accent)", "mobile": "var(--color-accent)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 15 } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 4, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 3, "token": "space-8" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 4, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 3, "token": "space-8" } },
+        "paddingLeft": { "desktop": { "kind": "token", "value": 5, "token": "space-16" }, "tablet": { "kind": "token", "value": 4, "token": "space-16" }, "mobile": { "kind": "token", "value": 4, "token": "space-16" } },
+        "paddingRight": { "desktop": { "kind": "token", "value": 5, "token": "space-16" }, "tablet": { "kind": "token", "value": 4, "token": "space-16" }, "mobile": { "kind": "token", "value": 4, "token": "space-16" } },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-full" }, "tablet": { "kind": "token", "value": 8, "token": "radius-full" }, "mobile": { "kind": "token", "value": 8, "token": "radius-full" } },
+        "minWidth": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Book a treatment",
+      "href": "#"
+    },
+    "sec-treatments": {
+      "id": "sec-treatments",
+      "type": "section",
+      "parentId": "page-home",
+      "children": ["h-treatments", "p-treatments", "card-facial", "card-massage", "card-peel"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-bg)", "tablet": "var(--color-bg)", "mobile": "var(--color-bg)" },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": true, "feather": 40, "overlap": 24 }
+    },
+    "h-treatments": {
+      "id": "h-treatments",
+      "type": "heading",
+      "parentId": "sec-treatments",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 40 }, "tablet": { "kind": "px", "value": 32 }, "mobile": { "kind": "px", "value": 26 } },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 2,
+      "text": "Our treatments"
+    },
+    "p-treatments": {
+      "id": "p-treatments",
+      "type": "paragraph",
+      "parentId": "sec-treatments",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "We tailor every facial and massage to your skin, using gentle products and a calm, unhurried approach."
+    },
+    "card-facial": {
+      "id": "card-facial",
+      "type": "card",
+      "parentId": "sec-treatments",
+      "children": ["h-card-facial", "p-card-facial", "price-facial"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-16" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-surface)" },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-md" } },
+        "border": { "desktop": "1px solid var(--color-border)", "tablet": "1px solid var(--color-border)", "mobile": "1px solid var(--color-border)" },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "h-card-facial": {
+      "id": "h-card-facial",
+      "type": "heading",
+      "parentId": "card-facial",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 22 }, "tablet": { "kind": "px", "value": 20 }, "mobile": { "kind": "px", "value": 18 } },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 3,
+      "text": "Facial"
+    },
+    "p-card-facial": {
+      "id": "p-card-facial",
+      "type": "paragraph",
+      "parentId": "card-facial",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 14 } },
+        "lineHeight": { "desktop": 1.6, "tablet": 1.6, "mobile": 1.5 },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Deep cleanse, exfoliation and hydration for balanced, glowing skin."
+    },
+    "price-facial": {
+      "id": "price-facial",
+      "type": "paragraph",
+      "parentId": "card-facial",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-accent)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 14 } },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "From R450."
+    },
+    "card-massage": {
+      "id": "card-massage",
+      "type": "card",
+      "parentId": "sec-treatments",
+      "children": ["h-card-massage", "p-card-massage", "price-massage"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-16" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-surface)" },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-md" } },
+        "border": { "desktop": "1px solid var(--color-border)", "tablet": "1px solid var(--color-border)", "mobile": "1px solid var(--color-border)" },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "h-card-massage": {
+      "id": "h-card-massage",
+      "type": "heading",
+      "parentId": "card-massage",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 22 }, "tablet": { "kind": "px", "value": 20 }, "mobile": { "kind": "px", "value": 18 } },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 3,
+      "text": "Massage"
+    },
+    "p-card-massage": {
+      "id": "p-card-massage",
+      "type": "paragraph",
+      "parentId": "card-massage",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 14 } },
+        "lineHeight": { "desktop": 1.6, "tablet": 1.6, "mobile": 1.5 },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Slow, firm massage to ease tension and support circulation."
+    },
+    "price-massage": {
+      "id": "price-massage",
+      "type": "paragraph",
+      "parentId": "card-massage",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-accent)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 14 } },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "From R650."
+    },
+    "card-peel": {
+      "id": "card-peel",
+      "type": "card",
+      "parentId": "sec-treatments",
+      "children": ["h-card-peel", "p-card-peel", "price-peel"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-16" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-surface)" },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-md" } },
+        "border": { "desktop": "1px solid var(--color-border)", "tablet": "1px solid var(--color-border)", "mobile": "1px solid var(--color-border)" },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "h-card-peel": {
+      "id": "h-card-peel",
+      "type": "heading",
+      "parentId": "card-peel",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 22 }, "tablet": { "kind": "px", "value": 20 }, "mobile": { "kind": "px", "value": 18 } },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 3,
+      "text": "Skin peel"
+    },
+    "p-card-peel": {
+      "id": "p-card-peel",
+      "type": "paragraph",
+      "parentId": "card-peel",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 14 } },
+        "lineHeight": { "desktop": 1.6, "tablet": 1.6, "mobile": 1.5 },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "A light peel to refresh tone and smooth fine lines."
+    },
+    "price-peel": {
+      "id": "price-peel",
+      "type": "paragraph",
+      "parentId": "card-peel",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-accent)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 14 } },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "From R850."
+    },
+    "sec-booking": {
+      "id": "sec-booking",
+      "type": "section",
+      "parentId": "page-home",
+      "children": ["h-booking", "p-booking", "btn-booking"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-booking)", "tablet": "var(--color-booking)", "mobile": "var(--color-booking)" },
+        "color": { "desktop": "var(--color-surface)" },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": false, "feather": 0, "overlap": 0 }
+    },
+    "h-booking": {
+      "id": "h-booking",
+      "type": "heading",
+      "parentId": "sec-booking",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-surface)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 40 }, "tablet": { "kind": "px", "value": 32 }, "mobile": { "kind": "px", "value": 26 } },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 2,
+      "text": "Book your visit"
+    },
+    "p-booking": {
+      "id": "p-booking",
+      "type": "paragraph",
+      "parentId": "sec-booking",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-surface)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "We see clients by appointment in Stellenbosch and Somerset West. Choose your treatment and time, and we will confirm within one business day."
+    },
+    "btn-booking": {
+      "id": "btn-booking",
+      "type": "button",
+      "parentId": "sec-booking",
+      "children": [],
+      "styles": {
+        "backgroundColor": { "desktop": "var(--color-surface)", "tablet": "var(--color-surface)", "mobile": "var(--color-surface)" },
+        "color": { "desktop": "var(--color-booking)", "tablet": "var(--color-booking)", "mobile": "var(--color-booking)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 15 } },
+        "paddingTop": { "desktop": { "kind": "token", "value": 4, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 3, "token": "space-8" } },
+        "paddingBottom": { "desktop": { "kind": "token", "value": 4, "token": "space-8" }, "tablet": { "kind": "token", "value": 3, "token": "space-8" }, "mobile": { "kind": "token", "value": 3, "token": "space-8" } },
+        "paddingLeft": { "desktop": { "kind": "token", "value": 5, "token": "space-16" }, "tablet": { "kind": "token", "value": 4, "token": "space-16" }, "mobile": { "kind": "token", "value": 4, "token": "space-16" } },
+        "paddingRight": { "desktop": { "kind": "token", "value": 5, "token": "space-16" }, "tablet": { "kind": "token", "value": 4, "token": "space-16" }, "mobile": { "kind": "token", "value": 4, "token": "space-16" } },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-full" }, "tablet": { "kind": "token", "value": 8, "token": "radius-full" }, "mobile": { "kind": "token", "value": 8, "token": "radius-full" } },
+        "minWidth": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Book now",
+      "href": "#"
+    },
+    "sec-testimonials": {
+      "id": "sec-testimonials",
+      "type": "section",
+      "parentId": "page-home",
+      "children": ["h-testimonials", "p-testimonials", "card-testimonial-1", "card-testimonial-2"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-surface)" },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": false, "feather": 0, "overlap": 0 }
+    },
+    "h-testimonials": {
+      "id": "h-testimonials",
+      "type": "heading",
+      "parentId": "sec-testimonials",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 40 }, "tablet": { "kind": "px", "value": 32 }, "mobile": { "kind": "px", "value": 26 } },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 2,
+      "text": "What our clients say"
+    },
+    "p-testimonials": {
+      "id": "p-testimonials",
+      "type": "paragraph",
+      "parentId": "sec-testimonials",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Gentle treatments in a calm studio, right here in Cape Town."
+    },
+    "card-testimonial-1": {
+      "id": "card-testimonial-1",
+      "type": "card",
+      "parentId": "sec-testimonials",
+      "children": ["quote-testimonial-1", "name-testimonial-1"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-16" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-bg)" },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-md" } },
+        "border": { "desktop": "1px solid var(--color-border)", "tablet": "1px solid var(--color-border)", "mobile": "1px solid var(--color-border)" },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "quote-testimonial-1": {
+      "id": "quote-testimonial-1",
+      "type": "paragraph",
+      "parentId": "card-testimonial-1",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 14 } },
+        "lineHeight": { "desktop": 1.6, "tablet": 1.6, "mobile": 1.5 },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "My skin has never felt calmer. The facial was gentle and the results show."
+    },
+    "name-testimonial-1": {
+      "id": "name-testimonial-1",
+      "type": "heading",
+      "parentId": "card-testimonial-1",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-accent)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 15 }, "tablet": { "kind": "px", "value": 14 }, "mobile": { "kind": "px", "value": 13 } },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 3,
+      "text": "Client — Cape Town"
+    },
+    "card-testimonial-2": {
+      "id": "card-testimonial-2",
+      "type": "card",
+      "parentId": "sec-testimonials",
+      "children": ["quote-testimonial-2", "name-testimonial-2"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-16" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-bg)" },
+        "borderRadius": { "desktop": { "kind": "token", "value": 8, "token": "radius-md" } },
+        "border": { "desktop": "1px solid var(--color-border)", "tablet": "1px solid var(--color-border)", "mobile": "1px solid var(--color-border)" },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "quote-testimonial-2": {
+      "id": "quote-testimonial-2",
+      "type": "paragraph",
+      "parentId": "card-testimonial-2",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 16 }, "tablet": { "kind": "px", "value": 15 }, "mobile": { "kind": "px", "value": 14 } },
+        "lineHeight": { "desktop": 1.6, "tablet": 1.6, "mobile": 1.5 },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "A wonderful, unhurried massage. We left feeling properly relaxed."
+    },
+    "name-testimonial-2": {
+      "id": "name-testimonial-2",
+      "type": "heading",
+      "parentId": "card-testimonial-2",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-accent)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 15 }, "tablet": { "kind": "px", "value": 14 }, "mobile": { "kind": "px", "value": 13 } },
+        "textAlign": { "desktop": "center", "tablet": "center", "mobile": "center" }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 3,
+      "text": "Client — Stellenbosch"
+    },
+    "footer-global": {
+      "id": "footer-global",
+      "type": "footer",
+      "parentId": null,
+      "children": ["gfooter-inner"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-16" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-bg)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 14 }, "tablet": { "kind": "px", "value": 13 }, "mobile": { "kind": "px", "value": 13 } },
+        "minHeight": { "desktop": { "kind": "token", "value": 11, "token": "tap-min" }, "tablet": { "kind": "token", "value": 11, "token": "tap-min" }, "mobile": { "kind": "token", "value": 11, "token": "tap-min" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "gfooter-inner": {
+      "id": "gfooter-inner",
+      "type": "container",
+      "parentId": "footer-global",
+      "children": ["foot-brand", "foot-phone"],
+      "styles": {
+        "display": { "desktop": "flex", "tablet": "flex", "mobile": "flex" },
+        "flexDirection": { "desktop": "column", "tablet": "column", "mobile": "column" },
+        "gap": { "desktop": { "kind": "token", "value": 2, "token": "space-8" }, "tablet": { "kind": "token", "value": 2, "token": "space-8" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "padding": { "desktop": { "kind": "token", "value": 3, "token": "space-16" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } }
+      },
+      "hidden": {},
+      "locked": false
+    },
+    "foot-brand": {
+      "id": "foot-brand",
+      "type": "heading",
+      "parentId": "gfooter-inner",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-accent)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 18 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 14 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 3,
+      "text": "Bloom Studio"
+    },
+    "foot-phone": {
+      "id": "foot-phone",
+      "type": "paragraph",
+      "parentId": "gfooter-inner",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 14 }, "tablet": { "kind": "px", "value": 13 }, "mobile": { "kind": "px", "value": 13 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "+27 00 000 0000"
+    },
+    "page-about": {
+      "id": "page-about",
+      "type": "page",
+      "parentId": null,
+      "children": ["sec-about-page"],
+      "styles": {},
+      "hidden": {},
+      "locked": false,
+      "rootId": "page-about",
+      "title": "About",
+      "slug": "about",
+      "backgroundLayers": []
+    },
+    "sec-about-page": {
+      "id": "sec-about-page",
+      "type": "section",
+      "parentId": "page-about",
+      "children": ["h-about-page", "p-about-page", "p-about-page-2"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-surface)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": false, "feather": 0, "overlap": 0 }
+    },
+    "h-about-page": {
+      "id": "h-about-page",
+      "type": "heading",
+      "parentId": "sec-about-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 48 }, "tablet": { "kind": "px", "value": 38 }, "mobile": { "kind": "px", "value": 28 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 1,
+      "text": "About our studio"
+    },
+    "p-about-page": {
+      "id": "p-about-page",
+      "type": "paragraph",
+      "parentId": "sec-about-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "We are a small beauty studio in Cape Town. We opened to give neighbours a calm place for facials, massage and skin care without the rush."
+    },
+    "p-about-page-2": {
+      "id": "p-about-page-2",
+      "type": "paragraph",
+      "parentId": "sec-about-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Every treatment is done by hand, with products chosen for sensitive skin. We take our time so you do too."
+    },
+    "page-services": {
+      "id": "page-services",
+      "type": "page",
+      "parentId": null,
+      "children": ["sec-services-page"],
+      "styles": {},
+      "hidden": {},
+      "locked": false,
+      "rootId": "page-services",
+      "title": "Services",
+      "slug": "services",
+      "backgroundLayers": []
+    },
+    "sec-services-page": {
+      "id": "sec-services-page",
+      "type": "section",
+      "parentId": "page-services",
+      "children": ["h-services-page", "p-services-page"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-bg)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": false, "feather": 0, "overlap": 0 }
+    },
+    "h-services-page": {
+      "id": "h-services-page",
+      "type": "heading",
+      "parentId": "sec-services-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 48 }, "tablet": { "kind": "px", "value": 38 }, "mobile": { "kind": "px", "value": 28 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 1,
+      "text": "Our services"
+    },
+    "p-services-page": {
+      "id": "p-services-page",
+      "type": "paragraph",
+      "parentId": "sec-services-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Facials, massage and skin peels, booked by appointment in Cape Town, Stellenbosch and Somerset West."
+    },
+    "page-contact": {
+      "id": "page-contact",
+      "type": "page",
+      "parentId": null,
+      "children": ["sec-contact-page"],
+      "styles": {},
+      "hidden": {},
+      "locked": false,
+      "rootId": "page-contact",
+      "title": "Contact",
+      "slug": "contact",
+      "backgroundLayers": []
+    },
+    "sec-contact-page": {
+      "id": "sec-contact-page",
+      "type": "section",
+      "parentId": "page-contact",
+      "children": ["h-contact-page", "p-contact-page"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-surface)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": false, "feather": 0, "overlap": 0 }
+    },
+    "h-contact-page": {
+      "id": "h-contact-page",
+      "type": "heading",
+      "parentId": "sec-contact-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 48 }, "tablet": { "kind": "px", "value": 38 }, "mobile": { "kind": "px", "value": 28 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 1,
+      "text": "Contact"
+    },
+    "p-contact-page": {
+      "id": "p-contact-page",
+      "type": "paragraph",
+      "parentId": "sec-contact-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Call us on +27 00 000 0000. We are in Cape Town and reply within one business day."
+    },
+    "page-pricing": {
+      "id": "page-pricing",
+      "type": "page",
+      "parentId": null,
+      "children": ["sec-pricing-page"],
+      "styles": {},
+      "hidden": {},
+      "locked": false,
+      "rootId": "page-pricing",
+      "title": "Pricing",
+      "slug": "pricing",
+      "backgroundLayers": []
+    },
+    "sec-pricing-page": {
+      "id": "sec-pricing-page",
+      "type": "section",
+      "parentId": "page-pricing",
+      "children": ["h-pricing-page", "p-pricing-page"],
+      "styles": {
+        "padding": { "desktop": { "kind": "token", "value": 4, "token": "space-24" }, "tablet": { "kind": "token", "value": 3, "token": "space-16" }, "mobile": { "kind": "token", "value": 2, "token": "space-8" } },
+        "backgroundColor": { "desktop": "var(--color-bg)" }
+      },
+      "hidden": {},
+      "locked": false,
+      "backgroundLayers": [],
+      "sectionBlend": { "enabled": false, "feather": 0, "overlap": 0 }
+    },
+    "h-pricing-page": {
+      "id": "h-pricing-page",
+      "type": "heading",
+      "parentId": "sec-pricing-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-heading)" },
+        "color": { "desktop": "var(--color-ink)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 48 }, "tablet": { "kind": "px", "value": 38 }, "mobile": { "kind": "px", "value": 28 } }
+      },
+      "hidden": {},
+      "locked": false,
+      "level": 1,
+      "text": "Pricing"
+    },
+    "p-pricing-page": {
+      "id": "p-pricing-page",
+      "type": "paragraph",
+      "parentId": "sec-pricing-page",
+      "children": [],
+      "styles": {
+        "fontFamily": { "desktop": "var(--font-body)" },
+        "color": { "desktop": "var(--color-muted)" },
+        "fontSize": { "desktop": { "kind": "px", "value": 17 }, "tablet": { "kind": "px", "value": 16 }, "mobile": { "kind": "px", "value": 15 } },
+        "lineHeight": { "desktop": 1.7, "tablet": 1.65, "mobile": 1.55 },
+        "maxWidth": { "desktop": { "kind": "token", "value": 48, "token": "space-16" } }
+      },
+      "hidden": {},
+      "locked": false,
+      "text": "Facials from R450. Massage from R650. Skin peels from R850."
+    }
+  },
+  "blocks": [],
+  "globalHeaderId": "nav-global",
+  "globalFooterId": "footer-global",
+  "schemaVersion": 2
+}
