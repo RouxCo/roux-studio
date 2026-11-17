@@ -131,6 +131,16 @@ export interface EditorStore extends ProjectData {
   insertBlock: (blockId: string, parentId: NodeId | null, index?: number) => void;
   renameBlock: (blockId: string, name: string) => void;
   deleteBlock: (blockId: string) => void;
+
+  // Global header/footer (each one history step unless batched).
+  makeGlobalHeader: (nodeId: NodeId) => void;
+  makeGlobalFooter: (nodeId: NodeId) => void;
+  removeGlobalHeader: () => void;
+  removeGlobalFooter: () => void;
+  setPageGlobals: (
+    pageId: PageId,
+    globals: { header?: boolean; footer?: boolean },
+  ) => void;
 }
 
 function projectDataOf(state: EditorStore): ProjectData {
@@ -754,6 +764,83 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       draft.blocks = draft.blocks.filter((b) => b.id !== blockId);
     });
   },
+
+  makeGlobalHeader: (nodeId) => {
+    get().updateData((draft) => {
+      const node = draft.nodes[nodeId];
+      if (!node) return;
+      if (node.type !== 'section' && node.type !== 'nav' && node.type !== 'footer') return;
+      if (nodeId === draft.globalHeaderId) return;
+      if (node.parentId === null) return;
+      const parent = draft.nodes[node.parentId];
+      if (!parent || parent.type !== 'page') return;
+      if (!parent.children.includes(nodeId)) return;
+      // Replace any existing global header subtree first.
+      if (draft.globalHeaderId) {
+        for (const id of collectDescendants(draft.nodes, draft.globalHeaderId)) {
+          delete draft.nodes[id];
+        }
+        delete draft.nodes[draft.globalHeaderId];
+      }
+      parent.children = parent.children.filter((id) => id !== nodeId);
+      node.parentId = null;
+      draft.globalHeaderId = nodeId;
+      for (const page of draft.pages) page.useGlobalHeader = true;
+    });
+  },
+
+  makeGlobalFooter: (nodeId) => {
+    get().updateData((draft) => {
+      const node = draft.nodes[nodeId];
+      if (!node) return;
+      if (node.type !== 'section' && node.type !== 'nav' && node.type !== 'footer') return;
+      if (nodeId === draft.globalFooterId) return;
+      if (node.parentId === null) return;
+      const parent = draft.nodes[node.parentId];
+      if (!parent || parent.type !== 'page') return;
+      if (!parent.children.includes(nodeId)) return;
+      // Replace any existing global footer subtree first.
+      if (draft.globalFooterId) {
+        for (const id of collectDescendants(draft.nodes, draft.globalFooterId)) {
+          delete draft.nodes[id];
+        }
+        delete draft.nodes[draft.globalFooterId];
+      }
+      parent.children = parent.children.filter((id) => id !== nodeId);
+      node.parentId = null;
+      draft.globalFooterId = nodeId;
+      for (const page of draft.pages) page.useGlobalFooter = true;
+    });
+  },
+
+  removeGlobalHeader: () => {
+    get().updateData((draft) => {
+      const id = draft.globalHeaderId;
+      if (!id) return;
+      for (const desc of collectDescendants(draft.nodes, id)) delete draft.nodes[desc];
+      delete draft.nodes[id];
+      draft.globalHeaderId = null;
+    });
+  },
+
+  removeGlobalFooter: () => {
+    get().updateData((draft) => {
+      const id = draft.globalFooterId;
+      if (!id) return;
+      for (const desc of collectDescendants(draft.nodes, id)) delete draft.nodes[desc];
+      delete draft.nodes[id];
+      draft.globalFooterId = null;
+    });
+  },
+
+  setPageGlobals: (pageId, globals) => {
+    get().updateData((draft) => {
+      const page = draft.pages.find((p) => p.id === pageId);
+      if (!page) return;
+      if (globals.header !== undefined) page.useGlobalHeader = globals.header;
+      if (globals.footer !== undefined) page.useGlobalFooter = globals.footer;
+    });
+  },
 };
   projectBroadcast.subscribe((notice) => {
     const state = get();
@@ -797,6 +884,24 @@ function collectDescendants(
     }
   }
   return out;
+}
+
+// Which global (header/footer) a node belongs to: walks parentId up to the
+// subtree root (parentId null) and checks it against the global ids. Returns
+// null when the node is not inside either global subtree.
+export function globalOwner(
+  nodes: Record<NodeId, Node>,
+  nodeId: NodeId,
+  headerId: NodeId | null,
+  footerId: NodeId | null,
+): 'header' | 'footer' | null {
+  let id: NodeId | null = nodeId;
+  while (id !== null) {
+    if (id === headerId) return 'header';
+    if (id === footerId) return 'footer';
+    id = nodes[id]?.parentId ?? null;
+  }
+  return null;
 }
 
 // Deep-clone a node and all of its descendants, keyed by their original ids.
