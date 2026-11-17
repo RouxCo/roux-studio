@@ -136,3 +136,13 @@ Optional layer fields added for M4 Job 4 (name, blur, brightness, intensity, sca
 - Give blended sections their own `isolation: isolate` stacking context.
 
 **Reason:** SectionBlend: overlap = overlap with previous section; featherTop/featherBottom optional, fall back to feather. All blend px values round to whole numbers to avoid sub-pixel seams, and `usesLayeredPath(node)` (visible layers && (needsLayeredPath || blendActive)) is used in both compileStyles and renderNode so they can't disagree.
+
+---
+
+## 2026-11-17 — Containment: content nesting inside containers, boxes, cards and slides
+
+**Decision:** Cards, containers, boxes and slides hold content nodes directly so templates can group a heading and a price; a pricing table stays section-level only.
+
+**Alternatives:** Leave `container`/`box`/`card`/`slide` as `NONE` and keep the old workaround of using `form` nodes as visual cards (deleted with the sample template in Job 8); let `pricingTable` hold cards outside sections.
+
+**Reason:** `CONTAINMENT_RULES` in `src/store/containment.ts` is widened before any real template is written: `container`, `box`, `card` and `slide` get `CONTENT_ALLOWED`, `faqItem` gains phrasing/content children, `form` gains `container` and `box`, while `pricingTable` stays `rule('card')`, sections stay section-level only, and `src/templates/validate.ts` checks every parent/child pair against the same table.

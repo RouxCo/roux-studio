@@ -34,11 +34,25 @@ const SECTION_ALLOWED: Rule = new Set(
   ALL_TYPES.filter((t) => t !== 'section' && t !== 'nav' && t !== 'footer'),
 );
 
+// Containers, boxes, cards and slides hold page content directly; a pricing
+// table is only valid inside a section.
+const CONTENT_ALLOWED: Rule = new Set(
+  ALL_TYPES.filter(
+    (t) =>
+      t !== 'page' &&
+      t !== 'section' &&
+      t !== 'nav' &&
+      t !== 'footer' &&
+      t !== 'componentInstance' &&
+      t !== 'pricingTable',
+  ),
+);
+
 export const CONTAINMENT_RULES: Record<ElementType, Rule> = {
   page: rule('section', 'nav', 'footer', 'componentInstance'),
   section: SECTION_ALLOWED,
-  container: NONE,
-  box: NONE,
+  container: CONTENT_ALLOWED,
+  box: CONTENT_ALLOWED,
   heading: NONE,
   paragraph: NONE,
   richText: NONE,
@@ -46,16 +60,16 @@ export const CONTAINMENT_RULES: Record<ElementType, Rule> = {
   link: NONE,
   image: NONE,
   icon: NONE,
-  form: rule('formField', 'button', 'paragraph', 'heading'),
+  form: rule('formField', 'button', 'paragraph', 'heading', 'container', 'box'),
   formField: NONE,
   faq: rule('faqItem'),
-  faqItem: NONE,
+  faqItem: rule('heading', 'paragraph', 'richText', 'button', 'link', 'image', 'icon'),
   slider: rule('slide'),
-  slide: NONE,
+  slide: CONTENT_ALLOWED,
   gallery: rule('imageItem'),
   imageItem: NONE,
   pricingTable: rule('card'),
-  card: NONE,
+  card: CONTENT_ALLOWED,
   nav: NAV_FOOTER_ALLOWED,
   footer: NAV_FOOTER_ALLOWED,
   componentInstance: NONE,

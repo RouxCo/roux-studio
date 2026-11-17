@@ -642,6 +642,13 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       if (targetParentId !== null && !parentType) {
         throw new ContainmentError(`Paste target ${targetParentId} does not exist.`);
       }
+      // Pasting a subtree into one of its own roots would reparent a copy onto
+      // the node being copied — the previous NONE rules rejected that, keep it.
+      if (targetParentId !== null && rootsSet.has(targetParentId)) {
+        throw new ContainmentError(
+          `Cannot paste into ${targetParentId}: it is one of the nodes being copied.`,
+        );
+      }
       for (const rootId of clip.roots) {
         const rootNode = clip.nodes[rootId];
         if (!rootNode) continue;
