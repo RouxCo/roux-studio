@@ -56,6 +56,12 @@ export interface RenderContext {
   // Canvas-only: when true, video background layers render a <video> so they
   // play on the canvas. Not persisted, not undoable.
   playBackgrounds?: boolean;
+  // Global header/footer rendered by this page. Null when the page has opted
+  // out (Canvas passes them only when Page.useGlobalHeader/useGlobalFooter is
+  // true) or the global subtree does not exist. The subtree nodes live in
+  // `nodes` with parentId null and belong to no page's children array.
+  globalHeaderId?: NodeId | null;
+  globalFooterId?: NodeId | null;
 }
 
 const DATA_NODE_ID = 'data-node-id';
@@ -374,9 +380,53 @@ export function renderNode(node: Node, ctx: RenderContext): JSX.Element {
   const className = classFor(node.id);
 
   switch (node.type) {
-    case 'page':
+    case 'page': {
+      // The global header renders after the page background and before the
+      // page's own children, the global footer after them; each subtree is
+      // rendered through renderNode with its own key. The header/footer
+      // subtrees live in `nodes` with parentId null and belong to no page's
+      // children array, so rendering them here does not recurse. Editing a
+      // global node anywhere edits it on every page that opts in.
+      const header = ctx.globalHeaderId ? ctx.nodes[ctx.globalHeaderId] : null;
+      const footer = ctx.globalFooterId ? ctx.nodes[ctx.globalFooterId] : null;
+      const layers = visibleLayers(node.backgroundLayers);
+      const background =
+        usesLayeredPath(node) ? (
+          <div className="r-bg" aria-hidden="true">
+            {[...layers].reverse().map((layer) => (
+              <div key={layer.id} className={`r-bg-layer ${layerClass(layer)}`}>
+                {ctx.mode === 'canvas' &&
+                  ctx.playBackgrounds &&
+                  layer.type === 'video' ? (
+                  <video
+                    src={layer.src}
+                    poster={layer.poster}
+                    muted
+                    loop
+                    playsInline
+                    autoPlay
+                    className="r-bg-video"
+                  />
+                ) : null}
+              </div>
+            ))}
+          </div>
+        ) : null;
+      return (
+        <div {...attrs} style={styleProp} className={className}>
+          {background}
+          {header && (
+            <Fragment key="global-header">{renderNode(header, ctx)}</Fragment>
+          )}
+          {children}
+          {footer && (
+            <Fragment key="global-footer">{renderNode(footer, ctx)}</Fragment>
+          )}
+        </div>
+      );
+    }
     case 'section': {
-      const Tag = node.type === 'page' ? 'div' : 'section';
+      const Tag = 'section';
       const layers = visibleLayers(node.backgroundLayers);
       // Layered backgrounds render an aria-hidden .r-bg wrapper as the first
       // child, holding one .r-bg-layer per visible layer in reverse order

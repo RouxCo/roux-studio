@@ -16,6 +16,7 @@ import { createPortal } from 'react-dom';
 import type { Node, NodeId, Breakpoint, PageId, Project } from '../types';
 import { renderNode } from './renderNode';
 import { compileStyles } from '../compile/compileStyles';
+import { globalOwner } from '../store/useEditorStore';
 import SelectionOverlay from './SelectionOverlay';
 import ContextMenu from '../components/ContextMenu';
 import { useEditorStore } from '../store/useEditorStore';
@@ -54,6 +55,8 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1, onContextMen
   const tokens = useEditorStore((state) => state.tokens);
   const currentPageId = useEditorStore((state) => state.currentPageId);
   const playBackgrounds = useEditorStore((state) => state.playBackgrounds);
+  const globalHeaderId = useEditorStore((state) => state.globalHeaderId);
+  const globalFooterId = useEditorStore((state) => state.globalFooterId);
   // PageId (e.g. 'pg-1'), not the page node id (e.g. 'page-1'): fall back to the
   // page whose rootId matches the rendered page node.
   const pageId =
@@ -68,10 +71,10 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1, onContextMen
       pages,
       tokens,
       blocks: [],
-      globalHeaderId: null,
-      globalFooterId: null,
+      globalHeaderId,
+      globalFooterId,
     }),
-    [projectId, projectName, pages, tokens]
+    [projectId, projectName, pages, tokens, globalHeaderId, globalFooterId]
   );
 
   const [loaded, setLoaded] = useState(false);
@@ -115,12 +118,30 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1, onContextMen
     if (!doc) return;
     const container = doc.body;
     if (!container) return;
+    // Only pass a global id to the renderer when the current page opts in, so
+    // a page that has turned the global header/footer off never renders it.
+    const currentPage = pages.find((p) => p.id === pageId);
+    const headerId = currentPage?.useGlobalHeader ? globalHeaderId : null;
+    const footerId = currentPage?.useGlobalFooter ? globalFooterId : null;
+    // Banner: when the selection sits inside a global subtree, edits apply to
+    // every page that renders it.
+    const owner =
+      selectedId && (headerId || footerId)
+        ? globalOwner(nodes, selectedId, headerId, footerId)
+        : null;
     return createPortal(
       <>
+        {owner ? (
+          <div id="roux-global-banner" data-global={owner}>
+            Editing global {owner} – changes apply to all pages
+          </div>
+        ) : null}
         {renderNode(page, {
           mode: 'canvas',
           breakpoint,
           nodes,
+          globalHeaderId: headerId,
+          globalFooterId: footerId,
           editingNodeId,
           playBackgrounds,
           onStartEditing: startEditing,
@@ -138,7 +159,23 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1, onContextMen
       </>,
       container,
     );
-  }, [page, nodes, breakpoint, loaded, editingNodeId, startEditing, saveText, cancelEditing, menu, playBackgrounds]);
+  }, [
+    page,
+    nodes,
+    breakpoint,
+    loaded,
+    pages,
+    pageId,
+    editingNodeId,
+    startEditing,
+    saveText,
+    cancelEditing,
+    menu,
+    playBackgrounds,
+    globalHeaderId,
+    globalFooterId,
+    selectedId,
+  ]);
 
   const [element, setElement] = useState<React.ReactNode>(null);
 

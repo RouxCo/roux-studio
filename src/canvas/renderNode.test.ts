@@ -489,3 +489,124 @@ describe('renderNode — play backgrounds (video)', () => {
     expect(html).not.toMatch(/style=/);
   });
 });
+
+describe('renderNode — global header/footer', () => {
+  const HEAD = 'head-1';
+  const HEADING = 'gh-1';
+  const FOOT = 'foot-1';
+  const FOOT_P = 'fp-1';
+
+  function globalPage(id: NodeId): Node {
+    return {
+      id, type: 'page', parentId: null, children: ['box-1'], styles: {},
+      hidden: {}, locked: false, title: 'Home', slug: 'home', backgroundLayers: [],
+    };
+  }
+
+  function globalTree(pages: Node[]): Record<NodeId, Node> {
+    const tree: Record<NodeId, Node> = {};
+    for (const page of pages) tree[page.id] = page;
+    tree['box-1'] = {
+      id: 'box-1', type: 'box', parentId: pages[0].id, children: ['p-1'], styles: {},
+      hidden: {}, locked: false,
+    };
+    tree['p-1'] = {
+      id: 'p-1', type: 'paragraph', parentId: 'box-1', children: [], styles: {},
+      hidden: {}, locked: false, text: 'Page content',
+    };
+    // Global header/footer: parentId null, NOT in any page's children array.
+    tree[HEAD] = {
+      id: HEAD, type: 'section', parentId: null, children: [HEADING], styles: {},
+      hidden: {}, locked: false,
+      backgroundLayers: [], sectionBlend: { enabled: false, feather: 0, overlap: 0 },
+    };
+    tree[HEADING] = {
+      id: HEADING, type: 'heading', parentId: HEAD, children: [], styles: {},
+      hidden: {}, locked: false, level: 1, text: 'Global header',
+    };
+    tree[FOOT] = {
+      id: FOOT, type: 'footer', parentId: null, children: [FOOT_P], styles: {},
+      hidden: {}, locked: false,
+    };
+    tree[FOOT_P] = {
+      id: FOOT_P, type: 'paragraph', parentId: FOOT, children: [], styles: {},
+      hidden: {}, locked: false, text: 'Global footer',
+    };
+    return tree;
+  }
+
+  function renderGlobals(
+    page: Node,
+    nodes: Record<NodeId, Node>,
+    globals: { header?: NodeId | null; footer?: NodeId | null },
+  ): string {
+    return renderToStaticMarkup(
+      renderNode(page, {
+        mode: 'canvas',
+        breakpoint: 'desktop',
+        nodes,
+        globalHeaderId: globals.header ?? null,
+        globalFooterId: globals.footer ?? null,
+      }),
+    );
+  }
+
+  it('renders the global header after the background and before the page children', () => {
+    const tree = globalTree([globalPage('page-1')]);
+    const html = renderGlobals(tree['page-1']!, tree, { header: HEAD });
+    expect(html).toContain('data-node-id="head-1"');
+    expect(html).toContain('Global header');
+    expect(html.indexOf('data-node-id="head-1"')).toBeLessThan(html.indexOf('data-node-id="box-1"'));
+    expect(html.indexOf('data-node-id="box-1"')).toBeLessThan(html.indexOf('Page content'));
+  });
+
+  it('renders the global footer after the page children', () => {
+    const tree = globalTree([globalPage('page-1')]);
+    const html = renderGlobals(tree['page-1']!, tree, { footer: FOOT });
+    expect(html).toContain('Global footer');
+    expect(html.indexOf('data-node-id="box-1"')).toBeLessThan(html.indexOf('data-node-id="foot-1"'));
+    expect(html.indexOf('data-node-id="foot-1"')).toBeLessThan(html.indexOf('data-node-id="fp-1"'));
+  });
+
+  it('renders header and footer together in the right order', () => {
+    const tree = globalTree([globalPage('page-1')]);
+    const html = renderGlobals(tree['page-1']!, tree, { header: HEAD, footer: FOOT });
+    expect(html.indexOf('data-node-id="head-1"')).toBeLessThan(html.indexOf('data-node-id="box-1"'));
+    expect(html.indexOf('data-node-id="box-1"')).toBeLessThan(html.indexOf('data-node-id="foot-1"'));
+  });
+
+  it('omits the header/footer when the page has not opted in (ids are null)', () => {
+    const tree = globalTree([globalPage('page-1')]);
+    const html = renderGlobals(tree['page-1']!, tree, {});
+    expect(html).not.toContain('Global header');
+    expect(html).not.toContain('Global footer');
+    expect(html).not.toContain('data-node-id="head-1"');
+    expect(html).not.toContain('data-node-id="foot-1"');
+  });
+
+  it('gives header/footer nodes data-node-id in canvas mode', () => {
+    const tree = globalTree([globalPage('page-1')]);
+    const html = renderGlobals(tree['page-1']!, tree, { header: HEAD, footer: FOOT });
+    expect(html).toContain('data-node-id="head-1"');
+    expect(html).toContain('data-node-id="gh-1"');
+    expect(html).toContain('data-node-id="foot-1"');
+    expect(html).toContain('data-node-id="fp-1"');
+  });
+
+  it('renders the same global header on two different pages', () => {
+    const pageA = globalPage('page-a');
+    const pageB = { ...globalPage('page-b'), children: ['box-b'] };
+    const tree = globalTree([pageA, pageB]);
+    tree['box-b'] = {
+      id: 'box-b', type: 'box', parentId: 'page-b', children: [], styles: {},
+      hidden: {}, locked: false,
+    };
+    const htmlA = renderGlobals(pageA, tree, { header: HEAD });
+    const htmlB = renderGlobals(pageB, tree, { header: HEAD });
+    expect(htmlA).toContain('Global header');
+    expect(htmlB).toContain('Global header');
+    expect(tree['page-a']!.children).not.toContain(HEAD);
+    expect(tree['page-b']!.children).not.toContain(HEAD);
+    expect(tree[HEAD]!.parentId).toBeNull();
+  });
+});
