@@ -129,9 +129,10 @@ function Row({
   const hasChildren = node.children.length > 0;
   const label = nodeLabel(node);
 
-  // Pages stay at the root and cannot be moved, so they are not draggable.
+  // Pages and the global header/footer roots stay at the tree root and cannot
+  // be moved, so they are not draggable.
   const { attributes, listeners, node: setDraggableRef, transform, isDragging } =
-    useDraggable({ id: node.id, disabled: node.type === 'page' });
+    useDraggable({ id: node.id, disabled: node.type === 'page' || node.parentId === null });
   const { isOver, node: setDroppableRef } = useDroppable({ id: node.id });
 
   const setRef = useCallback(
@@ -215,7 +216,13 @@ export default function LayersTree({ onContextMenu }: LayersTreeProps) {
   const nodes = useEditorStore((state) => state.nodes);
   const currentPageId = useEditorStore((state) => state.currentPageId);
   const moveNode = useEditorStore((state) => state.moveNode);
+  const globalHeaderId = useEditorStore((state) => state.globalHeaderId);
+  const globalFooterId = useEditorStore((state) => state.globalFooterId);
   const [collapsed, setCollapsed] = useState<Set<NodeId>>(new Set());
+
+  const globalHeader = globalHeaderId ? nodes[globalHeaderId] : undefined;
+  const globalFooter = globalFooterId ? nodes[globalFooterId] : undefined;
+  const hasGlobals = !!globalHeader || !!globalFooter;
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
@@ -257,10 +264,19 @@ export default function LayersTree({ onContextMenu }: LayersTreeProps) {
       <div className="h-full flex flex-col" onContextMenu={handleContextMenu}>
         <div className="px-4 py-3 text-xs font-semibold text-slate-300 uppercase tracking-wider">Layers</div>
         <div className="flex-1 overflow-y-auto">
-          {!root ? (
+          {!root && !hasGlobals ? (
             <div className="px-4 py-2 text-xs text-slate-500 italic">No page selected</div>
           ) : (
-            renderTree(root)
+            <>
+              {hasGlobals && (
+                <div key="global-label" className="px-4 py-2 text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                  Global
+                </div>
+              )}
+              {globalHeader && renderTree(globalHeader)}
+              {!root ? null : renderTree(root)}
+              {globalFooter && renderTree(globalFooter)}
+            </>
           )}
         </div>
       </div>

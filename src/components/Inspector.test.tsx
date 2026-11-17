@@ -10,7 +10,7 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { useEditorStore } from '../store/useEditorStore';
-import type { BoxNode, Breakpoint, NodeId } from '../types';
+import type { BoxNode, Breakpoint, Node, NodeId } from '../types';
 import { emptyEditorData } from '../types';
 import Inspector from './Inspector';
 
@@ -207,5 +207,98 @@ describe('Inspector: design tokens', () => {
     expect(get().tokens.byName).toEqual({});
     expect(get().nodes['box1']?.styles.width).toEqual({ desktop: { kind: 'px', value: 16 } });
     expect(input.value).toBe('16px');
+  });
+});
+
+describe('Inspector — page globals', () => {
+  function pageNode(): Node {
+    return {
+      id: 'page-1', type: 'page', parentId: null, children: [], styles: {}, hidden: {}, locked: false,
+      title: 'Home', slug: 'home', backgroundLayers: [],
+    };
+  }
+
+  function renderPageInspector(
+    pages: { id: string; rootId: string; useGlobalHeader?: boolean; useGlobalFooter?: boolean }[],
+    globals: { headerId: NodeId | null; footerId: NodeId | null },
+    nodes: Record<NodeId, Node> = { 'page-1': pageNode() },
+  ) {
+    useEditorStore.setState({
+      ...emptyEditorData(),
+      pages: pages.map((p) => ({ id: p.id, title: 'Home', slug: p.id, rootId: p.rootId, useGlobalHeader: p.useGlobalHeader, useGlobalFooter: p.useGlobalFooter })),
+      nodes,
+      selection: ['page-1'],
+      globalHeaderId: globals.headerId,
+      globalFooterId: globals.footerId,
+      zoom: 1,
+      readOnly: false,
+      remoteRevision: 0,
+      history: [],
+      historyIndex: -1,
+      isBatching: false,
+      pendingForward: [],
+      pendingInverse: [],
+    } as never);
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    let root!: ReturnType<typeof createRoot>;
+    act(() => {
+      root = createRoot(container);
+      root.render(<Inspector />);
+    });
+    return { container, get: () => useEditorStore.getState() };
+  }
+
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it('shows the global header/footer checkboxes when a page is selected', () => {
+    const { container } = renderPageInspector([{ id: 'pg-1', rootId: 'page-1' }], { headerId: null, footerId: null });
+    expect(container.textContent).toContain('Use global header');
+    expect(container.textContent).toContain('Use global footer');
+    expect(container.querySelector('button[aria-label="Remove global header"]')).toBeNull();
+    expect(container.querySelector('button[aria-label="Remove global footer"]')).toBeNull();
+  });
+
+  it('shows remove buttons when the globals exist', () => {
+    const nodes = { 'page-1': pageNode(), 'head-1': { ...pageNode(), id: 'head-1', type: 'section', parentId: null, children: [] } as Node };
+    const { container } = renderPageInspector([{ id: 'pg-1', rootId: 'page-1' }], { headerId: 'head-1', footerId: null }, nodes);
+    expect(container.querySelector('button[aria-label="Remove global header"]')).not.toBeNull();
+    expect(container.querySelector('button[aria-label="Remove global footer"]')).toBeNull();
+  });
+
+  it('toggles the page flags through the checkboxes', () => {
+    const { container, get } = renderPageInspector(
+      [{ id: 'pg-1', rootId: 'page-1', useGlobalHeader: false, useGlobalFooter: false }],
+      { headerId: null, footerId: null },
+    );
+    const checkboxes = Array.from(container.querySelectorAll('input[type="checkbox"]'));
+    expect(checkboxes).toHaveLength(2);
+    act(() => {
+      checkboxes[0]!.click();
+    });
+    expect(get().pages.find((p) => p.id === 'pg-1')!.useGlobalHeader).toBe(true);
+    expect(get().pages.find((p) => p.id === 'pg-1')!.useGlobalFooter).toBe(false);
+  });
+
+  it('removes the global header via the remove button and leaves the page flags alone', () => {
+    const nodes = {
+      'page-1': pageNode(),
+      'head-1': { ...pageNode(), id: 'head-1', type: 'section', parentId: null, children: [] } as Node,
+    };
+    const { container, get } = renderPageInspector(
+      [{ id: 'pg-1', rootId: 'page-1', useGlobalHeader: true, useGlobalFooter: false }],
+      { headerId: 'head-1', footerId: null },
+      nodes,
+    );
+    act(() => {
+      container.querySelector('button[aria-label="Remove global header"]')!.click();
+    });
+    expect(get().globalHeaderId).toBeNull();
+    // Page flags are left as they were.
+    const page = get().pages.find((p) => p.id === 'pg-1')!;
+    expect(page.useGlobalHeader).toBe(true);
+    expect(page.useGlobalFooter).toBe(false);
   });
 });

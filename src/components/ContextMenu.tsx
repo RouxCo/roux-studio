@@ -4,7 +4,7 @@
 // Redo. Paste is gated by the store's containment rules, so a node can never be
 // pasted where it isn't allowed to be contained.
 import { useCallback } from 'react';
-import { ClipboardPaste, Copy, CopyPlus, Redo2, Scissors, Trash2, Undo2, Blocks } from 'lucide-react';
+import { ClipboardPaste, Copy, CopyPlus, Grid, Layout, Redo2, Scissors, Trash2, Undo2, Blocks } from 'lucide-react';
 import { useEditorStore } from '../store/useEditorStore';
 
 interface ContextMenuProps {
@@ -22,7 +22,9 @@ type MenuAction =
   | 'paste'
   | 'duplicate'
   | 'delete'
-  | 'saveBlock';
+  | 'saveBlock'
+  | 'makeGlobalHeader'
+  | 'makeGlobalFooter';
 
 const ITEMS: {
   id: MenuAction;
@@ -38,6 +40,8 @@ const ITEMS: {
   { id: 'duplicate', label: 'Duplicate', icon: CopyPlus, shortcut: 'Ctrl+D' },
   { id: 'delete', label: 'Delete', icon: Trash2, shortcut: 'Delete' },
   { id: 'saveBlock', label: 'Save as block', icon: Blocks, shortcut: '' },
+  { id: 'makeGlobalHeader', label: 'Make global header', icon: Layout, shortcut: '' },
+  { id: 'makeGlobalFooter', label: 'Make global footer', icon: Grid, shortcut: '' },
 ];
 
 export default function ContextMenu({
@@ -60,13 +64,29 @@ export default function ContextMenu({
   const undo = useEditorStore((state) => state.undo);
   const redo = useEditorStore((state) => state.redo);
   const saveAsBlock = useEditorStore((state) => state.saveAsBlock);
+  const makeGlobalHeader = useEditorStore((state) => state.makeGlobalHeader);
+  const makeGlobalFooter = useEditorStore((state) => state.makeGlobalFooter);
+  const globalHeaderId = useEditorStore((state) => state.globalHeaderId);
+  const globalFooterId = useEditorStore((state) => state.globalFooterId);
 
   const hasSelection = selection.length > 0;
   const canPaste = !!clipboard?.roots.length;
 
+  // A global header/footer must be a section, nav or footer that is a direct
+  // child of a page root; making a node that is already the global is a no-op.
   const singleSectionOrContainer =
     selection.length === 1 &&
     (nodes[selection[0]!]?.type === 'section' || nodes[selection[0]!]?.type === 'container');
+
+  const singlePageChild =
+    selection.length === 1 &&
+    (() => {
+      const node = nodes[selection[0]!];
+      if (!node) return false;
+      if (node.type !== 'section' && node.type !== 'nav' && node.type !== 'footer') return false;
+      if (!node.parentId) return false;
+      return nodes[node.parentId]?.type === 'page';
+    })();
 
   const handleAction = useCallback(
     (action: MenuAction) => {
@@ -103,6 +123,12 @@ export default function ContextMenu({
             if (name !== null) saveAsBlock(id, name);
             break;
           }
+          case 'makeGlobalHeader':
+            makeGlobalHeader(selection[0]!);
+            break;
+          case 'makeGlobalFooter':
+            makeGlobalFooter(selection[0]!);
+            break;
         }
       } catch {
         // Containment rejected or nothing to do — leave the store untouched.
@@ -113,6 +139,7 @@ export default function ContextMenu({
       selection,
       nodes,
       undo, redo, cut, copy, paste, duplicate, removeNodes, setSelection, saveAsBlock,
+      makeGlobalHeader, makeGlobalFooter, globalHeaderId, globalFooterId,
     ],
   );
 
@@ -136,7 +163,9 @@ export default function ContextMenu({
             ((item.id === 'cut' || item.id === 'copy' || item.id === 'duplicate' || item.id === 'delete') &&
               !hasSelection) ||
             (item.id === 'paste' && !canPaste) ||
-            (item.id === 'saveBlock' && !singleSectionOrContainer);
+            (item.id === 'saveBlock' && !singleSectionOrContainer) ||
+            (item.id === 'makeGlobalHeader' && (!singlePageChild || selection[0] === globalHeaderId)) ||
+            (item.id === 'makeGlobalFooter' && (!singlePageChild || selection[0] === globalFooterId));
           const Icon = item.icon;
           return (
             <button

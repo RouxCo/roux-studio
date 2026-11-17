@@ -87,4 +87,72 @@ describe('ContextMenu gating', () => {
     expect(btn(container, 'Undo').disabled).toBe(true);
     expect(btn(container, 'Redo').disabled).toBe(false);
   });
+
+  describe('Make global header/footer', () => {
+    function seedPage() {
+      act(() => {
+        useEditorStore.setState({
+          pages: [{ id: 'pg-1', rootId: 'page-1', title: 'Home', slug: 'home' }],
+          currentPageId: 'pg-1',
+          nodes: {
+            'page-1': {
+              id: 'page-1', type: 'page', parentId: null, children: ['sec-1'], styles: {},
+              hidden: {}, locked: false, title: 'Home', slug: 'home', backgroundLayers: [],
+            },
+            'sec-1': {
+              id: 'sec-1', type: 'section', parentId: 'page-1', children: [], styles: {},
+              hidden: {}, locked: false,
+              backgroundLayers: [], sectionBlend: { enabled: false, feather: 0, overlap: 0 },
+            },
+            'box-1': {
+              id: 'box-1', type: 'box', parentId: 'sec-1', children: [], styles: {}, hidden: {}, locked: false,
+            },
+          },
+          selection: [],
+        });
+      });
+    }
+
+    it('offers "Make global header" for a section that is a direct child of a page', () => {
+      seedPage();
+      act(() => { useEditorStore.getState().setSelection(['sec-1']); });
+      const container = renderMenu();
+      expect(btn(container, 'Make global header').disabled).toBe(false);
+      act(() => { btn(container, 'Make global header').click(); });
+      const get = () => useEditorStore.getState();
+      expect(get().globalHeaderId).toBe('sec-1');
+      expect(get().nodes['sec-1']!.parentId).toBeNull();
+      expect(get().nodes['page-1']!.children).not.toContain('sec-1');
+      expect(get().pages.find((p) => p.id === 'pg-1')!.useGlobalHeader).toBe(true);
+    });
+
+    it('offers "Make global footer" for a footer that is a direct child of a page', () => {
+      seedPage();
+      act(() => {
+        const nodes = { ...useEditorStore.getState().nodes, 'sec-1': { ...useEditorStore.getState().nodes['sec-1']!, type: 'footer' } };
+        useEditorStore.setState({ nodes, selection: ['sec-1'] });
+      });
+      const container = renderMenu();
+      expect(btn(container, 'Make global footer').disabled).toBe(false);
+      act(() => { btn(container, 'Make global footer').click(); });
+      expect(useEditorStore.getState().globalFooterId).toBe('sec-1');
+    });
+
+    it('hides the make actions behind the selection rules', () => {
+      seedPage();
+      // A box nested in a section is not a direct page-root child.
+      act(() => { useEditorStore.getState().setSelection(['box-1']); });
+      let container = renderMenu();
+      expect(btn(container, 'Make global header').disabled).toBe(true);
+      expect(btn(container, 'Make global footer').disabled).toBe(true);
+
+      // Already the global header: making it again is a no-op, so the item is off.
+      act(() => {
+        useEditorStore.getState().makeGlobalHeader('sec-1');
+        useEditorStore.getState().setSelection(['sec-1']);
+      });
+      container = renderMenu();
+      expect(btn(container, 'Make global header').disabled).toBe(true);
+    });
+  });
 });

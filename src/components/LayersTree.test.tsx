@@ -134,3 +134,42 @@ describe('LayersTree', () => {
     expect(container.textContent).toContain('No page selected');
   });
 });
+
+describe('LayersTree — global header/footer', () => {
+  function renderGlobalsTree() {
+    const nodes: Record<NodeId, Node> = {
+      'page-1': pageNode(),
+      'sec-1': sectionNode('sec-1'),
+      'head-1': { ...sectionNode('head-1'), parentId: null, children: ['gh-1'] },
+      'gh-1': headingNode('gh-1', 'head-1'),
+      'foot-1': { ...pageNode(), id: 'foot-1', type: 'footer', parentId: null, children: ['fp-1'] } as Node,
+      'fp-1': {
+        id: 'fp-1', type: 'paragraph', parentId: 'foot-1', children: [], styles: {}, hidden: {}, locked: false,
+        text: 'Global footer',
+      },
+    };
+    const { container } = renderLayersTree(nodes, 'page-1');
+    act(() => {
+      useEditorStore.setState({ globalHeaderId: 'head-1', globalFooterId: 'foot-1' });
+    });
+    return { container, get: () => useEditorStore.getState() };
+  }
+
+  it('shows the global header above and the global footer below the page tree under a Global label', () => {
+    const { container } = renderGlobalsTree();
+    const text = container.textContent!;
+    expect(text).toContain('Global');
+    // Header subtree first, then the page tree, then the footer subtree.
+    expect(text.indexOf('Global')).toBeLessThan(text.indexOf('Home'));
+    expect(text.indexOf('Home')).toBeLessThan(text.indexOf('Footer'));
+    expect(text.indexOf('Global footer')).toBeGreaterThan(text.indexOf('Home'));
+  });
+
+  it('selects a global subtree row like any other node', () => {
+    const { container, get } = renderGlobalsTree();
+    act(() => row(container, 'head-1').click());
+    expect(get().selection).toEqual(['head-1']);
+    act(() => row(container, 'foot-1').click());
+    expect(get().selection).toEqual(['foot-1']);
+  });
+});

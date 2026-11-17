@@ -302,10 +302,19 @@ function Section({ title, fields, nodeId, breakpoint, nodes }: SectionProps) {
 export default function Inspector() {
   const breakpoint = useEditorStore((state) => state.breakpoint);
   const nodes = useEditorStore((state) => state.nodes);
+  const pages = useEditorStore((state) => state.pages);
   const selection = useEditorStore((state) => state.selection);
+  const setPageGlobals = useEditorStore((state) => state.setPageGlobals);
+  const removeGlobalHeader = useEditorStore((state) => state.removeGlobalHeader);
+  const removeGlobalFooter = useEditorStore((state) => state.removeGlobalFooter);
+  const globalHeaderId = useEditorStore((state) => state.globalHeaderId);
+  const globalFooterId = useEditorStore((state) => state.globalFooterId);
 
   const selectedId = selection.length > 0 ? (selection[0] ?? null) : null;
   const node = selectedId ? nodes[selectedId] : undefined;
+  // The Page record behind the selected page node (nodes are addressed by
+  // node id, pages by page id linked through Page.rootId).
+  const page = selectedId ? pages.find((p) => p.rootId === selectedId) : undefined;
   const saveAsBlock = useEditorStore((state) => state.saveAsBlock);
 
   if (!selectedId || !node) {
@@ -342,6 +351,49 @@ export default function Inspector() {
       <Section title="Spacing" fields={SPACING} nodeId={selectedId} breakpoint={breakpoint} nodes={nodes} />
       {node && (node.type === 'page' || node.type === 'section') && (
         <BackgroundPanel nodeId={selectedId} />
+      )}
+      {node.type === 'page' && page && (
+        <section className="border-t border-slate-800 pt-4 pb-2 first:border-t-0 first:pt-0">
+          <h3 className="px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-2">
+            Global
+          </h3>
+          <div className="divide-y divide-slate-800/50 px-2">
+            <div className="flex items-center gap-2 py-2">
+              <input
+                type="checkbox"
+                checked={page.useGlobalHeader}
+                onChange={(e) => setPageGlobals(page.id, { header: e.target.checked })}
+              />
+              <label className="text-xs text-slate-200">Use global header</label>
+              {globalHeaderId && (
+                <button
+                  onClick={removeGlobalHeader}
+                  className="ml-auto text-xs text-slate-400 hover:text-slate-300 underline"
+                  aria-label="Remove global header"
+                >
+                  Remove global header
+                </button>
+              )}
+            </div>
+            <div className="flex items-center gap-2 py-2">
+              <input
+                type="checkbox"
+                checked={page.useGlobalFooter}
+                onChange={(e) => setPageGlobals(page.id, { footer: e.target.checked })}
+              />
+              <label className="text-xs text-slate-200">Use global footer</label>
+              {globalFooterId && (
+                <button
+                  onClick={removeGlobalFooter}
+                  className="ml-auto text-xs text-slate-400 hover:text-slate-300 underline"
+                  aria-label="Remove global footer"
+                >
+                  Remove global footer
+                </button>
+              )}
+            </div>
+          </div>
+        </section>
       )}
     </div>
   );
