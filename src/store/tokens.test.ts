@@ -241,4 +241,54 @@ describe('token store actions', () => {
     expect(tokenUsage(get().nodes, 'space-4')).toBe(2);
     expect(tokenUsage(get().nodes, 'gap-4')).toBe(0);
   });
+
+  it('renameToken does nothing if newName already exists', () => {
+    resetWith(
+      [],
+      {},
+      { 'space-4': lengthToken('space-4'), 'gap-4': lengthToken('gap-4') },
+    );
+
+    get().renameToken('space-4', 'gap-4');
+
+    expect(get().tokens.byName['space-4']).toBeDefined();
+    expect(get().tokens.byName['gap-4']).toEqual({
+      name: 'gap-4',
+      value: '1rem',
+      type: 'length',
+    });
+  });
+
+  it('renameToken rewrites var(--oldName) inside other tokens\' values', () => {
+    resetWith(
+      [],
+      {},
+      {
+        'space-4': lengthToken('space-4'),
+        'gap-8': { name: 'gap-8', value: 'var(--space-4)', type: 'spacing' },
+      },
+    );
+
+    get().renameToken('space-4', 'gap-4');
+
+    expect(get().tokens.byName['space-4']).toBeUndefined();
+    expect(get().tokens.byName['gap-4']!.value).toBe('1rem');
+    expect(get().tokens.byName['gap-8']!.value).toBe('var(--gap-4)');
+  });
+
+  it('deleteToken rewrites var(--name) inside other tokens\' values', () => {
+    resetWith(
+      [],
+      {},
+      {
+        'space-4': lengthToken('space-4', '1rem'),
+        'gap-8': { name: 'gap-8', value: 'var(--space-4)', type: 'spacing' },
+      },
+    );
+
+    get().deleteToken('space-4', 'detach');
+
+    expect(get().tokens.byName['space-4']).toBeUndefined();
+    expect(get().tokens.byName['gap-8']!.value).toBe('1rem');
+  });
 });

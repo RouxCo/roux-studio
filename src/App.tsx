@@ -4,6 +4,7 @@ import type { Node, NodeId } from './types'
 import Canvas from './canvas/Canvas'
 import Inspector from './components/Inspector'
 import LayersTree from './components/LayersTree'
+import TokensPanel from './components/TokensPanel'
 import TopBar from './components/TopBar'
 import ContextMenu from './components/ContextMenu'
 import { useEditorStore } from './store/useEditorStore'
@@ -49,6 +50,9 @@ export default function App() {
     x: 0,
     y: 0,
   })
+
+  // Left panel tabs: Layers or Tokens. Defaults to Layers.
+  const [tab, setTab] = useState<'layers' | 'tokens'>('layers')
 
   // Seed the store with the built-in page so the layers tree (and canvas) share
   // one source of truth. Runs once on mount.
@@ -130,9 +134,31 @@ export default function App() {
       {/* Top bar — breakpoint, zoom, undo/redo */}
       <TopBar />
 
-      {/* Left panel — layers tree */}
+      {/* Left panel — layers / tokens tabs */}
       <aside className={`fixed top-[${TOP_BAR_HEIGHT}px] bottom-0 left-0 z-30 w-[${SIDE_PANEL_WIDTH}px] border-r border-slate-800 bg-slate-900 text-slate-400`}>
-        <LayersTree onContextMenu={openMenu} />
+        <div className="flex-shrink-0 px-4 py-2 border-b border-slate-800">
+          <div className="flex gap-1">
+            <button
+              onClick={() => setTab('layers')}
+              className={`px-3 py-1.5 text-xs rounded-t-lg transition ${tab === 'layers' ? 'bg-slate-800 text-slate-100' : 'text-slate-500 hover:text-slate-200'}`}
+            >
+              Layers
+            </button>
+            <button
+              onClick={() => setTab('tokens')}
+              className={`px-3 py-1.5 text-xs rounded-t-lg transition ${tab === 'tokens' ? 'bg-slate-800 text-slate-100' : 'text-slate-500 hover:text-slate-200'}`}
+            >
+              Tokens
+            </button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          {tab === 'layers' ? (
+            <LayersTree onContextMenu={openMenu} />
+          ) : (
+            <TokensPanel />
+          )}
+        </div>
       </aside>
 
       {/* Centre canvas — fills the remaining space, centred and scrollable */}

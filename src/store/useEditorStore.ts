@@ -247,18 +247,26 @@ export const useEditorStore = create<EditorStore>((set, get) => {
     get().updateData((draft) => {
       const token = draft.tokens.byName[oldName];
       if (!token || oldName === newName) return;
+      // Do nothing if the new name already exists.
+      if (draft.tokens.byName[newName]) return;
+
       token.name = newName;
       draft.tokens.byName[newName] = token;
       delete draft.tokens.byName[oldName];
 
       const oldColour = `var(--${oldName})`;
       const newColour = `var(--${newName})`;
+      const map = (val: unknown): unknown => {
+        if (isLengthTokenRef(val, oldName)) return { ...val, token: newName };
+        if (val === oldColour) return newColour;
+        return val;
+      };
       for (const node of Object.values(draft.nodes)) {
-        rewriteTokenRefs(node.styles, (val) => {
-          if (isLengthTokenRef(val, oldName)) return { ...val, token: newName };
-          if (val === oldColour) return newColour;
-          return val;
-        });
+        rewriteTokenRefs(node.styles, map);
+      }
+      for (const other of Object.values(draft.tokens.byName)) {
+        if (other.name === newName) continue;
+        other.value = rewriteTokenValue(other.value, map);
       }
     });
   },
@@ -270,18 +278,24 @@ export const useEditorStore = create<EditorStore>((set, get) => {
 
       const replaceWith =
         typeof strategy === 'object' ? strategy.replaceWith : null;
+      const oldColour = `var(--${name})`;
+      const map = (val: unknown): unknown => {
+        if (isLengthTokenRef(val, name)) {
+          if (replaceWith) return { ...val, token: replaceWith };
+          return { kind: 'px', value: parseFloat(token.value) || 0 };
+        }
+        if (typeof val === 'string' && val === oldColour) {
+          if (replaceWith) return `var(--${replaceWith})`;
+          return token.value;
+        }
+        return val;
+      };
       for (const node of Object.values(draft.nodes)) {
-        rewriteTokenRefs(node.styles, (val) => {
-          if (isLengthTokenRef(val, name)) {
-            if (replaceWith) return { ...val, token: replaceWith };
-            return { kind: 'px', value: parseFloat(token.value) || 0 };
-          }
-          if (typeof val === 'string' && val === `var(--${name})`) {
-            if (replaceWith) return `var(--${replaceWith})`;
-            return token.value;
-          }
-          return val;
-        });
+        rewriteTokenRefs(node.styles, map);
+      }
+      for (const other of Object.values(draft.tokens.byName)) {
+        if (other.name === name) continue;
+        other.value = rewriteTokenValue(other.value, map);
       }
       delete draft.tokens.byName[name];
     });
@@ -599,6 +613,15 @@ function rewriteTokenRefs(
       }
     }
   }
+}
+
+// Apply `map` to a single token value string, rewriting any `var(--oldName)`
+// occurrence it contains. Returns the (possibly unchanged) string.
+function rewriteTokenValue(value: string, map: (val: unknown) => unknown): string {
+  return value.replace(/var\(--([^)]+)\)/g, (_, varName) => {
+    const next = map(`var(--${varName})`);
+    return typeof next === 'string' ? next : `var(--${varName})`;
+  });
 }
 
 // Count how many nodes reference the token, in any style property at any
