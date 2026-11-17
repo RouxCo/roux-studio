@@ -1,38 +1,15 @@
 import './index.css'
 import { useCallback, useEffect, useState } from 'react'
-import type { Node, NodeId } from './types'
 import Canvas from './canvas/Canvas'
 import Inspector from './components/Inspector'
 import LayersTree from './components/LayersTree'
 import TokensPanel from './components/TokensPanel'
 import BlocksPanel from './components/BlocksPanel'
 import TopBar from './components/TopBar'
+import NewProjectDialog from './components/NewProjectDialog'
 import ContextMenu from './components/ContextMenu'
 import { useEditorStore } from './store/useEditorStore'
-
-const NODES: Record<NodeId, Node> = {
-  'page-1': {
-    id: 'page-1', type: 'page', parentId: null, children: ['sec-1'], styles: {}, hidden: {}, locked: false,
-    title: 'Home', slug: 'home', backgroundLayers: [],
-  },
-  'sec-1': {
-    id: 'sec-1', type: 'section', parentId: 'page-1', children: ['box-1'], styles: {},
-    hidden: {}, locked: false, backgroundLayers: [], sectionBlend: { enabled: false, feather: 0, overlap: 0 },
-  },
-  'box-1': {
-    id: 'box-1', type: 'box', parentId: 'sec-1', children: ['h-1', 'p-1'], styles: {
-      display: { desktop: 'flex' }, padding: { desktop: { kind: 'px', value: 24 } },
-    }, hidden: {}, locked: false,
-  },
-  'h-1': {
-    id: 'h-1', type: 'heading', parentId: 'box-1', children: [], styles: { color: { desktop: '#0f766e' } },
-    hidden: {}, locked: false, level: 1, text: 'Roux and Co.',
-  },
-  'p-1': {
-    id: 'p-1', type: 'paragraph', parentId: 'box-1', children: [], styles: { fontSize: { desktop: { kind: 'px', value: 16 } } },
-    hidden: {}, locked: false, text: 'We build websites that work.',
-  },
-}
+import { loadProject, listAllProjects } from './db/crud'
 
 const TOP_BAR_HEIGHT = 56
 const SIDE_PANEL_WIDTH = 280
@@ -45,6 +22,13 @@ export default function App() {
   const undo = useEditorStore((state) => state.undo)
   const redo = useEditorStore((state) => state.redo)
 
+  const pages = useEditorStore((state) => state.pages)
+  const nodes = useEditorStore((state) => state.nodes)
+  const currentPageId = useEditorStore((state) => state.currentPageId)
+
+  const page = pages.find((p) => p.id === currentPageId) ?? pages[0]
+  const pageNode = page ? nodes[page.rootId] : undefined
+
   const [menu, setMenu] = useState<{ open: boolean; x: number; y: number }>({
     open: false,
     x: 0,
@@ -54,14 +38,24 @@ export default function App() {
   // Left panel tabs: Layers, Tokens or Blocks. Defaults to Layers.
   const [tab, setTab] = useState<'layers' | 'tokens' | 'blocks'>('layers')
 
-  // Seed the store with the built-in page so the layers tree (and canvas) share
-  // one source of truth. Runs once on mount.
+  const [newOpen, setNewOpen] = useState(false)
+
+  const set = useEditorStore.setState
+
+  // Open the most recently saved project on mount. A missing or unreachable
+  // IndexedDB must not stop the editor opening, so a rejected lookup is ignored.
   useEffect(() => {
-    useEditorStore.setState({
-      pages: [{ id: 'page-1', title: 'Home', slug: 'home', rootId: 'page-1' }],
-      nodes: NODES,
-      currentPageId: 'page-1',
-    })
+    ;(async () => {
+      try {
+        const list = await listAllProjects()
+        const first = list[0]
+        if (first) {
+          await loadProject(set, first.id)
+        }
+      } catch {
+        // Ignore — the editor opens with an empty store.
+      }
+    })()
   }, [])
 
   // Global keyboard shortcuts: Del, Ctrl/Cmd + Z / Shift+Z / C / V / D / X.
@@ -132,7 +126,7 @@ export default function App() {
       }}
     >
       {/* Top bar — breakpoint, zoom, undo/redo */}
-      <TopBar />
+      <TopBar onNewProject={() => setNewOpen(true)} />
 
       {/* Left panel — layers / tokens tabs */}
       <aside className={`fixed top-[${TOP_BAR_HEIGHT}px] bottom-0 left-0 z-30 w-[${SIDE_PANEL_WIDTH}px] border-r border-slate-800 bg-slate-900 text-slate-400`}>
@@ -172,13 +166,28 @@ export default function App() {
       {/* Centre canvas — fills the remaining space, centred and scrollable */}
       <main className={`fixed top-[${TOP_BAR_HEIGHT}px] bottom-0 left-[${SIDE_PANEL_WIDTH}px] right-[${SIDE_PANEL_WIDTH}px] z-10 overflow-auto relative bg-slate-950`}>
         <div className="flex h-full w-full items-center justify-center p-6">
-          <Canvas
-            page={NODES['page-1']!}
-            nodes={NODES}
-            breakpoint={breakpoint}
-            zoom={zoom}
-            onContextMenu={openMenu}
-          />
+          {pageNode ? (
+            <Canvas
+              page={pageNode}
+              nodes={nodes}
+              breakpoint={breakpoint}
+              zoom={zoom}
+              onContextMenu={openMenu}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center text-slate-400">
+              <h2 className="text-sm font-semibold">No pages yet</h2>
+              <p className="text-xs text-slate-500">
+                Create a new project to start designing.
+              </p>
+              <button
+                onClick={() => setNewOpen(true)}
+                className="mt-4 rounded-md border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700"
+              >
+                New project
+              </button>
+            </div>
+          )}
         </div>
       </main>
 
@@ -195,6 +204,12 @@ export default function App() {
           onClose={closeMenu}
         />
       )}
+
+      <NewProjectDialog
+        open={newOpen}
+        onClose={() => setNewOpen(false)}
+        onCreated={() => setNewOpen(false)}
+      />
     </div>
   )
 }
