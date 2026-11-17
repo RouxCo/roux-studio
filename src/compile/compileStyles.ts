@@ -22,9 +22,16 @@ import type {
   Project,
   ResponsiveStyles,
 } from '../types';
+import { isPageNode, isSectionNode } from '../types';
 import { classFor } from './classFor';
 import { resolveStyle } from './resolveStyle';
 import { resolveResponsive } from '../types';
+import {
+  compileLayerRules,
+  fastBackground,
+  needsLayeredPath,
+  visibleLayers,
+} from './backgrounds';
 
 const TABLET = '(max-width: 1023px)';
 const MOBILE = '(max-width: 767px)';
@@ -80,6 +87,10 @@ function compileBaseStyles(): string {
     'button { margin: 0; font: inherit; }',
     'a { color: inherit; text-decoration: none; }',
     'img { display: block; max-width: 100%; }',
+    // Shared background-layer wrapper, emitted once for every page. Page/section
+    // nodes with layered backgrounds establish position:relative + isolate so
+    // their .r-bg layers stack inside them (z-index: -1 on .r-bg).
+    '.r-bg{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none}',
   ].join('\n');
 }
 
@@ -127,6 +138,25 @@ function compileNode(node: Node): string {
   }
 
   const out: string[] = [];
+
+  // Background layers (page and section nodes only). Fast path: one `background:`
+  // list on the element. Layered path: relative + isolated containment plus
+  // per-layer rules appended below; the shared .r-bg rule comes from
+  // compileBaseStyles and is emitted once for the whole page.
+  if (isPageNode(node) || isSectionNode(node)) {
+    const layers = visibleLayers(node.backgroundLayers);
+    if (layers.length) {
+      if (needsLayeredPath(layers)) {
+        base.set('position', 'relative');
+        base.set('isolation', 'isolate');
+        const layerCss = compileLayerRules(layers);
+        if (layerCss) out.push(layerCss);
+      } else {
+        base.set('background', fastBackground(layers));
+      }
+    }
+  }
+
   if (base.size) out.push(rule(cls, base));
   if (tablet.size) out.push(query(TABLET, cls, tablet));
   if (mobile.size) out.push(query(MOBILE, cls, mobile));

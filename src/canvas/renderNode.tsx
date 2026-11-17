@@ -40,6 +40,7 @@ import type {
 } from '../types';
 import { resolveResponsive } from '../types';
 import { classFor } from '../compile/classFor';
+import { visibleLayers, needsLayeredPath, layerClass } from '../compile/backgrounds';
 
 export interface RenderContext {
   mode: 'canvas' | 'export';
@@ -371,9 +372,27 @@ export function renderNode(node: Node, ctx: RenderContext): JSX.Element {
 
   switch (node.type) {
     case 'page':
-      return <div {...attrs} style={styleProp} className={className}>{children}</div>;
-    case 'section':
-      return <section {...attrs} style={styleProp} className={className}>{children}</section>;
+    case 'section': {
+      const Tag = node.type === 'page' ? 'div' : 'section';
+      const layers = visibleLayers(node.backgroundLayers);
+      // Layered backgrounds render an aria-hidden .r-bg wrapper as the first
+      // child, holding one .r-bg-layer per visible layer in reverse order
+      // (bottom layer first in the DOM). No inline styles are emitted.
+      const background =
+        needsLayeredPath(layers) ? (
+          <div className="r-bg" aria-hidden="true">
+            {[...layers].reverse().map((layer) => (
+              <div key={layer.id} className={`r-bg-layer ${layerClass(layer)}`} />
+            ))}
+          </div>
+        ) : null;
+      return (
+        <Tag {...attrs} style={styleProp} className={className}>
+          {background}
+          {children}
+        </Tag>
+      );
+    }
     case 'container':
     case 'box':
       return <div {...attrs} style={styleProp} className={className}>{children}</div>;

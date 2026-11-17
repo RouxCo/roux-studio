@@ -3,8 +3,9 @@
 // per-element markup, and the length/style helpers (spec §4.4, §7).
 import { describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import type { Breakpoint, Node, NodeId } from '../types';
+import type { BackgroundLayer, Breakpoint, Node, NodeId } from '../types';
 import { lengthToCss, resolveStyles, renderNode, type RenderContext } from './renderNode';
+import { layerClass } from '../compile/backgrounds';
 
 const PAGE: Node = {
   id: 'page-1', type: 'page', parentId: null, children: ['sec-1'], styles: {}, hidden: {}, locked: false,
@@ -331,5 +332,76 @@ describe('lengthToCss', () => {
       expect(html).not.toMatch(/style=/);
       expect(html).toMatch(/class="r-[0-9a-f]+"/);
     });
+  });
+});
+
+describe('renderNode — background layers', () => {
+  const BG_COLOR: BackgroundLayer = {
+    id: 'bg-c', type: 'color', enabled: true, opacity: 1, blendMode: 'normal', color: '#ff0000',
+  };
+  const BG_GRAD: BackgroundLayer = {
+    id: 'bg-g', type: 'gradient', enabled: true, opacity: 1, blendMode: 'normal',
+    angle: 45, stops: [{ offset: 0, color: '#0000ff' }, { offset: 100, color: '#ffffff' }],
+  };
+  const BG_HALF: BackgroundLayer = { ...BG_COLOR, id: 'bg-h', opacity: 0.5 };
+  const BG_DISABLED: BackgroundLayer = {
+    ...BG_COLOR, id: 'bg-d', type: 'image', enabled: false,
+    src: 'disabled.png', size: 'cover', position: 'center', repeat: 'no-repeat',
+  };
+  const BG_NOISE: BackgroundLayer = {
+    id: 'bg-n', type: 'noise', enabled: true, opacity: 1, blendMode: 'normal',
+  };
+
+  function bgPage(layers: BackgroundLayer[]): Node {
+    return {
+      id: 'page-bg', type: 'page', parentId: null, children: [], styles: {}, hidden: {}, locked: false,
+      title: 'Home', slug: 'home', backgroundLayers: layers,
+    };
+  }
+
+  function renderBg(layers: BackgroundLayer[], mode: 'canvas' | 'export' = 'export'): string {
+    const page = bgPage(layers);
+    return renderToStaticMarkup(
+      renderNode(page, { mode, breakpoint: 'desktop', nodes: { [page.id]: page } }),
+    );
+  }
+
+  it('renders no .r-bg wrapper for opaque color + gradient layers (fast path)', () => {
+    const html = renderBg([BG_COLOR, BG_GRAD]);
+    expect(html).not.toContain('r-bg');
+    expect(html).toMatch(/<div[^>]*class="r-[0-9a-f]+"[^>]*>/);
+    expect(html).not.toMatch(/style=/);
+  });
+
+  it('renders .r-bg as the first child with reversed layer DOM order for three layered layers', () => {
+    const html = renderBg([BG_COLOR, BG_GRAD, BG_NOISE]);
+    expect(html).toContain('<div class="r-bg" aria-hidden="true">');
+    const c = `r-bg-layer ${layerClass(BG_COLOR)}`;
+    const g = `r-bg-layer ${layerClass(BG_GRAD)}`;
+    const n = `r-bg-layer ${layerClass(BG_NOISE)}`;
+    expect((html.match(/r-bg-layer/g) || [])).toHaveLength(3);
+    // bottom layer first in the DOM: C, B, A
+    expect(html.indexOf(n)).toBeLessThan(html.indexOf(g));
+    expect(html.indexOf(g)).toBeLessThan(html.indexOf(c));
+    expect(html.indexOf('<div class="r-bg"')).toBeLessThan(html.indexOf(n));
+    expect(html).not.toMatch(/style=/);
+  });
+
+  it('takes the layered path (.r-bg rendered) for a layer below opacity 1', () => {
+    const html = renderBg([BG_HALF]);
+    expect(html).toContain('<div class="r-bg" aria-hidden="true">');
+    expect(html).toContain(`<div class="r-bg-layer ${layerClass(BG_HALF)}">`);
+    expect((html.match(/r-bg-layer/g) || [])).toHaveLength(1);
+    expect(html).not.toMatch(/style=/);
+  });
+
+  it('omits an enabled:false layer from the DOM', () => {
+    const html = renderBg([BG_HALF, BG_DISABLED, BG_GRAD]);
+    expect((html.match(/r-bg-layer/g) || [])).toHaveLength(2);
+    const grad = `r-bg-layer ${layerClass(BG_GRAD)}`;
+    const half = `r-bg-layer ${layerClass(BG_HALF)}`;
+    expect(html.indexOf(grad)).toBeLessThan(html.indexOf(half));
+    expect(html).not.toContain(layerClass(BG_DISABLED));
+    expect(html).not.toContain('disabled.png');
   });
 });
