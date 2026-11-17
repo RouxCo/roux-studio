@@ -3,11 +3,14 @@
 // (synced with the store), and collapse/expand children.
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
 import { afterEach, describe, expect, it } from 'vitest';
 import { useEditorStore } from '../store/useEditorStore';
 import type { NodeId, Node } from '../types';
 import { emptyEditorData } from '../types';
 import LayersTree from './LayersTree';
+
+const roots: Root[] = [];
 
 function pageNode(): Node {
   return {
@@ -54,6 +57,7 @@ function renderLayersTree(nodes: Record<NodeId, Node>, currentPageId: NodeId | n
   let root!: ReturnType<typeof createRoot>;
   act(() => {
     root = createRoot(container);
+    roots.push(root);
     root.render(<LayersTree />);
   });
   return { container, get: () => useEditorStore.getState() };
@@ -66,6 +70,10 @@ function row(container: HTMLElement, id: NodeId): HTMLElement {
 }
 
 afterEach(() => {
+  act(() => {
+    for (const root of roots) root.unmount();
+    roots.length = 0;
+  });
   document.body.innerHTML = '';
   useEditorStore.setState({ ...emptyEditorData(), selection: [], clipboard: null });
 });
