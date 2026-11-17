@@ -273,7 +273,9 @@ describe('Inspector — page globals', () => {
       [{ id: 'pg-1', rootId: 'page-1', useGlobalHeader: false, useGlobalFooter: false }],
       { headerId: null, footerId: null },
     );
-    const checkboxes = Array.from(container.querySelectorAll('input[type="checkbox"]'));
+    const checkboxes = Array.from(container.querySelectorAll('input[type="checkbox"]')).map(
+      (el) => el as HTMLInputElement,
+    );
     expect(checkboxes).toHaveLength(2);
     act(() => {
       checkboxes[0]!.click();
@@ -293,7 +295,7 @@ describe('Inspector — page globals', () => {
       nodes,
     );
     act(() => {
-      container.querySelector('button[aria-label="Remove global header"]')!.click();
+      (container.querySelector('button[aria-label="Remove global header"]') as HTMLButtonElement).click();
     });
     expect(get().globalHeaderId).toBeNull();
     // Page flags are left as they were.

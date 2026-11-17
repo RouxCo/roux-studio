@@ -507,7 +507,7 @@ describe('renderNode — global header/footer', () => {
     const tree: Record<NodeId, Node> = {};
     for (const page of pages) tree[page.id] = page;
     tree['box-1'] = {
-      id: 'box-1', type: 'box', parentId: pages[0].id, children: ['p-1'], styles: {},
+      id: 'box-1', type: 'box', parentId: pages[0]!.id, children: ['p-1'], styles: {},
       hidden: {}, locked: false,
     };
     tree['p-1'] = {

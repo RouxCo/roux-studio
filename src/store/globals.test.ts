@@ -22,8 +22,6 @@ function pageNode(id: NodeId, children: NodeId[] = []): Node {
     title: id,
     slug: id,
     backgroundLayers: [],
-    useGlobalHeader: false,
-    useGlobalFooter: false,
   };
 }
 

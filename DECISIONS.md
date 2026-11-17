@@ -114,6 +114,18 @@ Optional layer fields added for M4 Job 4 (name, blur, brightness, intensity, sca
 **Reason:** Matches the M4 Job 6 step-1 spec exactly; migration keeps v1 records readable with no IndexedDB version change.
 ---
 
+## 2026-11-17 — Global header/footer: shared subtrees outside any page tree
+
+**Decision:** The global header and footer are node subtrees in `nodes` with `parentId: null`; they belong to no page's `children` array and are rendered by every page whose `Page.useGlobalHeader`/`useGlobalFooter` flag is true, so editing them in one place edits them everywhere. `makeGlobalHeader`/`makeGlobalFooter` (one `updateData` step each) take a direct page-root child of type section/nav/footer out of its page, null its parentId, set the global id (deleting any previous global subtree first), and flip the flag on all pages; `removeGlobalHeader`/`removeGlobalFooter` delete the subtree and null the id but leave page flags untouched; `setPageGlobals` toggles the flags per page. `compileStyles` walks the header subtree before the page root's children and the footer after them (only when the page opts in), so their `r-` classes are compiled and sections are counted in document order; `renderNode` renders header after the page background and before the page's children, footer after; the canvas shows an "Editing global header/footer – changes apply to all pages" banner when the selection is inside a global subtree (`globalOwner` walks `parentId` to the subtree root).
+
+**Alternatives:**
+- Store a copy of the header/footer inside each page (rejected: duplicates subtrees and breaks single-source editing — the spec's model is one shared subtree).
+- Keep the subtree in its page and render a reference on other pages (rejected: containment rules forbid a node having two parents, and editing-in-place would not propagate).
+
+**Reason:** Matches the M4 Job 6 step-3 model exactly: globals live outside the page tree, are opted into per page, and are compiled and rendered in document order on every opt-in page.
+
+---
+
 ## 2026-11-17 — SectionBlend: optional featherTop/featherBottom, overlap = previous section
 
 **Decision:** SectionBlend gains optional `featherTop`/`featherBottom` (px) that fall back to `feather`; `overlap` is the overlap with the PREVIOUS section, applied as `top: -Npx` on the section's `.r-bg` wrapper. Blend CSS (feather `mask-image`/`-webkit-mask-image`, overlap `top`) goes on `.r-<hash> > .r-bg` only, never on the section itself, so the text content is never masked. A blended section gets `position:relative` without `isolation` so its `.r-bg` joins the page's stacking context; each blended section's wrapper gets `z-index: -1000 + sectionIndex` (sections counted in document order from 0) and the page's own `.r-bg` gets `z-index: -2000`; the page gets `isolation: isolate` whenever any section on it has an active blend.

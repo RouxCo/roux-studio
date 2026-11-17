@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { useEditorStore } from '../store/useEditorStore';
 import ContextMenu from './ContextMenu';
 import { emptyEditorData } from '../types';
+import type { Node } from '../types';
 
 let root!: ReturnType<typeof createRoot>;
 
@@ -129,7 +130,11 @@ describe('ContextMenu gating', () => {
     it('offers "Make global footer" for a footer that is a direct child of a page', () => {
       seedPage();
       act(() => {
-        const nodes = { ...useEditorStore.getState().nodes, 'sec-1': { ...useEditorStore.getState().nodes['sec-1']!, type: 'footer' } };
+        const base = useEditorStore.getState().nodes;
+        const nodes: Record<string, Node> = {
+          ...base,
+          'sec-1': { ...base['sec-1']!, type: 'footer' } as unknown as Node,
+        };
         useEditorStore.setState({ nodes, selection: ['sec-1'] });
       });
       const container = renderMenu();
