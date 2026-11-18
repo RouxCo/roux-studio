@@ -10,13 +10,15 @@ import App from '../App';
 
 let root!: ReturnType<typeof createRoot>;
 
-function renderApp() {
+async function renderApp() {
   const container = document.createElement('div');
   document.body.appendChild(container);
-  act(() => {
+  await act(async () => {
     root = createRoot(container);
     root.render(<App />);
   });
+  // Let the lazy left panels resolve so any panel content is mounted.
+  await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
 function keyDown(key: string, mods: { ctrl?: boolean; shift?: boolean } = {}) {
@@ -80,9 +82,9 @@ afterEach(() => {
   });
 });
 
-describe('App keyboard shortcuts', () => {
-  it('undoes with Ctrl+Z', () => {
-    renderApp();
+describe('App keyboard shortcuts', async () => {
+  it('undoes with Ctrl+Z', async () => {
+    await renderApp();
     act(() => { useEditorStore.getState().setProjectName('Renamed'); });
     expect(useEditorStore.getState().projectName).toBe('Renamed');
     expect(useEditorStore.getState().historyIndex).toBe(0);
@@ -92,8 +94,8 @@ describe('App keyboard shortcuts', () => {
     expect(useEditorStore.getState().historyIndex).toBe(-1);
   });
 
-  it('redoes with Ctrl+Shift+Z', () => {
-    renderApp();
+  it('redoes with Ctrl+Shift+Z', async () => {
+    await renderApp();
     act(() => { useEditorStore.getState().setProjectName('Renamed'); });
     keyDown('z', { ctrl: true });
     expect(useEditorStore.getState().projectName).toBe('Untitled');
@@ -103,8 +105,8 @@ describe('App keyboard shortcuts', () => {
     expect(useEditorStore.getState().historyIndex).toBe(0);
   });
 
-  it('removes selected nodes with Delete', () => {
-    renderApp();
+  it('removes selected nodes with Delete', async () => {
+    await renderApp();
     seedDemo();
     act(() => { useEditorStore.getState().setSelection(['box-1']); });
     keyDown('Delete');
@@ -112,8 +114,8 @@ describe('App keyboard shortcuts', () => {
     expect(useEditorStore.getState().nodes['sec-1']!.children).not.toContain('box-1');
   });
 
-  it('copies selection with Ctrl+C', () => {
-    renderApp();
+  it('copies selection with Ctrl+C', async () => {
+    await renderApp();
     seedDemo();
     act(() => { useEditorStore.getState().setSelection(['box-1']); });
     keyDown('c', { ctrl: true });
@@ -123,8 +125,8 @@ describe('App keyboard shortcuts', () => {
     expect(clip!.nodes['box-1']).toBeDefined();
   });
 
-  it('pastes with Ctrl+V under the selected node parent', () => {
-    renderApp();
+  it('pastes with Ctrl+V under the selected node parent', async () => {
+    await renderApp();
     seedDemo();
     act(() => {
       useEditorStore.getState().setSelection(['box-1']);
@@ -136,8 +138,8 @@ describe('App keyboard shortcuts', () => {
     expect(boxesAfter).toBe(boxesBefore + 1);
   });
 
-  it('duplicates selection with Ctrl+D', () => {
-    renderApp();
+  it('duplicates selection with Ctrl+D', async () => {
+    await renderApp();
     seedDemo();
     act(() => { useEditorStore.getState().setSelection(['box-1']); });
     const boxesBefore = Object.values(useEditorStore.getState().nodes).filter((n) => n.type === 'box').length;
@@ -146,8 +148,8 @@ describe('App keyboard shortcuts', () => {
     expect(boxesAfter).toBe(boxesBefore + 1);
   });
 
-  it('cuts selection with Ctrl+X', () => {
-    renderApp();
+  it('cuts selection with Ctrl+X', async () => {
+    await renderApp();
     seedDemo();
     act(() => { useEditorStore.getState().setSelection(['box-1']); });
     keyDown('x', { ctrl: true });
@@ -155,8 +157,8 @@ describe('App keyboard shortcuts', () => {
     expect(useEditorStore.getState().clipboard).not.toBeNull();
   });
 
-  it('ignores shortcuts while typing into an input', () => {
-    renderApp();
+  it('ignores shortcuts while typing into an input', async () => {
+    await renderApp();
     act(() => { useEditorStore.getState().setProjectName('Renamed'); });
     expect(useEditorStore.getState().projectName).toBe('Renamed');
     const input = document.createElement('input');
@@ -167,8 +169,8 @@ describe('App keyboard shortcuts', () => {
     expect(useEditorStore.getState().projectName).toBe('Renamed'); // unchanged — ignored
   });
 
-  it('renders an empty state with a New project button when the store is empty', () => {
-    renderApp();
+  it('renders an empty state with a New project button when the store is empty', async () => {
+    await renderApp();
     expect(document.body.textContent).toContain('No pages yet');
     expect(
       Array.from(document.querySelectorAll('button')).some(

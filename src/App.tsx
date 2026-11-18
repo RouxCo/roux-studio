@@ -1,12 +1,7 @@
 import './index.css'
-import { useCallback, useEffect, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
 import Canvas from './canvas/Canvas'
 import Inspector from './components/Inspector'
-import LayersTree from './components/LayersTree'
-import BlocksPanel from './components/BlocksPanel'
-import PagesPanel from './components/PagesPanel'
-import SeoPanel from './components/SeoPanel'
-import TokensPanel from './components/TokensPanel'
 import TopBar from './components/TopBar'
 import NewProjectDialog from './components/NewProjectDialog'
 import ContextMenu from './components/ContextMenu'
@@ -15,6 +10,14 @@ import { loadProject, listAllProjects } from './db/crud'
 
 const TOP_BAR_HEIGHT = 56
 const SIDE_PANEL_WIDTH = 280
+
+// Left panels are lazy-loaded so each one ships in its own chunk instead of
+// the main bundle. None is used outside App.tsx.
+const LayersTree = lazy(() => import('./components/LayersTree'))
+const PagesPanel = lazy(() => import('./components/PagesPanel'))
+const SeoPanel = lazy(() => import('./components/SeoPanel'))
+const TokensPanel = lazy(() => import('./components/TokensPanel'))
+const BlocksPanel = lazy(() => import('./components/BlocksPanel'))
 
 export default function App() {
   const breakpoint = useEditorStore((state) => state.breakpoint)
@@ -167,17 +170,19 @@ export default function App() {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto">
-          {tab === 'layers' ? (
-            <LayersTree onContextMenu={openMenu} />
-          ) : tab === 'pages' ? (
-            <PagesPanel />
-          ) : tab === 'seo' ? (
-            <SeoPanel />
-          ) : tab === 'tokens' ? (
-            <TokensPanel />
-          ) : (
-            <BlocksPanel />
-          )}
+          <Suspense fallback={<div className="h-40 w-[280px] bg-slate-900/40" />}>
+            {tab === 'layers' ? (
+              <LayersTree onContextMenu={openMenu} />
+            ) : tab === 'pages' ? (
+              <PagesPanel />
+            ) : tab === 'seo' ? (
+              <SeoPanel />
+            ) : tab === 'tokens' ? (
+              <TokensPanel />
+            ) : (
+              <BlocksPanel />
+            )}
+          </Suspense>
         </div>
       </aside>
 
