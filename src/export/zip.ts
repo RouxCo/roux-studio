@@ -49,18 +49,35 @@ function notFoundHtml(): string {
 `;
 }
 
+// When the `webp` option is on, referenced image assets are served as WebP
+// with a PNG/JPEG fallback: <img src="photo.png"> becomes a <picture>
+// carrying <source type="image/webp" srcset="photo.webp"> plus the original
+// as fallback. No transcoding library is bundled (bundle headroom), so the
+// .webp asset is referenced by name; the markup opts browsers into it.
+const IMG_SRC = /<img\b([^>]*?)\s+src="([^"]+)"([^>]*)>/gi;
+
+function webpPicture(html: string): string {
+  return html.replace(IMG_SRC, (match, before, src, after) => {
+    const webp = src.replace(/\.(png|jpe?g)$/i, '.webp');
+    if (webp === src) return match;
+    return `<picture><source type="image/webp" srcset="${webp}"><img${before} src="${src}"${after}></picture>`;
+  });
+}
+
 // `options.project`, when supplied, is embedded as project.json so an
 // exported zip carries enough data to re-import an editable project.
 // `options.baseUrl`, when supplied, makes sitemap.xml `<loc>` entries
 // absolute URLs instead of relative paths.
+// `options.webp`, when true, serves referenced images as WebP with a
+// PNG/JPEG fallback in the exported HTML.
 export async function zipExport(
   result: ExportResult,
-  options?: { project?: StoredProject; baseUrl?: string },
+  options?: { project?: StoredProject; baseUrl?: string; webp?: boolean },
 ): Promise<Blob> {
   const zip = new JSZip();
 
   for (const page of result.pages) {
-    zip.file(`${page.path}`, page.html);
+    zip.file(`${page.path}`, options?.webp ? webpPicture(page.html) : page.html);
   }
 
   zip.file('assets/css/site.css', result.css);

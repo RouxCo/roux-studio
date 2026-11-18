@@ -56,6 +56,33 @@ describe('zipExport', () => {
     expect(entries).toContain('about/index.html');
   });
 
+  it('serves referenced images as WebP with PNG/JPEG fallback when webp is set', async () => {
+    const r = result([
+      { ...PAGE, html: '<body><img src="photo.png" alt="Photo"><img src="hero.jpg"></body></html>' },
+    ], null);
+    const blob = await zipExport(r, { webp: true });
+    const zip = await JSZip.loadAsync(blob);
+    const html = await zip.files['home/index.html']!.async('string');
+
+    expect(html).toContain('<picture>');
+    expect(html).toContain('<source type="image/webp" srcset="photo.webp">');
+    expect(html).toContain('<source type="image/webp" srcset="hero.webp">');
+    expect(html).toContain('<img src="photo.png" alt="Photo">');
+    expect(html).toContain('<img src="hero.jpg">');
+  });
+
+  it('leaves image markup unchanged when webp is not set', async () => {
+    const r = result([
+      { ...PAGE, html: '<body><img src="photo.png"></body></html>' },
+    ], null);
+    const blob = await zipExport(r);
+    const zip = await JSZip.loadAsync(blob);
+    const html = await zip.files['home/index.html']!.async('string');
+
+    expect(html).toContain('<img src="photo.png">');
+    expect(html).not.toContain('.webp');
+  });
+
   it('produces a non-empty zip blob', async () => {
     const blob = await zipExport(result([PAGE], null));
     expect(blob.size).toBeGreaterThan(0);

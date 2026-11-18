@@ -8,6 +8,9 @@ export interface ExportOptions {
   nodes: Record<NodeId, StudioNode>;
   baseUrl?: string;
   lang?: string;
+  // When true, referenced image assets are served as WebP with a PNG/JPEG
+  // fallback in the exported zip (<picture> + source, no transcoding lib).
+  webp?: boolean;
 }
 
 export interface ExportPage {

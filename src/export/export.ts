@@ -185,5 +185,8 @@ export function exportProject(options: ExportOptions): ExportResult {
  * project.json so the zip can be re-imported as an editable project. */
 export async function exportProjectToZip(options: ExportOptions): Promise<Blob> {
   const result = exportProject(options);
-  return zipExport(result, { project: { ...options.project, nodes: options.nodes } });
+  return zipExport(result, {
+    project: { ...options.project, nodes: options.nodes },
+    webp: options.webp,
+  });
 }
