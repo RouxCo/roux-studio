@@ -62,6 +62,26 @@ describe('zipExport', () => {
     expect(blob.type).toBe('application/zip');
   });
 
+  it('emits absolute sitemap <loc> URLs when baseUrl is supplied, relative otherwise', async () => {
+    const withBase = await zipExport(result([PAGE], null), {
+      baseUrl: 'https://example.com',
+    });
+    const withoutBase = await zipExport(result([PAGE], null));
+
+    const zipWith = await JSZip.loadAsync(withBase);
+    const sitemapWith = await zipWith.files['sitemap.xml']!.async('string');
+    expect(
+      sitemapWith.match(/<loc>([^<]+)<\/loc>/g),
+    ).toEqual(['<loc>https://example.com/home/index.html</loc>']);
+
+    const zipWithout = await JSZip.loadAsync(withoutBase);
+    const sitemapWithout = await zipWithout.files['sitemap.xml']!.async('string');
+    expect(sitemapWithout).toContain('<loc>home/index.html</loc>');
+    expect(
+      sitemapWithout.match(/<loc>([^<]+)<\/loc>/g),
+    ).toEqual(['<loc>home/index.html</loc>']);
+  });
+
   it('embeds project.json when a project is supplied, omitted otherwise', async () => {
     const project = {
       id: 'proj-1',

@@ -14,7 +14,7 @@ function sitemapXml(pages: ExportResult['pages'], baseUrl?: string): string {
   const entries = pages
     .map(
       (p) =>
-        `  <url><loc>${baseUrl ?? ''}/${p.path}</loc></url>`,
+        `  <url><loc>${baseUrl ? `${baseUrl}/${p.path}` : p.path}</loc></url>`,
     )
     .join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -51,9 +51,11 @@ function notFoundHtml(): string {
 
 // `options.project`, when supplied, is embedded as project.json so an
 // exported zip carries enough data to re-import an editable project.
+// `options.baseUrl`, when supplied, makes sitemap.xml `<loc>` entries
+// absolute URLs instead of relative paths.
 export async function zipExport(
   result: ExportResult,
-  options?: { project?: StoredProject },
+  options?: { project?: StoredProject; baseUrl?: string },
 ): Promise<Blob> {
   const zip = new JSZip();
 
@@ -71,7 +73,7 @@ export async function zipExport(
     zip.file('project.json', JSON.stringify(options.project, null, 2));
   }
 
-  zip.file('sitemap.xml', sitemapXml(result.pages));
+  zip.file('sitemap.xml', sitemapXml(result.pages, options?.baseUrl));
   zip.file('robots.txt', robotsTxt());
   zip.file('404.html', notFoundHtml());
 
