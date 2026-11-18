@@ -4,6 +4,9 @@ import Canvas from './canvas/Canvas'
 import Inspector from './components/Inspector'
 import TopBar from './components/TopBar'
 import NewProjectDialog from './components/NewProjectDialog'
+// Lazy-loaded: the export pipeline (compile, render, jszip) ships in its own
+// chunk instead of bloating the main index chunk.
+const ExportDialog = lazy(() => import('./components/ExportDialog'))
 import ContextMenu from './components/ContextMenu'
 import { useEditorStore } from './store/useEditorStore'
 import { loadProject, listAllProjects } from './db/crud'
@@ -44,6 +47,7 @@ export default function App() {
   const [tab, setTab] = useState<'layers' | 'pages' | 'seo' | 'tokens' | 'blocks'>('layers')
 
   const [newOpen, setNewOpen] = useState(false)
+  const [exportOpen, setExportOpen] = useState(false)
 
   const set = useEditorStore.setState
 
@@ -131,7 +135,10 @@ export default function App() {
       }}
     >
       {/* Top bar — breakpoint, zoom, undo/redo */}
-      <TopBar onNewProject={() => setNewOpen(true)} />
+      <TopBar
+        onNewProject={() => setNewOpen(true)}
+        onExport={() => setExportOpen(true)}
+      />
 
       {/* Left panel — layers / tokens tabs */}
       <aside className={`fixed top-[${TOP_BAR_HEIGHT}px] bottom-0 left-0 z-30 w-[${SIDE_PANEL_WIDTH}px] border-r border-slate-800 bg-slate-900 text-slate-400`}>
@@ -233,6 +240,9 @@ export default function App() {
         onClose={() => setNewOpen(false)}
         onCreated={() => setNewOpen(false)}
       />
+      <Suspense fallback={<div className="fixed inset-0 z-[55] bg-slate-900/70" />}>
+        <ExportDialog open={exportOpen} onClose={() => setExportOpen(false)} />
+      </Suspense>
     </div>
   )
 }

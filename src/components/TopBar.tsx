@@ -5,7 +5,19 @@
 // zoom) is not history-tracked, so toggling them never creates undo steps.
 import { useCallback } from 'react';
 import type { ElementType } from 'react';
-import { Plus, Undo2, Redo2, Maximize2, Minimize2, Monitor, Smartphone, Tablet, Play, Pause } from 'lucide-react';
+import {
+  Plus,
+  Download,
+  Undo2,
+  Redo2,
+  Maximize2,
+  Minimize2,
+  Monitor,
+  Smartphone,
+  Tablet,
+  Play,
+  Pause,
+} from 'lucide-react';
 import { useEditorStore } from '../store/useEditorStore';
 import type { Breakpoint } from '../types';
 
@@ -22,7 +34,10 @@ const BREAKPOINTS: {
 
 const ZOOM_LEVELS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4];
 
-export default function TopBar({ onNewProject }: { onNewProject?: () => void }) {
+export default function TopBar({
+  onNewProject,
+  onExport,
+}: { onNewProject?: () => void; onExport?: () => void }) {
   const breakpoint = useEditorStore((state) => state.breakpoint);
   const setBreakpoint = useEditorStore((state) => state.setBreakpoint);
   const zoom = useEditorStore((state) => state.zoom);
@@ -56,6 +71,15 @@ export default function TopBar({ onNewProject }: { onNewProject?: () => void }) 
           >
             <Plus size={14} strokeWidth={2} />
             New project
+          </button>
+        )}
+        {onExport && (
+          <button
+            onClick={onExport}
+            className="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-700 hover:text-slate-100"
+          >
+            <Download size={14} strokeWidth={2} />
+            Export
           </button>
         )}
       </div>
