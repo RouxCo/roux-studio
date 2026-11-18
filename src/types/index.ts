@@ -412,6 +412,7 @@ export interface Page {
   rootId: NodeId; // page node id
   useGlobalHeader?: boolean;
   useGlobalFooter?: boolean;
+  metaDescription?: string;
 }
 
 export interface Project {

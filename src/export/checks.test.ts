@@ -1,7 +1,7 @@
 // src/export/checks.test.ts
 // Tests for runPreExportChecks: errors (no title, duplicate slugs) and
-// warnings (images without alt, H1 count, heading skips, accessible name)
-// (spec §11.5).
+// warnings (images without alt, H1 count, heading skips, accessible name,
+// text size, contrast, font family, meta description) (spec §11.5).
 import { describe, expect, it } from 'vitest';
 import type { Node, PageId, Project } from '../types';
 import { runPreExportChecks } from './checks';
@@ -60,15 +60,27 @@ function baseTree(): Record<string, Node> {
   } as Record<string, Node>;
 }
 
+function addNode(tree: Record<string, Node>, node: Node): Record<string, Node> {
+  const sec = tree[SEC]!;
+  return {
+    ...tree,
+    [SEC]: { ...sec, children: [...sec.children, node.id] },
+    [node.id]: node,
+  };
+}
+
 describe('runPreExportChecks', () => {
   it('returns no errors or warnings for a clean project', () => {
     const cleanTree: Record<string, Node> = {
       ...baseTree(),
+      [H]: { ...baseTree()[H]!, styles: { fontFamily: { desktop: 'Inter' } } } as Node,
       [IMG]: { ...baseTree()[IMG]!, alt: 'Roux logo' } as Node,
-      [LNK]: { ...baseTree()[LNK]!, text: 'See our work' } as Node,
-      [BTN]: { ...baseTree()[BTN]!, text: 'Get in touch' } as Node,
+      [LNK]: { ...baseTree()[LNK]!, styles: { fontFamily: { desktop: 'Inter' } }, text: 'See our work' } as Node,
+      [BTN]: { ...baseTree()[BTN]!, styles: { fontFamily: { desktop: 'Inter' } }, text: 'Get in touch' } as Node,
     };
-    const p = project([page('pg-1', ROOT)]);
+    const p = project([
+      { ...page('pg-1', ROOT), metaDescription: 'Roux Studio builds distinctive websites for independent brands.' },
+    ]);
     const result = runPreExportChecks(p, cleanTree);
     expect(result.errors).toEqual([]);
     expect(result.warnings).toEqual([]);
@@ -150,5 +162,114 @@ describe('runPreExportChecks', () => {
     const result = runPreExportChecks(project([page('pg-1', ROOT)]), baseTree());
     const imgWarn = result.warnings.find((w) => w.id === 'image-no-alt');
     expect(imgWarn!.nodeId).toBe(IMG);
+  });
+
+  it('warns when body text is smaller than 16px', () => {
+    const tree = addNode(baseTree(), {
+      id: 'para-1',
+      type: 'paragraph',
+      parentId: SEC,
+      children: [],
+      styles: { fontFamily: { desktop: 'Inter' }, fontSize: { desktop: { kind: 'px', value: 14 } } },
+      hidden: {},
+      locked: false,
+      text: 'Small print.',
+    });
+    const result = runPreExportChecks(project([page('pg-1', ROOT)]), tree);
+    const warn = result.warnings.find((w) => w.id === 'text-size-too-small' && w.nodeId === 'para-1');
+    expect(warn).toBeDefined();
+    expect(warn!.type).toBe('warning');
+  });
+
+  it('does not warn when body text is 16px or larger', () => {
+    const tree = addNode(baseTree(), {
+      id: 'para-1',
+      type: 'paragraph',
+      parentId: SEC,
+      children: [],
+      styles: { fontFamily: { desktop: 'Inter' }, fontSize: { desktop: { kind: 'rem', value: 1 } } },
+      hidden: {},
+      locked: false,
+      text: 'Body text.',
+    });
+    const result = runPreExportChecks(project([page('pg-1', ROOT)]), tree);
+    expect(result.warnings.find((w) => w.id === 'text-size-too-small')).toBeUndefined();
+  });
+
+  it('warns when text contrast is below 4.5:1', () => {
+    const tree = addNode(baseTree(), {
+      id: 'h-2',
+      type: 'heading',
+      parentId: SEC,
+      children: [],
+      styles: { fontFamily: { desktop: 'Inter' }, color: { desktop: '#777777' }, backgroundColor: { desktop: '#ffffff' } },
+      hidden: {},
+      locked: false,
+      level: 2,
+      text: 'Faint heading',
+    });
+    const result = runPreExportChecks(project([page('pg-1', ROOT)]), tree);
+    const warn = result.warnings.find((w) => w.id === 'low-contrast' && w.nodeId === 'h-2');
+    expect(warn).toBeDefined();
+    expect(warn!.type).toBe('warning');
+  });
+
+  it('does not warn when text contrast meets 4.5:1', () => {
+    const tree = addNode(baseTree(), {
+      id: 'h-2',
+      type: 'heading',
+      parentId: SEC,
+      children: [],
+      styles: { fontFamily: { desktop: 'Inter' }, color: { desktop: '#111111' }, backgroundColor: { desktop: '#ffffff' } },
+      hidden: {},
+      locked: false,
+      level: 2,
+      text: 'Dark heading',
+    });
+    const result = runPreExportChecks(project([page('pg-1', ROOT)]), tree);
+    expect(result.warnings.find((w) => w.id === 'low-contrast')).toBeUndefined();
+  });
+
+  it('warns when a text node has no font family', () => {
+    const tree = addNode(baseTree(), {
+      id: 'para-2',
+      type: 'paragraph',
+      parentId: SEC,
+      children: [],
+      styles: {},
+      hidden: {},
+      locked: false,
+      text: 'Plain paragraph',
+    });
+    const result = runPreExportChecks(project([page('pg-1', ROOT)]), tree);
+    const warn = result.warnings.find((w) => w.id === 'missing-font' && w.nodeId === 'para-2');
+    expect(warn).toBeDefined();
+    expect(warn!.type).toBe('warning');
+  });
+
+  it('warns when a page has no meta description', () => {
+    const result = runPreExportChecks(project([page('pg-1', ROOT)]), baseTree());
+    const warn = result.warnings.find((w) => w.id === 'meta-description-missing');
+    expect(warn).toBeDefined();
+    expect(warn!.type).toBe('warning');
+    expect(warn!.nodeId).toBeNull();
+  });
+
+  it('warns when a page meta description is too short', () => {
+    const p = project([{ ...page('pg-1', ROOT), metaDescription: 'Too short' }]);
+    const result = runPreExportChecks(p, baseTree());
+    const warn = result.warnings.find((w) => w.id === 'meta-description-too-short');
+    expect(warn).toBeDefined();
+    expect(warn!.type).toBe('warning');
+    expect(warn!.nodeId).toBeNull();
+  });
+
+  it('warns when a page meta description is too long', () => {
+    const p = project([{ ...page('pg-1', ROOT), metaDescription: 'x'.repeat(161) }]);
+    const result = runPreExportChecks(p, baseTree());
+    const warn = result.warnings.find((w) => w.id === 'meta-description-too-long');
+    expect(warn).toBeDefined();
+    expect(warn!.type).toBe('warning');
+    expect(warn!.nodeId).toBeNull();
   });
 });
