@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Canvas from './canvas/Canvas'
 import Inspector from './components/Inspector'
 import LayersTree from './components/LayersTree'
+import PagesPanel from './components/PagesPanel'
 import TokensPanel from './components/TokensPanel'
 import BlocksPanel from './components/BlocksPanel'
 import TopBar from './components/TopBar'
@@ -35,8 +36,8 @@ export default function App() {
     y: 0,
   })
 
-  // Left panel tabs: Layers, Tokens or Blocks. Defaults to Layers.
-  const [tab, setTab] = useState<'layers' | 'tokens' | 'blocks'>('layers')
+  // Left panel tabs: Layers, Pages, Tokens or Blocks. Defaults to Layers.
+  const [tab, setTab] = useState<'layers' | 'pages' | 'tokens' | 'blocks'>('layers')
 
   const [newOpen, setNewOpen] = useState(false)
 
@@ -139,6 +140,12 @@ export default function App() {
               Layers
             </button>
             <button
+              onClick={() => setTab('pages')}
+              className={`px-3 py-1.5 text-xs rounded-t-lg transition ${tab === 'pages' ? 'bg-slate-800 text-slate-100' : 'text-slate-500 hover:text-slate-200'}`}
+            >
+              Pages
+            </button>
+            <button
               onClick={() => setTab('tokens')}
               className={`px-3 py-1.5 text-xs rounded-t-lg transition ${tab === 'tokens' ? 'bg-slate-800 text-slate-100' : 'text-slate-500 hover:text-slate-200'}`}
             >
@@ -155,6 +162,8 @@ export default function App() {
         <div className="flex-1 overflow-y-auto">
           {tab === 'layers' ? (
             <LayersTree onContextMenu={openMenu} />
+          ) : tab === 'pages' ? (
+            <PagesPanel />
           ) : tab === 'tokens' ? (
             <TokensPanel />
           ) : (
