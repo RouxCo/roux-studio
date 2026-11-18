@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import 'fake-indexeddb/auto';
 
 import { useEditorStore } from './useEditorStore';
-import type { BoxNode, Node, NodeId, SectionNode } from '../types';
+import type { BoxNode, Node, NodeId, PageNode, SectionNode } from '../types';
 import { emptyEditorData } from '../types';
 import { ContainmentError } from './containment';
 
@@ -505,5 +505,65 @@ describe('clipboard — copy / cut / paste / duplicate', () => {
     get().redo();
     expect(Object.keys(get().nodes)).toHaveLength(5);
     expect(get().historyIndex).toBe(indexAfterPaste);
+  });
+});
+
+describe('addBlankPage', () => {
+  it('adds one page and one root page node with matching ids, slugged from the title, and makes it current', () => {
+    const id = get().addBlankPage('Contact');
+    const state = get();
+
+    expect(state.pages).toHaveLength(1);
+    expect(state.pages[0]!).toMatchObject({
+      id,
+      title: 'Contact',
+      slug: 'contact',
+      rootId: id,
+      useGlobalHeader: true,
+      useGlobalFooter: true,
+    });
+    expect(state.currentPageId).toBe(id);
+
+    const node = state.nodes[id] as PageNode | undefined;
+    expect(node?.type).toBe('page');
+    expect(node?.parentId).toBeNull();
+    expect(node?.children).toEqual([]);
+    expect(node?.title).toBe('Contact');
+    expect(node?.slug).toBe('contact');
+    expect(node?.backgroundLayers).toEqual([]);
+  });
+
+  it('gives repeated titles unique slugs (about, about-2)', () => {
+    const first = get().addBlankPage('About');
+    expect(get().pages[0]!.slug).toBe('about');
+
+    const second = get().addBlankPage('About');
+    expect(get().pages[1]!.slug).toBe('about-2');
+    expect(get().pages).toHaveLength(2);
+    expect(second).not.toBe(first);
+    expect(get().nodes).toHaveProperty(first);
+    expect(get().nodes).toHaveProperty(second);
+  });
+
+  it('is a single undo step: one undo removes both the page and its node', () => {
+    const id = get().addBlankPage('Contact');
+    expect(get().canUndo()).toBe(true);
+    expect(get().pages).toHaveLength(1);
+    expect(get().nodes).toHaveProperty(id);
+    expect(get().currentPageId).toBe(id);
+
+    get().undo();
+
+    expect(get().pages).toHaveLength(0);
+    expect(get().nodes).not.toHaveProperty(id);
+    expect(get().currentPageId).toBeNull();
+    expect(get().canUndo()).toBe(false);
+    expect(get().canRedo()).toBe(true);
+
+    get().redo();
+    expect(get().pages).toHaveLength(1);
+    expect(get().pages[0]!.id).toBe(id);
+    expect(get().nodes).toHaveProperty(id);
+    expect(get().currentPageId).toBe(id);
   });
 });

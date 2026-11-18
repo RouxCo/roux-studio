@@ -97,8 +97,14 @@ export interface EditorStore extends ProjectData {
   renameToken: (oldName: string, newName: string) => void;
   deleteToken: (name: string, strategy: { replaceWith: string } | 'detach') => void;
   addPage: (page: Page) => void;
+  addBlankPage: (title?: string, slug?: string) => PageId;
   removePage: (pageId: PageId) => void;
   renamePage: (pageId: PageId, title: string) => void;
+  updatePage: (
+    projectId: string | null,
+    pageId: PageId,
+    patch: Partial<Pick<Page, 'title' | 'slug' | 'metaDescription'>>,
+  ) => void;
   addNode: (node: Node, parentId: NodeId | null) => void;
   removeNode: (nodeId: NodeId) => void;
   moveNode: (nodeId: NodeId, parentId: NodeId | null, index?: number) => void;
@@ -141,6 +147,25 @@ export interface EditorStore extends ProjectData {
     pageId: PageId,
     globals: { header?: boolean; footer?: boolean },
   ) => void;
+}
+
+// Derive a unique page slug from a base string: lowercase, trim, turn runs of
+// non-alphanumerics into a single `-`, strip leading/trailing dashes, fall back
+// to `page` when empty, then append `-2`, `-3`, … until no existing page uses it.
+function uniqueSlug(base: string, pages: Page[]): string {
+  let slug = base
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  if (!slug) slug = 'page';
+  const existing = new Set(pages.map((p) => p.slug));
+  let n = 2;
+  while (existing.has(slug)) {
+    slug = `${slug}-${n}`;
+    n++;
+  }
+  return slug;
 }
 
 function projectDataOf(state: EditorStore): ProjectData {
@@ -353,6 +378,37 @@ export const useEditorStore = create<EditorStore>((set, get) => {
     });
   },
 
+  addBlankPage: (title, slug) => {
+    const id = nanoid();
+    get().updateData((draft) => {
+      const pageTitle = title ?? `Page ${draft.pages.length + 1}`;
+      const pageSlug = uniqueSlug(slug ?? pageTitle, draft.pages);
+      const pageNode: Node = {
+        id,
+        type: 'page',
+        parentId: null,
+        children: [],
+        styles: {},
+        hidden: {},
+        locked: false,
+        title: pageTitle,
+        slug: pageSlug,
+        backgroundLayers: [],
+      };
+      draft.nodes[id] = pageNode;
+      draft.pages.push({
+        id,
+        title: pageTitle,
+        slug: pageSlug,
+        rootId: id,
+        useGlobalHeader: true,
+        useGlobalFooter: true,
+      });
+      draft.currentPageId = id;
+    });
+    return id;
+  },
+
   removePage: (pageId) => {
     get().updateData((draft) => {
       draft.pages = draft.pages.filter((p) => p.id !== pageId);
@@ -367,6 +423,22 @@ export const useEditorStore = create<EditorStore>((set, get) => {
     get().updateData((draft) => {
       const page = draft.pages.find((p) => p.id === pageId);
       if (page) page.title = title;
+    });
+  },
+
+  // Edit a page's SEO fields (title, slug, metaDescription). One history step
+  // unless batched. The store holds one project at a time; projectId names the
+  // active project and edits for any other project are ignored.
+  updatePage: (projectId, pageId, patch) => {
+    const state = get();
+    if (projectId !== null && projectId !== state.projectId) return;
+    get().updateData((draft) => {
+      const page = draft.pages.find((p) => p.id === pageId);
+      if (!page) return;
+      if (patch.title !== undefined) page.title = patch.title;
+      if (patch.slug !== undefined) page.slug = patch.slug;
+      if (patch.metaDescription !== undefined)
+        page.metaDescription = patch.metaDescription;
     });
   },
 
