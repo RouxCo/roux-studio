@@ -10,6 +10,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { isPageNode } from '../types';
 import { compileStyles } from '../compile/compileStyles';
 import { renderNode, type RenderContext } from '../canvas/renderNode';
+import { zipExport } from './zip';
 import type { ExportOptions, ExportPage, ExportResult } from './types';
 
 // Block-level tags that get their own indented line in the pretty printer.
@@ -178,4 +179,11 @@ export function exportProject(options: ExportOptions): ExportResult {
   }
 
   return { pages, css: cssParts.join('\n'), js: null };
+}
+
+/** Compile then zip: exports the project and bundles the source project as
+ * project.json so the zip can be re-imported as an editable project. */
+export async function exportProjectToZip(options: ExportOptions): Promise<Blob> {
+  const result = exportProject(options);
+  return zipExport(result, { project: { ...options.project, nodes: options.nodes } });
 }

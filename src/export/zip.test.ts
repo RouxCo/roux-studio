@@ -61,4 +61,33 @@ describe('zipExport', () => {
     expect(blob.size).toBeGreaterThan(0);
     expect(blob.type).toBe('application/zip');
   });
+
+  it('embeds project.json when a project is supplied, omitted otherwise', async () => {
+    const project = {
+      id: 'proj-1',
+      name: 'My Site',
+      createdAt: '2026-01-01T00:00:00Z',
+      updatedAt: '2026-01-02T00:00:00Z',
+      pages: [],
+      tokens: { byName: {} },
+      nodes: {},
+      blocks: [],
+      globalHeaderId: null,
+      globalFooterId: null,
+    };
+
+    const withProject = await zipExport(result([PAGE], null), { project });
+    const withoutProject = await zipExport(result([PAGE], null));
+
+    const entriesWith = await zipEntries(withProject);
+    const entriesWithout = await zipEntries(withoutProject);
+    expect(entriesWith).toContain('project.json');
+    expect(entriesWithout).not.toContain('project.json');
+
+    const zip = await JSZip.loadAsync(withProject);
+    const parsed = JSON.parse(
+      await zip.files['project.json']!.async('string'),
+    );
+    expect(parsed).toMatchObject({ id: 'proj-1', name: 'My Site' });
+  });
 });

@@ -3,11 +3,12 @@
 //
 // zipExport packs an ExportResult into a JSZip blob with the output
 // structure: {slug}/index.html per page, assets/css/site.css,
-// assets/js/site.js (only when js is non-null), sitemap.xml, robots.txt,
-// 404.html.
+// assets/js/site.js (only when js is non-null), project.json (only when
+// a project is supplied), sitemap.xml, robots.txt, 404.html.
 
 import JSZip from 'jszip';
 import type { ExportResult } from './types';
+import type { StoredProject } from '../db/stores';
 
 function sitemapXml(pages: ExportResult['pages'], baseUrl?: string): string {
   const entries = pages
@@ -48,7 +49,12 @@ function notFoundHtml(): string {
 `;
 }
 
-export async function zipExport(result: ExportResult): Promise<Blob> {
+// `options.project`, when supplied, is embedded as project.json so an
+// exported zip carries enough data to re-import an editable project.
+export async function zipExport(
+  result: ExportResult,
+  options?: { project?: StoredProject },
+): Promise<Blob> {
   const zip = new JSZip();
 
   for (const page of result.pages) {
@@ -59,6 +65,10 @@ export async function zipExport(result: ExportResult): Promise<Blob> {
 
   if (result.js) {
     zip.file('assets/js/site.js', result.js);
+  }
+
+  if (options?.project) {
+    zip.file('project.json', JSON.stringify(options.project, null, 2));
   }
 
   zip.file('sitemap.xml', sitemapXml(result.pages));

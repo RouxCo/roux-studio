@@ -2,8 +2,9 @@
 // Tests for exportProject: one HTML page per page, compiled r-<hash> classes,
 // no inline `style=`, no `data-node-id` in export output (spec §11, §11.2).
 import { describe, expect, it } from 'vitest';
+import JSZip from 'jszip';
 import type { Node, NodeId, PageId, Project } from '../types';
-import { exportProject } from './export';
+import { exportProject, exportProjectToZip } from './export';
 
 function mkPage(id: PageId, rootId: string, title = 'Home'): Project['pages'][number] {
   return { id, title, slug: id, rootId };
@@ -105,5 +106,24 @@ describe('exportProject', () => {
     const p = mkProject([mkPage('pg-1', ROOT)]);
     const result = exportProject({ project: p, nodes: TREE, lang: 'af' });
     expect(result.pages[0]!.html).toContain('<html lang="af">');
+  });
+
+  it('exportProjectToZip returns a zip blob containing project.json', async () => {
+    const p = mkProject([mkPage('pg-1', ROOT)]);
+    const blob = await exportProjectToZip({ project: p, nodes: TREE });
+
+    expect(blob.size).toBeGreaterThan(0);
+    expect(blob.type).toBe('application/zip');
+
+    const zip = await JSZip.loadAsync(blob);
+    expect(zip.files['pg-1/index.html']).toBeDefined();
+    expect(zip.files['assets/css/site.css']).toBeDefined();
+    expect(zip.files['project.json']).toBeDefined();
+
+    const parsed = JSON.parse(
+      await zip.files['project.json']!.async('string'),
+    );
+    expect(parsed).toMatchObject({ id: 'proj-1', name: 'Roux Studio' });
+    expect(parsed.pages).toHaveLength(1);
   });
 });
