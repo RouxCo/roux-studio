@@ -94,7 +94,6 @@ export default function PagesPanel() {
                 onStartRename={() => startRename(page.id)}
                 onChangeValue={setRenameValue}
                 onCommitRename={(next: string) => commitRename(page.id, next)}
-
                 onCancelRename={cancelRename}
                 onDelete={() => handleDelete(page.id)}
                 canDelete={canDelete}
