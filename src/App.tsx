@@ -3,9 +3,10 @@ import { useCallback, useEffect, useState } from 'react'
 import Canvas from './canvas/Canvas'
 import Inspector from './components/Inspector'
 import LayersTree from './components/LayersTree'
-import PagesPanel from './components/PagesPanel'
-import TokensPanel from './components/TokensPanel'
 import BlocksPanel from './components/BlocksPanel'
+import PagesPanel from './components/PagesPanel'
+import SeoPanel from './components/SeoPanel'
+import TokensPanel from './components/TokensPanel'
 import TopBar from './components/TopBar'
 import NewProjectDialog from './components/NewProjectDialog'
 import ContextMenu from './components/ContextMenu'
@@ -36,8 +37,8 @@ export default function App() {
     y: 0,
   })
 
-  // Left panel tabs: Layers, Pages, Tokens or Blocks. Defaults to Layers.
-  const [tab, setTab] = useState<'layers' | 'pages' | 'tokens' | 'blocks'>('layers')
+  // Left panel tabs: Layers, Pages, SEO, Tokens or Blocks. Defaults to Layers.
+  const [tab, setTab] = useState<'layers' | 'pages' | 'seo' | 'tokens' | 'blocks'>('layers')
 
   const [newOpen, setNewOpen] = useState(false)
 
@@ -152,6 +153,12 @@ export default function App() {
               Tokens
             </button>
             <button
+              onClick={() => setTab('seo')}
+              className={`px-3 py-1.5 text-xs rounded-t-lg transition ${tab === 'seo' ? 'bg-slate-800 text-slate-100' : 'text-slate-500 hover:text-slate-200'}`}
+            >
+              SEO
+            </button>
+            <button
               onClick={() => setTab('blocks')}
               className={`px-3 py-1.5 text-xs rounded-t-lg transition ${tab === 'blocks' ? 'bg-slate-800 text-slate-100' : 'text-slate-500 hover:text-slate-200'}`}
             >
@@ -164,6 +171,8 @@ export default function App() {
             <LayersTree onContextMenu={openMenu} />
           ) : tab === 'pages' ? (
             <PagesPanel />
+          ) : tab === 'seo' ? (
+            <SeoPanel />
           ) : tab === 'tokens' ? (
             <TokensPanel />
           ) : (

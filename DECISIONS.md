@@ -159,3 +159,11 @@ Optional layer fields added for M4 Job 4 (name, blur, brightness, intensity, sca
 
 **Reason:** Per the M5 plan (docs/superpowers/plans/2026-11-17-m5-export-pipeline.md), the core export slice is complete and verified (tsc -b --noEmit clean, vitest 374 passed, build 390.95 kB). The `c-{hash}` dedupe remains deferred to M5 (logged in compileStyles.ts). Size/contrast/font/meta-description pre-export checks need asset metadata not yet on the Page/Asset types and are deferred to a follow-up. The M4 sign-off check ("export has no style=/data-node-id/1440/768/390") required an export serializer that did not exist; that gap is now closed by Task 1.
 
+
+## 2026-11-18 — M5 Job 6: SEO panel store action
+
+**Decision:** `updatePage(pageId, patch)` was not added to `src/store/useEditorStore.ts`; the existing `updatePage(projectId, pageId, patch)` (M5 Job 4) already covers slug/metaDescription/title with one history step via `updateData`, so `SeoPanel` calls it with `projectId = null`.
+
+**Alternatives:** Add a second `updatePage(pageId, patch)` overload alongside the existing one.
+
+**Reason:** Avoids duplicate store APIs for the same mutation; the existing signature already satisfies the job (finds the page by id, applies a `Partial<Page>` patch, records one history step). `projectId = null` passes the store's cross-project guard.

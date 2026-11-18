@@ -567,3 +567,65 @@ describe('addBlankPage', () => {
     expect(get().currentPageId).toBe(id);
   });
 });
+
+describe('updatePage', () => {
+  beforeEach(() => {
+    get().addBlankPage('Home');
+    get().addBlankPage('About');
+  });
+
+  it('updates slug and metaDescription in one history step per call', () => {
+    const home = get().pages[0]!;
+    expect(home.slug).toBe('home');
+    expect(home.metaDescription).toBeUndefined();
+
+    get().updatePage(null, home.id, {
+      slug: 'custom-home',
+      metaDescription: 'Welcome to our home page.',
+    });
+
+    const updated = get().pages.find((p) => p.id === home.id)!;
+    expect(updated.slug).toBe('custom-home');
+    expect(updated.metaDescription).toBe('Welcome to our home page.');
+    expect(get().canUndo()).toBe(true);
+
+    get().undo();
+    const reverted = get().pages.find((p) => p.id === home.id)!;
+    expect(reverted.slug).toBe('home');
+    expect(reverted.metaDescription).toBeUndefined();
+
+    get().redo();
+    const redone = get().pages.find((p) => p.id === home.id)!;
+    expect(redone.slug).toBe('custom-home');
+    expect(redone.metaDescription).toBe('Welcome to our home page.');
+  });
+
+  it('updates title via updatePage without touching slug or metaDescription', () => {
+    const about = get().pages[1]!;
+    get().updatePage(null, about.id, { title: 'About us' });
+
+    const updated = get().pages.find((p) => p.id === about.id)!;
+    expect(updated.title).toBe('About us');
+    expect(updated.slug).toBe('about');
+    expect(updated.metaDescription).toBeUndefined();
+  });
+
+  it('updating one page leaves the other pages untouched', () => {
+    const home = get().pages[0]!;
+    const about = get().pages[1]!;
+
+    get().updatePage(null, home.id, { metaDescription: 'Home page.' });
+
+    const pages = get().pages;
+    expect(pages.find((p) => p.id === home.id)!.metaDescription).toBe('Home page.');
+    expect(pages.find((p) => p.id === about.id)!.metaDescription).toBeUndefined();
+  });
+
+  it('ignores a patch for an unknown page id', () => {
+    get().updatePage(null, 'nope', { slug: 'x', metaDescription: 'nope' });
+    const pages = get().pages;
+    expect(pages).toHaveLength(2);
+    expect(pages[0]!.slug).toBe('home');
+    expect(pages[1]!.slug).toBe('about');
+  });
+});
