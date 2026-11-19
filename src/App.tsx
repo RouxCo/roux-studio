@@ -8,6 +8,7 @@ import NewProjectDialog from './components/NewProjectDialog'
 // chunk instead of bloating the main index chunk.
 const ExportDialog = lazy(() => import('./components/ExportDialog'))
 import ContextMenu from './components/ContextMenu'
+import MultiTabGuard from './components/MultiTabGuard'
 import { useEditorStore } from './store/useEditorStore'
 import { loadProject, listAllProjects } from './db/crud'
 
@@ -139,6 +140,9 @@ export default function App() {
         onNewProject={() => setNewOpen(true)}
         onExport={() => setExportOpen(true)}
       />
+
+      {/* Multi-tab take-over banner — shown when another tab saved a newer revision */}
+      <MultiTabGuard />
 
       {/* Left panel — layers / tokens tabs */}
       <aside className={`fixed top-[${TOP_BAR_HEIGHT}px] bottom-0 left-0 z-30 w-[${SIDE_PANEL_WIDTH}px] border-r border-slate-800 bg-slate-900 text-slate-400`}>
