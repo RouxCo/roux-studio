@@ -983,6 +983,14 @@ export function globalOwner(
   return null;
 }
 
+// Shift/Cmd/Ctrl-click multi-select: toggle `id` into/out of `current` when a
+// modifier is held; otherwise replace the selection with `id` alone. Pure, so it
+// can be unit-tested and reused by the canvas, overlay and layers tree.
+export function multiSelect(current: NodeId[], id: NodeId, multi: boolean): NodeId[] {
+  if (!multi) return [id];
+  return current.includes(id) ? current.filter((x) => x !== id) : [...current, id];
+}
+
 // Deep-clone a node and all of its descendants, keyed by their original ids.
 function cloneSubtree(nodes: Record<NodeId, Node>, rootId: NodeId): Record<NodeId, Node> {
   const out: Record<NodeId, Node> = {};

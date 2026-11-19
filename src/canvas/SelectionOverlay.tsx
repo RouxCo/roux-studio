@@ -15,7 +15,7 @@
 // When nothing is selected the component renders nothing.
 import { useCallback, useEffect, useState } from 'react';
 import type { NodeId } from '../types';
-import { useEditorStore } from '../store/useEditorStore';
+import { multiSelect, useEditorStore } from '../store/useEditorStore';
 
 interface Rect {
   left: number;
@@ -93,7 +93,9 @@ export default function SelectionOverlay({
       while (target && target !== root) {
         const id = target.getAttribute('data-node-id');
         if (id) {
-          useEditorStore.setState({ selection: [id] });
+          const multi = event.shiftKey || event.metaKey || event.ctrlKey;
+          const current = useEditorStore.getState().selection;
+          useEditorStore.setState({ selection: multiSelect(current, id, multi) });
           return;
         }
         target = target.parentElement;

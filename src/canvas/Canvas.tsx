@@ -16,7 +16,7 @@ import { createPortal } from 'react-dom';
 import type { Node, NodeId, Breakpoint, PageId, Project } from '../types';
 import { renderNode } from './renderNode';
 import { compileStyles } from '../compile/compileStyles';
-import { globalOwner } from '../store/useEditorStore';
+import { globalOwner, multiSelect } from '../store/useEditorStore';
 import SelectionOverlay from './SelectionOverlay';
 import ContextMenu from '../components/ContextMenu';
 import { useEditorStore } from '../store/useEditorStore';
@@ -204,7 +204,16 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1, onContextMen
     const handler = (e: MouseEvent) => {
       const el = (e.target as Element | null)?.closest('[data-node-id]');
       const id = el?.getAttribute('data-node-id') ?? null;
-      if (id) setSelection([id]);
+      const multi = e.shiftKey || e.metaKey || e.ctrlKey;
+      const current = useEditorStore.getState().selection;
+      if (id) {
+        // Shift/Cmd/Ctrl-click toggles a node in and out of the selection;
+        // plain click replaces the selection with the single node.
+        setSelection(multiSelect(current, id, multi));
+      } else if (!multi) {
+        // Clicking the canvas background with no modifier clears the selection.
+        setSelection([]);
+      }
       setMenu(null);
     };
     doc.addEventListener('click', handler);

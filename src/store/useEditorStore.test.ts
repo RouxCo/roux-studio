@@ -4,7 +4,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import 'fake-indexeddb/auto';
 
-import { useEditorStore } from './useEditorStore';
+import { multiSelect, useEditorStore } from './useEditorStore';
 import type { BoxNode, Node, NodeId, PageNode, SectionNode } from '../types';
 import { emptyEditorData } from '../types';
 import { ContainmentError } from './containment';
@@ -627,5 +627,23 @@ describe('updatePage', () => {
     expect(pages).toHaveLength(2);
     expect(pages[0]!.slug).toBe('home');
     expect(pages[1]!.slug).toBe('about');
+  });
+});
+
+describe('multiSelect', () => {
+  it('replaces the selection with a single id when no modifier is held', () => {
+    expect(multiSelect(['a', 'b'], 'c', false)).toEqual(['c']);
+  });
+
+  it('adds an unselected id when the modifier is held', () => {
+    expect(multiSelect(['a'], 'b', true)).toEqual(['a', 'b']);
+  });
+
+  it('toggles an already-selected id off when the modifier is held', () => {
+    expect(multiSelect(['a', 'b'], 'b', true)).toEqual(['a']);
+  });
+
+  it('toggling the only selected id yields an empty selection', () => {
+    expect(multiSelect(['a'], 'a', true)).toEqual([]);
   });
 });

@@ -17,9 +17,9 @@ import {
   closestCorners,
   type DragEndEvent,
 } from '@dnd-kit/core';
-import { useCallback, useMemo, useState, type ReactElement } from 'react';
+import { useCallback, useMemo, useState, type MouseEvent, type ReactElement } from 'react';
 import { ChevronDown, ChevronRight, Layers } from 'lucide-react';
-import { useEditorStore } from '../store/useEditorStore';
+import { multiSelect, useEditorStore } from '../store/useEditorStore';
 import { assertCanContain } from '../store/containment';
 import type { ElementType, Node, NodeId } from '../types';
 
@@ -153,8 +153,11 @@ function Row({
     }
   };
 
-  const select = () => {
-    setSelection([node.id]);
+  const select = (e?: MouseEvent) => {
+    const multi = e ? (e.shiftKey || e.metaKey || e.ctrlKey) : false;
+    // Shift/Cmd/Ctrl-click toggles a node in and out of the selection;
+    // plain click replaces the selection with the single node.
+    setSelection(multiSelect(useEditorStore.getState().selection, node.id, multi));
   };
 
   const selectedCls = isSelected ? 'bg-slate-700 text-slate-100' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200';
@@ -178,7 +181,7 @@ function Row({
       }}
       onClick={(e) => {
         e.stopPropagation();
-        select();
+        select(e);
       }}
       title={node.id}
     >
