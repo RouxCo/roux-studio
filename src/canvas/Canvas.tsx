@@ -291,8 +291,10 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1, onContextMen
           {element}
           <SelectionOverlay
             iframeRef={iframeRef}
-            selectedId={selectedId}
+            selection={selection}
             zoom={zoom}
+            onStartEditing={startEditing}
+            onContextMenu={onContextMenu}
           />
         </>
       ) : null}
