@@ -27,6 +27,7 @@ import {
   assertCanMove,
   ContainmentError,
 } from './containment';
+import { deleteAsset, getAllAssets } from '../db/stores';
 
 const HISTORY_CAP = 200;
 
@@ -137,6 +138,10 @@ export interface EditorStore extends ProjectData {
   insertBlock: (blockId: string, parentId: NodeId | null, index?: number) => void;
   renameBlock: (blockId: string, name: string) => void;
   deleteBlock: (blockId: string) => void;
+
+  // Asset manager: cleanUnusedAssets deletes unreferenced asset blobs and
+  // returns the number deleted (not history-tracked).
+  cleanUnusedAssets: () => Promise<number>;
 
   // Global header/footer (each one history step unless batched).
   makeGlobalHeader: (nodeId: NodeId) => void;
@@ -844,6 +849,24 @@ export const useEditorStore = create<EditorStore>((set, get) => {
     });
   },
 
+  // Asset manager: delete every asset blob that no node references
+  // (image.src, imageItem.src, or a background image layer.src). Returns the
+  // number of assets deleted. One history step is not recorded — asset blobs
+  // live outside the project data model.
+  cleanUnusedAssets: async () => {
+    const state = get();
+    const referenced = referencedAssetIds(state.nodes);
+    const assets = await getAllAssets();
+    let deleted = 0;
+    for (const asset of assets) {
+      if (!referenced.has(asset.id)) {
+        await deleteAsset(asset.id);
+        deleted++;
+      }
+    }
+    return deleted;
+  },
+
   makeGlobalHeader: (nodeId) => {
     get().updateData((draft) => {
       const node = draft.nodes[nodeId];
@@ -1042,6 +1065,23 @@ function filterTopLevel(nodes: Record<NodeId, Node>, ids: NodeId[]): NodeId[] {
     if (!isDescendant) out.push(id);
   }
   return out;
+}
+
+// Collect every asset id referenced by a node: image.src, imageItem.src, and
+// background image layer.src. Returns the set of referenced asset ids.
+export function referencedAssetIds(nodes: Record<NodeId, Node>): Set<string> {
+  const referenced = new Set<string>();
+  for (const node of Object.values(nodes)) {
+    if ((node.type === 'image' || node.type === 'imageItem') && node.src) {
+      referenced.add(node.src);
+    }
+    if ('backgroundLayers' in node && node.backgroundLayers) {
+      for (const layer of node.backgroundLayers as BackgroundLayer[]) {
+        if (layer.type === 'image' && layer.src) referenced.add(layer.src);
+      }
+    }
+  }
+  return referenced;
 }
 
 function isLengthTokenRef(val: unknown, name: string): val is Draft<Length> {

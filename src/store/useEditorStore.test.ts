@@ -4,10 +4,11 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import 'fake-indexeddb/auto';
 
-import { multiSelect, useEditorStore } from './useEditorStore';
-import type { BoxNode, Node, NodeId, PageNode, SectionNode } from '../types';
+import { multiSelect, referencedAssetIds, useEditorStore } from './useEditorStore';
+import type { BoxNode, ImageLayer, Node, NodeId, PageNode, SectionNode } from '../types';
 import { emptyEditorData } from '../types';
 import { ContainmentError } from './containment';
+import { getAllAssets, getDB, putAsset } from '../db/stores';
 
 const get = () => useEditorStore.getState();
 
@@ -645,5 +646,145 @@ describe('multiSelect', () => {
 
   it('toggling the only selected id yields an empty selection', () => {
     expect(multiSelect(['a'], 'a', true)).toEqual([]);
+  });
+});
+
+function imageNode(id: NodeId, src: string): Node {
+  return {
+    id,
+    type: 'image',
+    parentId: null,
+    children: [],
+    styles: {},
+    hidden: {},
+    locked: false,
+    src,
+    alt: 'An image',
+  } as Node;
+}
+
+function imageItemNode(id: NodeId, src: string): Node {
+  return {
+    id,
+    type: 'imageItem',
+    parentId: null,
+    children: [],
+    styles: {},
+    hidden: {},
+    locked: false,
+    src,
+    alt: 'An image item',
+  } as Node;
+}
+
+function sectionWithBackground(id: NodeId, src: string): Node {
+  return {
+    id,
+    type: 'section',
+    parentId: null,
+    children: [],
+    styles: {},
+    hidden: {},
+    locked: false,
+    sectionBlend: { enabled: false, feather: 0, overlap: 0 },
+    backgroundLayers: [
+      {
+        id: 'layer-1',
+        type: 'image',
+        enabled: true,
+        opacity: 1,
+        blendMode: 'normal',
+        src,
+        size: 'cover',
+        position: 'center',
+        repeat: 'no-repeat',
+      } as ImageLayer,
+    ],
+  } as Node;
+}
+
+describe('referencedAssetIds', () => {
+  it('collects image, imageItem and background-image layer srcs', () => {
+    const nodes: Record<NodeId, Node> = {
+      'i-1': imageNode('i-1', 'asset-a'),
+      'ii-1': imageItemNode('ii-1', 'asset-b'),
+      's-1': sectionWithBackground('s-1', 'asset-a'),
+      'p-1': {
+        id: 'p-1',
+        type: 'paragraph',
+        parentId: null,
+        children: [],
+        styles: {},
+        hidden: {},
+        locked: false,
+        text: 'Hi',
+      },
+    };
+    expect([...referencedAssetIds(nodes)].sort()).toEqual(['asset-a', 'asset-b']);
+  });
+
+  it('returns an empty set when no nodes reference assets', () => {
+    const nodes: Record<NodeId, Node> = {
+      'h-1': {
+        id: 'h-1',
+        type: 'heading',
+        parentId: null,
+        children: [],
+        styles: {},
+        hidden: {},
+        locked: false,
+        level: 1,
+        text: 'Hi',
+      },
+    };
+    expect([...referencedAssetIds(nodes)]).toEqual([]);
+  });
+});
+
+describe('cleanUnusedAssets', () => {
+  beforeEach(async () => {
+    const db = await getDB();
+    await db.clear('assets');
+    await putAsset('used-1', new Blob(['a'], { type: 'image/png' }), 'a.png', 'image/png');
+    await putAsset('used-2', new Blob(['b'], { type: 'image/png' }), 'b.png', 'image/png');
+    await putAsset('unused-1', new Blob(['c'], { type: 'image/png' }), 'c.png', 'image/png');
+    await putAsset('unused-2', new Blob(['d'], { type: 'image/png' }), 'd.png', 'image/png');
+  });
+
+  it('deletes assets not referenced by any node', async () => {
+    useEditorStore.setState({
+      nodes: {
+        'i-1': imageNode('i-1', 'used-1'),
+        's-1': sectionWithBackground('s-1', 'used-2'),
+      },
+    });
+
+    const deleted = await get().cleanUnusedAssets();
+    expect(deleted).toBe(2);
+
+    const remaining = await getAllAssets();
+    expect(remaining.map((a) => a.id).sort()).toEqual(['used-1', 'used-2']);
+  });
+
+  it('deletes nothing when every asset is referenced', async () => {
+    useEditorStore.setState({
+      nodes: {
+        'i-1': imageNode('i-1', 'used-1'),
+        'ii-1': imageItemNode('ii-1', 'unused-1'),
+        's-1': sectionWithBackground('s-1', 'used-2'),
+        's-2': sectionWithBackground('s-2', 'unused-2'),
+      },
+    });
+
+    const deleted = await get().cleanUnusedAssets();
+    expect(deleted).toBe(0);
+
+    const remaining = await getAllAssets();
+    expect(remaining.map((a) => a.id).sort()).toEqual([
+      'unused-1',
+      'unused-2',
+      'used-1',
+      'used-2',
+    ]);
   });
 });
