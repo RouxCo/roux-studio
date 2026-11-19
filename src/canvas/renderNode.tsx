@@ -46,6 +46,10 @@ export interface RenderContext {
   mode: 'canvas' | 'export';
   breakpoint: Breakpoint;
   nodes: Record<NodeId, Node>;
+  // Id → blob URL map for uploaded assets. When a node's src (image, imageItem,
+  // or background image layer) matches a key here it is replaced with the blob
+  // URL so the image paints on the canvas. External URLs (://) pass through.
+  assetUrls?: Record<string, string>;
   // Inline text editing (canvas mode only). When editingNodeId matches a node's
   // id that node renders contentEditable. On blur the new text is saved through
   // onSaveText as exactly one undo step; onCancelEditing aborts without saving.
@@ -68,6 +72,15 @@ const DATA_NODE_ID = 'data-node-id';
 
 function canvasAttrs(node: Node, ctx: RenderContext): Record<string, string> {
   return ctx.mode === 'canvas' ? { [DATA_NODE_ID]: node.id } : {};
+}
+
+// Resolve a node's src attribute: if assetUrls has an entry for it use the blob
+// URL; otherwise pass the value through unchanged (external URLs, or ids whose
+// asset hasn't been loaded yet).
+function resolveSrc(src: string | undefined, ctx: RenderContext): string | undefined {
+  if (!src) return src;
+  if (ctx.assetUrls && ctx.assetUrls[src]) return ctx.assetUrls[src];
+  return src;
 }
 
 export function lengthToCss(value: Length | 'auto' | 'none'): string {
@@ -476,7 +489,7 @@ export function renderNode(node: Node, ctx: RenderContext): JSX.Element {
     case 'link':
       return textNode(node, 'a', ctx, { style: styleProp, className, attrs, href: node.href });
     case 'image':
-      return <img src={node.src} alt={node.alt} {...attrs} style={styleProp} className={className} />;
+      return <img src={resolveSrc(node.src, ctx)} alt={node.alt} {...attrs} style={styleProp} className={className} />;
     case 'icon':
       return renderIcon(node, className, attrs);
     case 'form':

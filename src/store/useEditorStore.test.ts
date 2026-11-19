@@ -788,3 +788,38 @@ describe('cleanUnusedAssets', () => {
     ]);
   });
 });
+
+describe('addAsset', () => {
+  beforeEach(async () => {
+    const db = await getDB();
+    await db.clear('assets');
+  });
+
+  it('stores a file as a blob and returns the asset id', async () => {
+    const id = await get().addAsset(
+      new File(['hello'], 'hello.txt', { type: 'text/plain' }),
+    );
+    expect(typeof id).toBe('string');
+    expect(id.length).toBeGreaterThan(0);
+
+    const assets = await getAllAssets();
+    expect(assets).toHaveLength(1);
+    expect(assets[0]!.id).toBe(id);
+    expect(assets[0]!.name).toBe('hello.txt');
+    expect(assets[0]!.mimeType).toBe('text/plain');
+    expect(assets[0]!.blob).toBeTruthy();
+  });
+
+  it('does not touch project data or history', async () => {
+    useEditorStore.setState({
+      ...emptyEditorData(),
+      projectId: 'proj-1',
+    });
+    await get().addAsset(new File(['x'], 'x.png', { type: 'image/png' }));
+
+    const state = get();
+    expect(state.projectId).toBe('proj-1');
+    expect(state.history).toHaveLength(0);
+    expect(state.historyIndex).toBe(-1);
+  });
+});

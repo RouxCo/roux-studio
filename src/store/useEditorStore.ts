@@ -27,7 +27,7 @@ import {
   assertCanMove,
   ContainmentError,
 } from './containment';
-import { deleteAsset, getAllAssets } from '../db/stores';
+import { deleteAsset, getAllAssets, putAsset } from '../db/stores';
 
 const HISTORY_CAP = 200;
 
@@ -142,6 +142,11 @@ export interface EditorStore extends ProjectData {
   // Asset manager: cleanUnusedAssets deletes unreferenced asset blobs and
   // returns the number deleted (not history-tracked).
   cleanUnusedAssets: () => Promise<number>;
+
+  // Asset manager: addAsset stores a File blob in the IndexedDB assets store and
+  // returns the new asset id. Not history-tracked — asset blobs live outside the
+  // project data model.
+  addAsset: (file: File) => Promise<string>;
 
   // Global header/footer (each one history step unless batched).
   makeGlobalHeader: (nodeId: NodeId) => void;
@@ -865,6 +870,14 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       }
     }
     return deleted;
+  },
+
+  addAsset: async (file) => {
+    const id = nanoid();
+    const arrayBuffer = await file.arrayBuffer();
+    const blob = new Blob([arrayBuffer], { type: file.type });
+    await putAsset(id, blob, file.name, file.type);
+    return id;
   },
 
   makeGlobalHeader: (nodeId) => {

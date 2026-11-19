@@ -22,6 +22,7 @@ const PagesPanel = lazy(() => import('./components/PagesPanel'))
 const SeoPanel = lazy(() => import('./components/SeoPanel'))
 const TokensPanel = lazy(() => import('./components/TokensPanel'))
 const BlocksPanel = lazy(() => import('./components/BlocksPanel'))
+const AssetPanel = lazy(() => import('./components/AssetPanel'))
 
 export default function App() {
   const breakpoint = useEditorStore((state) => state.breakpoint)
@@ -45,7 +46,7 @@ export default function App() {
   })
 
   // Left panel tabs: Layers, Pages, SEO, Tokens or Blocks. Defaults to Layers.
-  const [tab, setTab] = useState<'layers' | 'pages' | 'seo' | 'tokens' | 'blocks'>('layers')
+  const [tab, setTab] = useState<'layers' | 'pages' | 'seo' | 'tokens' | 'blocks' | 'assets'>('layers')
 
   const [newOpen, setNewOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
@@ -178,6 +179,12 @@ export default function App() {
             >
               Blocks
             </button>
+            <button
+              onClick={() => setTab('assets')}
+              className={`px-3 py-1.5 text-xs rounded-t-lg transition ${tab === 'assets' ? 'bg-slate-800 text-slate-100' : 'text-slate-500 hover:text-slate-200'}`}
+            >
+              Assets
+            </button>
           </div>
         </div>
         <div className="flex-1 overflow-y-auto">
@@ -190,6 +197,8 @@ export default function App() {
               <SeoPanel />
             ) : tab === 'tokens' ? (
               <TokensPanel />
+            ) : tab === 'assets' ? (
+              <AssetPanel />
             ) : (
               <BlocksPanel />
             )}

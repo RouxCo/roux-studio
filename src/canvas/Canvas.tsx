@@ -20,6 +20,7 @@ import { globalOwner, multiSelect } from '../store/useEditorStore';
 import SelectionOverlay from './SelectionOverlay';
 import ContextMenu from '../components/ContextMenu';
 import { useEditorStore } from '../store/useEditorStore';
+import { getAllAssets } from '../db/stores';
 
 const BREAKPOINT_WIDTH: Record<Breakpoint, number> = {
   desktop: 1440,
@@ -80,6 +81,10 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1, onContextMen
   const [loaded, setLoaded] = useState(false);
   // UI-only state (not history-tracked): the node currently being inline-edited.
   const [editingNodeId, setEditingNodeId] = useState<NodeId | null>(null);
+  // Uploaded asset blobs resolved to blob URLs so `` tags paint on the canvas.
+  // Revoked on unmount.
+  const [assetUrls, setAssetUrls] = useState<Record<string, string>>({});
+  const assetUrlsRef = useRef<Record<string, string>>({});
   // Right-click context menu, positioned within the iframe so iframe-relative
   // client coordinates line up without any main-window transform math.
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
@@ -109,6 +114,34 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1, onContextMen
 
   const cancelEditing = useCallback(() => {
     setEditingNodeId(null);
+  }, []);
+
+  // Load all uploaded assets once and resolve each to a blob URL. Kept alive for
+  // the component's lifetime and revoked on unmount.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const assets = await getAllAssets();
+        const next: Record<string, string> = {};
+        for (const a of assets) {
+          next[a.id] = URL.createObjectURL(a.blob);
+        }
+        if (!cancelled) {
+          assetUrlsRef.current = next;
+          setAssetUrls(next);
+        }
+      } catch {
+        // IndexedDB unavailable in this environment (e.g. jsdom, SSR). No assets
+        // to paint; canvas renders with empty assetUrls.
+      }
+    })();
+    return () => {
+      cancelled = true;
+      for (const url of Object.values(assetUrlsRef.current)) {
+        URL.revokeObjectURL(url);
+      }
+    };
   }, []);
 
   const render = useCallback(() => {
@@ -142,6 +175,7 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1, onContextMen
           nodes,
           globalHeaderId: headerId,
           globalFooterId: footerId,
+          assetUrls,
           editingNodeId,
           playBackgrounds,
           onStartEditing: startEditing,
@@ -175,6 +209,7 @@ export default function Canvas({ page, nodes, breakpoint, zoom = 1, onContextMen
     globalHeaderId,
     globalFooterId,
     selectedId,
+    assetUrls,
   ]);
 
   const [element, setElement] = useState<React.ReactNode>(null);
