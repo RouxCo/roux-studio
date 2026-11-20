@@ -10,7 +10,7 @@ import JSZip from 'jszip';
 import type { ExportResult } from './types';
 import type { StoredProject } from '../db/stores';
 
-function sitemapXml(pages: ExportResult['pages'], baseUrl?: string): string {
+export function sitemapXml(pages: ExportResult['pages'], baseUrl?: string): string {
   const entries = pages
     .map(
       (p) =>
@@ -24,14 +24,14 @@ ${entries}
 `;
 }
 
-function robotsTxt(): string {
+export function robotsTxt(): string {
   return `User-agent: *
 Allow: /
 
 `;
 }
 
-function notFoundHtml(): string {
+export function notFoundHtml(): string {
   return `<!doctype html>
 <html lang="en">
 <head>
