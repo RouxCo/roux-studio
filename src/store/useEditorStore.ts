@@ -18,7 +18,7 @@ enablePatches();
 import { nanoid } from 'nanoid';
 import type {
   BackgroundLayer, BackgroundLayerType, Block, Node, NodeId, PageId, Page, DesignTokens,
-  Breakpoint, DesignToken, Length, ResponsiveStyles,
+  Breakpoint, DesignToken, ElementType, Length, Responsive, ResponsiveStyles,
 } from '../types';
 import { defaultLayer } from '../compile/backgrounds';
 import { projectBroadcast } from '../db/broadcast';
@@ -107,6 +107,7 @@ export interface EditorStore extends ProjectData {
     patch: Partial<Pick<Page, 'title' | 'slug' | 'metaDescription'>>,
   ) => void;
   addNode: (node: Node, parentId: NodeId | null) => void;
+  insertElement: (type: ElementType) => void;
   removeNode: (nodeId: NodeId) => void;
   moveNode: (nodeId: NodeId, parentId: NodeId | null, index?: number) => void;
   patchNode: (nodeId: NodeId, recipe: (node: Draft<Node>) => void) => void;
@@ -472,6 +473,46 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         nodeDraft.parentId = null;
       }
     });
+  },
+
+  insertElement: (type) => {
+    const state = get();
+    const pageId = state.currentPageId;
+    const page = pageId ? state.pages.find((p) => p.id === pageId) : undefined;
+    const rootId = page?.rootId ?? null;
+
+    function canContain(parentType: ElementType | 'root', childType: ElementType): boolean {
+      try {
+        assertCanContain(parentType, childType);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    // Where the new node lands: the selected node if it can contain the type,
+    // else its parent, else the page root. Never leaves the canvas empty-handed
+    // when a legal spot exists.
+    function pickTarget(): NodeId | null {
+      const sel = state.selection;
+      const selected = sel.length > 0 ? state.nodes[sel[0]!] : undefined;
+      if (selected && canContain(selected.type as ElementType, type)) return selected.id;
+      if (selected && selected.parentId !== null) {
+        const parent = state.nodes[selected.parentId];
+        const pt = parent?.type;
+        if (pt && canContain(pt, type)) return selected.parentId;
+      }
+      if (rootId !== null && canContain('root', type)) return rootId;
+      return null;
+    }
+
+    const target = pickTarget();
+    if (target === null) return;
+
+    const id = nanoid();
+    const node = defaultElementNode(type, id);
+    get().addNode(node, target);
+    set({ selection: [id] });
   },
 
   removeNode: (nodeId) => {
@@ -1025,6 +1066,39 @@ export function globalOwner(
 export function multiSelect(current: NodeId[], id: NodeId, multi: boolean): NodeId[] {
   if (!multi) return [id];
   return current.includes(id) ? current.filter((x) => x !== id) : [...current, id];
+}
+
+// Sensible defaults for a newly inserted element of each type, so dragging one
+// onto the canvas gives something visible and editable right away.
+function defaultElementNode(type: ElementType, id: NodeId): Node {
+  const base = {
+    id, type, parentId: null as NodeId | null, children: [] as NodeId[],
+    styles: {} as ResponsiveStyles, hidden: {} as Responsive<boolean>, locked: false,
+  };
+  switch (type) {
+    case 'page':
+      return { ...base, title: 'Untitled page', slug: 'untitled-page', backgroundLayers: [] } as Node;
+    case 'section':
+      return {
+        ...base,
+        backgroundLayers: [],
+        sectionBlend: { enabled: false, feather: 0, overlap: 0 },
+      } as Node;
+    case 'heading': return { ...base, level: 1, text: 'Heading' } as Node;
+    case 'paragraph': return { ...base, text: 'Paragraph' } as Node;
+    case 'button': return { ...base, text: 'Button' } as Node;
+    case 'link': return { ...base, href: '#', text: 'Link' } as Node;
+    case 'image': return { ...base, src: '', alt: '' } as Node;
+    case 'icon': return { ...base, name: 'Menu' } as Node;
+    case 'richText': return { ...base, content: null } as Node;
+    case 'form': return { ...base, method: 'get' } as Node;
+    case 'formField':
+      return { ...base, label: 'Field', name: 'field', inputType: 'text' } as Node;
+    case 'faqItem': return { ...base, question: 'Question', answer: 'Answer' } as Node;
+    case 'imageItem': return { ...base, src: '', alt: '' } as Node;
+    default:
+      return base as Node;
+  }
 }
 
 // Deep-clone a node and all of its descendants, keyed by their original ids.

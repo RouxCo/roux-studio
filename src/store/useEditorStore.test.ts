@@ -309,6 +309,53 @@ describe('containment — addNode / moveNode reject illegal nests', () => {
     expect(() => get().addNode({ ...item, id: 'item-2' } as any, 'item-1')).toThrow(ContainmentError);
   });
 
+  describe('insertElement', () => {
+    function setupPage() {
+      const pageId = get().addBlankPage('Home', 'home');
+      get().setCurrentPageId(pageId);
+      return pageId;
+    }
+
+    it('adds a section to the page root when nothing is selected', () => {
+      const pageId = setupPage();
+      get().insertElement('section');
+      const nodes = get().nodes;
+      const added = Object.values(nodes).find((n) => n.type === 'section' && n.id !== pageId);
+      expect(added).toBeDefined();
+      expect(added!.parentId).toBe(pageId);
+      expect(get().selection).toContain(added!.id);
+    });
+
+    it('inserts under the selected node when containment allows', () => {
+      const pageId = setupPage();
+      get().insertElement('section');
+      const sectionId = Object.values(get().nodes).find((n) => n.type === 'section' && n.id !== pageId)!.id;
+      get().setSelection([sectionId]);
+      get().insertElement('container');
+      const nodes = get().nodes;
+      const container = Object.values(nodes).find((n) => n.type === 'container');
+      expect(container).toBeDefined();
+      expect(container!.parentId).toBe(sectionId);
+      expect(get().selection).toContain(container!.id);
+    });
+
+    it('respects containment: page cannot be inserted as a child', () => {
+      const pageId = setupPage();
+      get().setSelection([pageId]);
+      get().insertElement('page');
+      expect(Object.keys(get().nodes)).toEqual([pageId]);
+      expect(get().selection).toEqual([pageId]);
+    });
+
+    it('does nothing and selects nothing when no legal target exists', () => {
+      const pageId = setupPage();
+      // Nothing selected and only 'page' is at root; heading is not legal at root.
+      get().insertElement('heading');
+      expect(get().selection).toEqual([]);
+      expect(Object.keys(get().nodes)).toEqual([pageId]);
+    });
+  });
+
   it('moves a root-eligible section to the page root', () => {
     get().addNode(section('sec-1'), null);
     get().addNode(section('sec-2'), null);

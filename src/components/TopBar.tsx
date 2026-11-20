@@ -37,7 +37,8 @@ const ZOOM_LEVELS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4];
 export default function TopBar({
   onNewProject,
   onExport,
-}: { onNewProject?: () => void; onExport?: () => void }) {
+  onInsert,
+}: { onNewProject?: () => void; onExport?: () => void; onInsert?: () => void }) {
   const breakpoint = useEditorStore((state) => state.breakpoint);
   const setBreakpoint = useEditorStore((state) => state.setBreakpoint);
   const zoom = useEditorStore((state) => state.zoom);
@@ -71,6 +72,17 @@ export default function TopBar({
           >
             <Plus size={14} strokeWidth={2} />
             New project
+          </button>
+        )}
+        {onInsert && (
+          <button
+            onClick={onInsert}
+            className="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-700 hover:text-slate-100"
+            title="Insert element"
+            aria-label="Insert element"
+          >
+            <Plus size={14} strokeWidth={2} />
+            Insert
           </button>
         )}
         {onExport && (

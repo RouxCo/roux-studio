@@ -9,6 +9,7 @@ import NewProjectDialog from './components/NewProjectDialog'
 const ExportDialog = lazy(() => import('./components/ExportDialog'))
 import ContextMenu from './components/ContextMenu'
 import MultiTabGuard from './components/MultiTabGuard'
+import InsertMenu from './components/InsertMenu'
 import { useEditorStore } from './store/useEditorStore'
 import { loadProject, listAllProjects } from './db/crud'
 
@@ -50,6 +51,7 @@ export default function App() {
 
   const [newOpen, setNewOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
+  const [insertOpen, setInsertOpen] = useState(false)
 
   const set = useEditorStore.setState
 
@@ -140,6 +142,7 @@ export default function App() {
       <TopBar
         onNewProject={() => setNewOpen(true)}
         onExport={() => setExportOpen(true)}
+        onInsert={() => setInsertOpen(true)}
       />
 
       {/* Multi-tab take-over banner — shown when another tab saved a newer revision */}
@@ -247,6 +250,8 @@ export default function App() {
           onClose={closeMenu}
         />
       )}
+
+      <InsertMenu open={insertOpen} onClose={() => setInsertOpen(false)} />
 
       <NewProjectDialog
         open={newOpen}
