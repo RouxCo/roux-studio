@@ -9,6 +9,7 @@ import { exportProject, exportProjectToZip } from '../export/export'
 import type { ExportOptions } from '../export/types'
 import { zipExport } from '../export/zip'
 import { runPreExportChecks, type PreExportResult } from '../export/checks'
+import PublishGuide from './PublishGuide'
 
 interface ExportDialogProps {
   open: boolean
@@ -85,6 +86,7 @@ export default function ExportDialog({ open, onClose }: ExportDialogProps) {
   const [webp, setWebp] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const [checks, setChecks] = useState<PreExportResult>({ errors: [], warnings: [] })
+  const [publishOpen, setPublishOpen] = useState(false)
 
   const project = useMemo<Project>(() => {
     const now = new Date().toISOString()
@@ -254,6 +256,17 @@ export default function ExportDialog({ open, onClose }: ExportDialogProps) {
             {downloading ? 'Preparing…' : 'Download editable (.roux.zip)'}
           </button>
         </div>
+
+        <p className="text-[10px] text-slate-500 mt-4">
+          After exporting: <span className="text-cyan-400 underline underline-offset-2 hover:text-cyan-300 cursor-pointer" onClick={() => setPublishOpen(true)}>
+            How to publish
+          </span>
+        </p>
+
+        <PublishGuide
+          open={publishOpen}
+          onClose={() => setPublishOpen(false)}
+        />
       </div>
     </div>
   )
