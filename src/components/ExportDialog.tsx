@@ -28,6 +28,35 @@ function slugify(name: string): string {
   return slug
 }
 
+/** A single pre-export check item. Items tied to a node are clickable:
+ * selecting the node (and closing the dialog) lets the user fix it in place.
+ * Page-level items (no nodeId) are plain text. */
+function CheckRow({
+  check,
+  onSelect,
+}: {
+  check: { id: string; message: string; nodeId: string | null }
+  onSelect: (id: string) => void
+}) {
+  const nodeId = check.nodeId
+  if (!nodeId) {
+    return <li key={check.id} className="text-xs text-slate-400">
+      {check.message}
+    </li>
+  }
+  return (
+    <li key={check.id}>
+      <button
+        type="button"
+        onClick={() => onSelect(nodeId)}
+        className="flex items-center gap-1 text-xs text-cyan-400 underline underline-offset-4 hover:text-cyan-300"
+      >
+        {check.message}
+      </button>
+    </li>
+  )
+}
+
 /** Save a blob to downloads via a temporary anchor, then revoke its URL. */
 function downloadBlob(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob)
@@ -50,6 +79,7 @@ export default function ExportDialog({ open, onClose }: ExportDialogProps) {
   const blocks = useEditorStore((state) => state.blocks)
   const globalHeaderId = useEditorStore((state) => state.globalHeaderId)
   const globalFooterId = useEditorStore((state) => state.globalFooterId)
+  const setSelection = useEditorStore((state) => state.setSelection)
 
   const [baseUrl, setBaseUrl] = useState('')
   const [webp, setWebp] = useState(false)
@@ -155,7 +185,14 @@ export default function ExportDialog({ open, onClose }: ExportDialogProps) {
                 </h3>
                 <ul className="text-xs text-slate-300 space-y-1">
                   {checks.errors.map((check) => (
-                    <li key={check.id}>{check.message}</li>
+                    <CheckRow
+                      key={check.id}
+                      check={check}
+                      onSelect={(id) => {
+                        setSelection([id])
+                        onClose()
+                      }}
+                    />
                   ))}
                 </ul>
               </div>
@@ -167,7 +204,14 @@ export default function ExportDialog({ open, onClose }: ExportDialogProps) {
                 </h3>
                 <ul className="text-xs text-slate-300 space-y-1">
                   {checks.warnings.map((check) => (
-                    <li key={check.id}>{check.message}</li>
+                    <CheckRow
+                      key={check.id}
+                      check={check}
+                      onSelect={(id) => {
+                        setSelection([id])
+                        onClose()
+                      }}
+                    />
                   ))}
                 </ul>
               </div>
