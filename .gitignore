@@ -5,3 +5,7 @@ node_modules
 .rouxcache
 *.log
 .env
+
+# Playwright e2e output
+/test-results/
+/playwright-report/
