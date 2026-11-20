@@ -10,6 +10,7 @@ import { Image, Plus, Trash2, RefreshCw } from 'lucide-react';
 import { useEditorStore } from '../store/useEditorStore';
 import { getAllAssets, deleteAsset, type StoredAsset } from '../db/stores';
 import { CONTAINMENT_RULES } from '../store/containment';
+import ConfirmDialog from './ConfirmDialog';
 import type { ElementType, Node, NodeId } from '../types';
 import { nanoid } from 'nanoid';
 
@@ -184,6 +185,7 @@ export default function AssetPanel({ open = true }: AssetPanelProps) {
   const [message, setMessage] = useState<{ text: string; kind: 'ok' | 'error' } | null>(null);
   const [uploading, setUploading] = useState(false);
   const [cleaning, setCleaning] = useState(false);
+  const [cleanOpen, setCleanOpen] = useState(false);
 
   const clearMessage = () => setMessage(null);
 
@@ -250,11 +252,12 @@ export default function AssetPanel({ open = true }: AssetPanelProps) {
   if (!open) return null;
 
   return (
+    <>
     <div className="h-full flex flex-col">
       <div className="px-4 py-3 text-xs font-semibold text-slate-300 uppercase tracking-wider border-b border-slate-800 flex items-center justify-between">
         Assets
         <button
-          onClick={handleClean}
+          onClick={() => setCleanOpen(true)}
           disabled={cleaning}
           className="flex items-center gap-1 px-2 py-1 rounded border border-slate-700 bg-slate-800 text-[10px] text-slate-300 disabled:opacity-50 hover:bg-slate-700 hover:text-slate-100"
           aria-label="Clean unused assets"
@@ -306,5 +309,20 @@ export default function AssetPanel({ open = true }: AssetPanelProps) {
         )}
       </div>
     </div>
+
+    <ConfirmDialog
+      open={cleanOpen}
+      onClose={() => setCleanOpen(false)}
+      title="Clean unused assets"
+      body="This will delete every asset blob that no node references (unused images, videos and documents). It can't be undone."
+      confirmLabel="Clean now"
+      confirmVariant="danger"
+      loading={cleaning}
+      onConfirm={async () => {
+        setCleanOpen(false);
+        await handleClean();
+      }}
+    />
+    </>
   );
 }
