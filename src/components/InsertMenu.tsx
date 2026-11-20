@@ -44,7 +44,6 @@ interface InsertMenuProps {
 
 export default function InsertMenu({ open, onClose }: InsertMenuProps) {
   const insertElement = useEditorStore((state) => state.insertElement);
-  if (!open) return null;
 
   const handleInsert = useCallback(
     (type: ElementType) => {
@@ -53,6 +52,8 @@ export default function InsertMenu({ open, onClose }: InsertMenuProps) {
     },
     [insertElement, onClose],
   );
+
+  if (!open) return null;
 
   return (
     <div
